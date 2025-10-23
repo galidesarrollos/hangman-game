@@ -1,14 +1,14 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ViewWillEnter } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ModalController } from '@ionic/angular';
+import { ModalController, Platform } from '@ionic/angular';
 import { VolumeSidebarComponent } from '../volume-sidebar/volume-sidebar.component';
 import { IonRouterOutlet } from '@ionic/angular';
 
 import { AdmobService } from 'src/app/services/admob.service';
-import { AdMob, BannerAdPosition, BannerAdSize } from '@capacitor-community/admob';
+import { AdMob } from '@capacitor-community/admob';
 
 @Component({
   selector: 'app-start',
@@ -21,61 +21,59 @@ import { AdMob, BannerAdPosition, BannerAdSize } from '@capacitor-community/admo
     IonicModule
   ]
 })
-export class StartComponent{
-
-
+export class StartComponent implements ViewWillEnter, AfterViewInit {
 
   tematicas = [
-    {
-      id: 'deportes',
-      nombre: 'Deportes',
-      icono: '⚽',
-      descripcion: 'Palabras relacionadas con deportes'
-    },
-    {
-      id: 'ciencia',
-      nombre: 'Ciencia',
-      icono: '🔬',
-      descripcion: 'Términos científicos y naturales'
-    },
-    {
-      id: 'infantil',
-      nombre: 'Infantil',
-      icono: '🎨',
-      descripcion: 'Palabras divertidas para los más pequeños'
-    },
-    {
-      id: 'general',
-      nombre: 'General',
-      icono: '📚',
-      descripcion: 'Vocabulario general y cotidiano'
-    }
+    { id: 'deportes', nombre: 'Deportes', icono: '⚽', descripcion: 'Palabras relacionadas con deportes' },
+    { id: 'ciencia', nombre: 'Ciencia', icono: '🔬', descripcion: 'Términos científicos y naturales' },
+    { id: 'infantil', nombre: 'Infantil', icono: '🎨', descripcion: 'Palabras divertidas para los más pequeños' },
+    { id: 'general', nombre: 'General', icono: '📚', descripcion: 'Vocabulario general y cotidiano' }
   ];
 
   constructor(
     private router: Router,
-    private modalController: ModalController ,
-      private routerOutlet: IonRouterOutlet,
-      private admobService: AdmobService
+    private modalController: ModalController,
+    private routerOutlet: IonRouterOutlet,
+    private admobService: AdmobService,
+    private platform: Platform
   ) {}
 
-  ionViewWillEnter() {
-    this.admobService.showBannerBottomCenter();
+  async ionViewWillEnter() {
+    if (this.platform.is('hybrid')) {
+      // Solo muestra el banner de AdMob si es app nativa (Android/iOS)
+      this.admobService.showBannerBottomCenter();
+    }
   }
 
-async openVolumeSettings() {
-  const modal = await this.modalController.create({
-    component: VolumeSidebarComponent,
-    cssClass: 'volume-sidebar-modal',
-    breakpoints: [0, 0.5, 0.8],
-    initialBreakpoint: 0.8,
-    presentingElement: this.routerOutlet.nativeEl // Use nativeEl
-  });
-  await modal.present();
-}
+  ngAfterViewInit() {
+    // Solo inicializa AdSense si NO es app (es decir, si es navegador web)
+    if (!this.platform.is('hybrid')) {
+      try {
+        (window as any).adsbygoogle = (window as any).adsbygoogle || [];
+        (window as any).adsbygoogle.push({});
+        console.log('AdSense cargado en versión web.');
+      } catch (e) {
+        console.error('Error cargando AdSense', e);
+      }
+    }
+  }
+
+  async openVolumeSettings() {
+    const modal = await this.modalController.create({
+      component: VolumeSidebarComponent,
+      cssClass: 'volume-sidebar-modal',
+      breakpoints: [0, 0.5, 0.8],
+      initialBreakpoint: 0.8,
+      presentingElement: this.routerOutlet.nativeEl
+    });
+    await modal.present();
+  }
 
   seleccionarTematica(tematica: string): void {
-    this.admobService.showInterstitial();
+    // Solo muestra interstitial en app (AdMob)
+    if (this.platform.is('hybrid')) {
+      this.admobService.showInterstitial();
+    }
     this.router.navigate(['/level', tematica]);
   }
 }
