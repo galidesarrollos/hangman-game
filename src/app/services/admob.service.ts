@@ -4,9 +4,9 @@ import { AdMob, BannerAdSize, BannerAdPosition } from '@capacitor-community/admo
 @Injectable({ providedIn: 'root' })
 export class AdmobService {
   // 👇 Estos son los ID de cada tipo de anuncio
-  private bannerId = 'ca-app-pub-3940256099942544/6300978111';
-  private interstitialId = 'ca-app-pub-3940256099942544/1033173712';
-  private rewardedId = 'ca-app-pub-3940256099942544/5224354917';
+  private bannerId = 'ca-app-pub-6536506161156686/1504061076';
+  private interstitialId = 'ca-app-pub-6536506161156686/6321451098';
+  // private rewardedId = 'ca-app-pub-3940256099942544/5224354917';
 
   async initialize() {
     await AdMob.initialize();
@@ -41,12 +41,12 @@ export class AdmobService {
     await AdMob.showInterstitial();
   }
 
-  async showRewarded() {
-    await AdMob.prepareRewardVideoAd({
-      adId: this.rewardedId,
-      isTesting: true,
-    });
-    await AdMob.showRewardVideoAd();
-  }
+  // async showRewarded() {
+  //   await AdMob.prepareRewardVideoAd({
+  //     adId: this.rewardedId,
+  //     isTesting: true,
+  //   });
+  //   await AdMob.showRewardVideoAd();
+  // }
 
 }
