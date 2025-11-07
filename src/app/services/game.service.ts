@@ -9,7 +9,7 @@ import { AdmobService } from 'src/app/services/admob.service';
   providedIn: 'root'
 })
 export class GameService {
-    private readonly MAX_INTENTOS = 6;
+  private readonly MAX_INTENTOS = 6;
   private GameStateSubject: BehaviorSubject<GameState>;
   public GameState$: Observable<GameState>;
 
@@ -31,7 +31,7 @@ export class GameService {
   }
 
   iniciarNuevoJuego(tematica: Theme, Level: Level): void {
-        this.admobService.showInterstitial();
+    // this.admobService.showInterstitial();
     const palabra = this.palabrasService.obtenerPalabraAleatoria(tematica, Level);
     const nuevoEstado: GameState = {
       secretWord: palabra,
@@ -68,7 +68,7 @@ export class GameService {
         nuevoEstado.gameOver = true;
         nuevoEstado.winner = true;
         this.admobService.showBannerTopCenter();
-        this.admobService.showInterstitial();
+        // this.admobService.showInterstitial();
         this.audioService.playSound('victoria');
       }
     } else {
@@ -79,7 +79,7 @@ export class GameService {
       if (nuevoEstado.attemptsRemaining === 0) {
         nuevoEstado.gameOver = true;
         nuevoEstado.winner = false;
-            this.admobService.showInterstitial();
+        // this.admobService.showInterstitial();
         this.audioService.playSound('derrota');
       }
     }
@@ -100,8 +100,7 @@ export class GameService {
 
   reiniciarJuego(): void {
     const estadoInicial = this.crearEstadoInicial();
-    this.admobService.showBannerTopCenter();
-        this.admobService.showInterstitial();
+    this.admobService.showInterstitial();
     this.GameStateSubject.next(estadoInicial);
   }
 }

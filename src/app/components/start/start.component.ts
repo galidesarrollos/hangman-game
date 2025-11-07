@@ -1,6 +1,6 @@
 import { AfterViewInit, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ViewWillEnter } from '@ionic/angular';
+import { IonicModule, ViewWillEnter, ViewWillLeave } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ModalController, Platform } from '@ionic/angular';
@@ -40,8 +40,8 @@ export class StartComponent implements ViewWillEnter, AfterViewInit {
 
   async ionViewWillEnter() {
     if (this.platform.is('hybrid')) {
+      this.admobService.showBannerTopCenter();
       // Solo muestra el banner de AdMob si es app nativa (Android/iOS)
-      this.admobService.showBannerBottomCenter();
     }
   }
 

@@ -8,6 +8,7 @@ import { Theme } from 'src/app/models/game.model';
 import { VolumeSidebarComponent } from '../volume-sidebar/volume-sidebar.component';
 import { ModalController } from '@ionic/angular';
 import { IonRouterOutlet } from '@ionic/angular';
+import { AdmobService } from 'src/app/services/admob.service';
 
 @Component({
   selector: 'app-level',
@@ -36,6 +37,7 @@ async openVolumeSettings() {
   await modal.present();
 }
   constructor(
+    private admobService: AdmobService,
     private router: Router,
     private route: ActivatedRoute,
         private modalController: ModalController ,
@@ -46,6 +48,7 @@ async openVolumeSettings() {
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       this.tematica = params['theme'] as Theme;
+      this.admobService.showBannerBottomCenter();
     });
   }
 

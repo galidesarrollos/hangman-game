@@ -23,5 +23,21 @@
 <body>
   <app-root></app-root>
 </body>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+  const banner = document.getElementById('cookie-banner');
+  const acceptBtn = document.getElementById('accept-cookies');
 
+  // Si ya aceptó cookies, ocultamos el banner
+  if (localStorage.getItem('cookiesAccepted') === 'true') {
+    banner.style.display = 'none';
+  }
+
+  acceptBtn.addEventListener('click', () => {
+    localStorage.setItem('cookiesAccepted', 'true');
+    banner.style.display = 'none';
+  });
+});
+
+</script>
 </html>

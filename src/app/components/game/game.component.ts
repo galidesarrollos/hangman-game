@@ -50,10 +50,11 @@ esIncorrecto(_t51: string) {
   nivel: Level = 'normal';
   estado: GameState | null = null;
   palabraVisible: string = '';
-mostrarModal: boolean = false;
+  mostrarModal: boolean = false;
   letras: string[] = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-    'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+    'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    'Á', 'É', 'Í', 'Ó', 'Ú'
   ];
 
   private subscription: Subscription = new Subscription();
@@ -128,7 +129,7 @@ onModalDismiss() {
   }
 
   volverAlMenu(): void {
-    this.admobService.showInterstitial();
+    // this.admobService.showInterstitial();
     this.router.navigate(['/']);
   }
 }
