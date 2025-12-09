@@ -1,10 +1,20 @@
 <ion-app>
-    <div id="cookie-banner" class="cookie-banner">
+
+  <div
+    class="cookie-overlay" id="cookie-banner"
+  >
+    <div class="cookie-box">
       <p>
-        Usamos cookies para mejorar tu experiencia en el juego. Al continuar, aceptas nuestro uso de cookies.
-        <a href="/terminos y condiciones">Más información</a>
+        Usamos cookies para mejorar tu experiencia en el juego.
+        Al continuar, aceptas nuestro uso de cookies.
       </p>
-      <button id="accept-cookies">Aceptar</button>
+      <a routerLink="/terminos">Más información</a>
+
+      <button id="accept-cookies" class="accept-btn">
+        Aceptar
+      </button>
     </div>
+  </div>
+
   <ion-router-outlet id="main-content"></ion-router-outlet>
 </ion-app>

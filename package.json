@@ -31,6 +31,7 @@
     "@capacitor/status-bar": "7.0.3",
     "@ionic/angular": "8.7.6",
     "@ionic/core": "8.7.6",
+    "@scullyio/init": "^2.1.21",
     "ionicons": "^8.0.13",
     "passive-events-support": "^1.1.0",
     "rxjs": "~7.8.2",
@@ -50,6 +51,7 @@
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "7.4.4",
     "@ionic/angular-toolkit": "12.3.0",
+    "@scullyio/scully-plugin-puppeteer": "^2.1.41",
     "@types/jasmine": "~5.1.12",
     "@typescript-eslint/eslint-plugin": "8.46.2",
     "@typescript-eslint/parser": "8.46.2",
@@ -67,5 +69,4 @@
     "typescript": "~5.9.3"
   },
   "description": "An Ionic project"
-
 }

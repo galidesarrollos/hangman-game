@@ -1,0 +1,11 @@
+identifier: m3h7pe7195m4tc21
+appPort: 1864
+staticPort: 1668
+reloadPort: 2667
+hostName: localhost
+projectName: app
+homeFolder: C:\Users\fbern\OneDrive\Escritorio\hangman-game
+distFolder: www
+outDir: C:\Users\fbern\OneDrive\Escritorio\hangman-game\dist\static
+handle404: ''
+allowErrorCollect: true

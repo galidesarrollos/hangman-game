@@ -9,7 +9,7 @@ import { AdmobService } from 'src/app/services/admob.service';
   providedIn: 'root'
 })
 export class GameService {
-  private readonly MAX_INTENTOS = 6;
+  private readonly MAX_INTENTOS = 7;
   private GameStateSubject: BehaviorSubject<GameState>;
   public GameState$: Observable<GameState>;
 
@@ -67,7 +67,7 @@ export class GameService {
       if (this.palabraCompletada(estadoActual.secretWord, nuevoEstado.lettersGuessed)) {
         nuevoEstado.gameOver = true;
         nuevoEstado.winner = true;
-        this.admobService.showBannerTopCenter();
+        this.admobService.showBannerBottomCenter();
         // this.admobService.showInterstitial();
         this.audioService.playSound('victoria');
       }

@@ -13,7 +13,7 @@ const routes: Routes = [
   },
   { path: 'level/:theme', component: LevelComponent },
   { path: 'game/:theme/:level', component: GameComponent },
-  { path: 'terminos y condiciones', component: TermsComponent },
+  { path: 'terminos-y-condiciones', component: TermsComponent },
   { path: '**', redirectTo: '' }
 ];
 

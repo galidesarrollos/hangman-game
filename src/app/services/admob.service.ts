@@ -14,20 +14,22 @@ export class AdmobService {
     await AdMob.initialize();
   }
 
-  async showBannerTopCenter() {
-    await AdMob.showBanner({
-      adId: this.bannerId,
-      adSize: BannerAdSize.BANNER,
-      position: BannerAdPosition.TOP_CENTER,
-      isTesting: true, // ⚠️ cambia a false en producción
-    });
-  }
+  // async showBannerTopCenter() {
+  //   await AdMob.showBanner({
+  //     adId: this.bannerId,
+  //     adSize: BannerAdSize.BANNER,
+  //     position: BannerAdPosition.TOP_CENTER,
+  //     isTesting: true, // ⚠️ cambia a false en producción
+  //   });
+  // }
+
   async showBannerBottomCenter() {
     await AdMob.showBanner({
       adId: this.bannerId,
       adSize: BannerAdSize.BANNER,
       position: BannerAdPosition.BOTTOM_CENTER,
-      isTesting: true, // ⚠️ cambia a false en producción
+      isTesting: false, // ⚠️ cambia a false en producción
+
     });
   }
 
@@ -38,7 +40,7 @@ export class AdmobService {
   async showInterstitial() {
     await AdMob.prepareInterstitial({
       adId: this.interstitialId,
-      isTesting: true,
+      isTesting: false,
     });
     await AdMob.showInterstitial();
   }

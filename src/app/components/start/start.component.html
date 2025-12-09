@@ -5,12 +5,6 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-
-    <ion-buttons slot="end">
-      <ion-button (click)="openVolumeSettings()" fill="clear">
-        <ion-icon slot="icon-only" name="volume-medium"></ion-icon>
-      </ion-button>
-    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -87,6 +81,11 @@
 
   <div class="container-inicio">
     <div class="content-wrapper">
+        <ion-buttons slot="end">
+    <ion-button (click)="openVolumeSettings()" fill="clear">
+      <ion-icon slot="icon-only" name="volume-medium"></ion-icon>
+        </ion-button>
+      </ion-buttons>
       <div class="header-section">
         <div class="title">
           <svg _ngcontent-ng-c754733093="" width="307" height="190" viewBox="0 0 707 490" fill="none"
@@ -144,14 +143,14 @@
         </div>
         <p class="subtitle">Adivina la palabra antes de que sea demasiado tarde!!!</p>
       </div>
-      <div class="ad-container">
+      <!-- <div class="ad-container">
         <ins class="adsbygoogle"
             style="display:block"
             data-ad-client="ca-pub-XXXXXXXXXXXXXX"
             data-ad-slot="1234567890"
             data-ad-format="auto"
             data-full-width-responsive="true"></ins>
-      </div>
+      </div> -->
       <div class="tematicas-grid">
         <button *ngFor="let tematica of tematicas" (click)="seleccionarTematica(tematica.id)" class="tematica-card">
           <div class="icono">{{ tematica.icono }}</div>
@@ -191,7 +190,7 @@
     </div>
 
     <div class="footer-bottom">
-      <a href="terminos y condiciones">Terminos y condiciones</a>
+      <a href="terminos-y-condiciones">Terminos y condiciones</a>
       <p>© 2025 ... Todos los derechos reservados.</p>
     </div>
   </ion-footer>

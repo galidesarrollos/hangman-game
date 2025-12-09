@@ -40,7 +40,7 @@ export class StartComponent implements ViewWillEnter, AfterViewInit {
 
   async ionViewWillEnter() {
     if (this.platform.is('hybrid')) {
-      this.admobService.showBannerTopCenter();
+      this.admobService.showBannerBottomCenter();
       // Solo muestra el banner de AdMob si es app nativa (Android/iOS)
     }
   }
@@ -72,7 +72,7 @@ export class StartComponent implements ViewWillEnter, AfterViewInit {
   seleccionarTematica(tematica: string): void {
     // Solo muestra interstitial en app (AdMob)
     if (this.platform.is('hybrid')) {
-      this.admobService.showInterstitial();
+      // this.admobService.showInterstitial();
     }
     this.router.navigate(['/level', tematica]);
   }
