@@ -53,8 +53,6 @@
 .daily-modal-action { display: inline-flex; align-items: center; gap: 16px; padding: 13px 17px; border: 0; border-radius: 12px; background: #b5f566; color: #192518; font: inherit; font-weight: 850; cursor: pointer; }
 .daily-modal-complete { display: flex; align-items: center; justify-content: center; gap: 7px; margin-bottom: 0 !important; color: #b5f566 !important; font-weight: 700; }
 .daily-modal-complete ion-icon { font-size: 1.2rem; }
-.daily-reset-button { display: block; margin: 8px 0 20px auto; padding: 7px 10px; border: 1px dashed #69738f; border-radius: 8px; background: transparent; color: #aab4cd; font: inherit; font-size: .7rem; cursor: pointer; }
-.daily-reset-button:hover, .daily-reset-button:focus-visible { border-color: #b5f566; color: #b5f566; outline: none; }
 .stats-overview-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 .stats-overview-heading h2 { margin: 7px 0 0; color: #fff; font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -.04em; }
 .stats-caption { color: #7884a1; font-size: .75rem; }

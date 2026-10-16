@@ -9,7 +9,7 @@ import { StartComponent } from './start.component';
 describe('StartComponent', () => {
   let fixture: ComponentFixture<StartComponent>;
   const router = jasmine.createSpyObj('Router', ['navigate']);
-  const stats = jasmine.createSpyObj('StatsService', ['getStats', 'isDailyAvailable', 'getDailyRemainingMs', 'resetDaily']);
+  const stats = jasmine.createSpyObj('StatsService', ['getStats', 'isDailyAvailable', 'getDailyRemainingMs']);
 
   beforeEach(async () => {
     localStorage.clear();
@@ -39,12 +39,5 @@ describe('StartComponent', () => {
     expect(component.estadisticas.gamesPlayed).toBe(2);
     component.seleccionarTematica('animales');
     expect(router.navigate).toHaveBeenCalledWith(['/level', 'animales']);
-  });
-
-  it('resets the daily challenge status when requested', () => {
-    fixture.componentInstance.resetDailyChallenge();
-    expect(stats.resetDaily).toHaveBeenCalled();
-    expect(fixture.componentInstance.retoDiarioDisponible).toBeTrue();
-    expect(fixture.componentInstance.showDailyModal).toBeTrue();
   });
 });

@@ -111,13 +111,6 @@ export class StartComponent implements ViewWillEnter, AfterViewInit, OnDestroy {
     this.showDailyModal = false;
   }
 
-  resetDailyChallenge(): void {
-    this.statsService.resetDaily();
-    sessionStorage.removeItem(this.dailyPromptKey());
-    this.retoDiarioDisponible = true;
-    this.showDailyModal = true;
-  }
-
   private startDailyClock(): void {
     this.updateDailyClock();
     if (!this.dailyTimer) this.dailyTimer = setInterval(() => this.updateDailyClock(), 1000);

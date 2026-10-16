@@ -31,7 +31,5 @@ describe('StatsService', () => {
     service.completeDaily(date);
     expect(service.isDailyAvailable(date)).toBeFalse();
     expect(service.getDailyRemainingMs(date)).toBe(12 * 60 * 60 * 1000);
-    service.resetDaily();
-    expect(service.isDailyAvailable(date)).toBeTrue();
   });
 });

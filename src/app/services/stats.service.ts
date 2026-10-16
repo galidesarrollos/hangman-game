@@ -49,10 +49,6 @@ export class StatsService {
     localStorage.setItem('dailyChallengeDate', this.dailyKey(date));
   }
 
-  resetDaily(): void {
-    localStorage.removeItem('dailyChallengeDate');
-  }
-
   getDailyRemainingMs(date = new Date()): number {
     const nextDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
     return Math.max(0, nextDay.getTime() - date.getTime());
