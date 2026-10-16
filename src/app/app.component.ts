@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
-import { Platform, ModalController } from '@ionic/angular';
+import { Component, inject } from '@angular/core';
+import { Platform } from '@ionic/angular';
 import { AdmobService } from './services/admob.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -9,30 +10,28 @@ import { AdmobService } from './services/admob.service';
   standalone: false
 })
 export class AppComponent {
-  showVolumeSidebar = false;
+  private readonly platform = inject(Platform);
+  private readonly admobService = inject(AdmobService);
+  readonly router = inject(Router);
 
-  constructor(
-    private modalController: ModalController,
-    private platform: Platform,
-    private admobService: AdmobService
-  ) {
+  showPrivacyNotice = localStorage.getItem('privacyNoticeDismissed') !== 'true';
+
+  constructor() {
     this.initializeApp();
   }
 
   async initializeApp() {
     await this.platform.ready();
 
-    console.log('Plataforma lista');
-
     try {
       await this.admobService.initialize();
-      console.log('AdMob inicializado correctamente');
     } catch (err) {
-      console.error(' Error al inicializar AdMob:', err);
+      console.error('Error al inicializar AdMob:', err);
     }
   }
 
-  openVolumeSettings() {
-    this.showVolumeSidebar = true;
+  dismissPrivacyNotice(): void {
+    localStorage.setItem('privacyNoticeDismissed', 'true');
+    this.showPrivacyNotice = false;
   }
 }

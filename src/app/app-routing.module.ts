@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { StartComponent } from './components/start/start.component';
 import { LevelComponent } from './components/level/level.component';
 import { GameComponent } from './components/game/game.component';
 import { TermsComponent } from './components/terms/terms.component';
+import { PrivacyComponent } from './components/privacy/privacy.component';
 
 
 const routes: Routes = [
@@ -13,13 +14,15 @@ const routes: Routes = [
   },
   { path: 'level/:theme', component: LevelComponent },
   { path: 'game/:theme/:level', component: GameComponent },
+  { path: 'reto-diario', component: GameComponent },
   { path: 'terminos-y-condiciones', component: TermsComponent },
+  { path: 'politica-privacidad', component: PrivacyComponent },
   { path: '**', redirectTo: '' }
 ];
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })
+    RouterModule.forRoot(routes)
   ],
   exports: [RouterModule]
 })

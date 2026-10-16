@@ -1,19 +1,26 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { WordsService } from './words.service';
 import { Theme, Level, GameState } from '../models/game.model';
 import { AudioService } from 'src/app/services/audio.service';
 import { AdmobService } from 'src/app/services/admob.service';
+import { StatsService } from './stats.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameService {
+  private readonly palabrasService = inject(WordsService);
+  private readonly audioService = inject(AudioService);
+  private readonly admobService = inject(AdmobService);
+  private readonly statsService = inject(StatsService);
+
   private readonly MAX_INTENTOS = 7;
   private GameStateSubject: BehaviorSubject<GameState>;
   public GameState$: Observable<GameState>;
+  private currentLevel: Level = 'normal';
 
-  constructor(private palabrasService: WordsService, private audioService: AudioService, private admobService: AdmobService) {
+  constructor() {
     const estadoInicial = this.crearEstadoInicial();
     this.GameStateSubject = new BehaviorSubject<GameState>(estadoInicial);
     this.GameState$ = this.GameStateSubject.asObservable();
@@ -26,20 +33,28 @@ export class GameService {
       lettersFailed: new Set<string>(),
       attemptsRemaining: this.MAX_INTENTOS,
       gameOver: false,
-      winner: false
+      winner: false,
+      score: 0,
+      streak: 0
     };
   }
 
-  iniciarNuevoJuego(tematica: Theme, Level: Level): void {
-    // this.admobService.showInterstitial();
-    const palabra = this.palabrasService.obtenerPalabraAleatoria(tematica, Level);
+  iniciarNuevoJuego(tematica: Theme, level: Level): void {
+    this.currentLevel = level;
+    const retoDiario = level === 'diario' ? this.palabrasService.obtenerRetoDiario() : undefined;
+    const palabra = retoDiario?.word ?? this.palabrasService.obtenerPalabraAleatoria(tematica, level);
+    const temaPartida = retoDiario?.theme ?? tematica;
+    const estadoAnterior = this.GameStateSubject.value;
     const nuevoEstado: GameState = {
       secretWord: palabra,
       lettersGuessed: new Set<string>(),
       lettersFailed: new Set<string>(),
       attemptsRemaining: this.MAX_INTENTOS,
       gameOver: false,
-      winner: false
+      winner: false,
+      score: estadoAnterior.score,
+      streak: estadoAnterior.streak,
+      theme: temaPartida
     };
     this.GameStateSubject.next(nuevoEstado);
   }
@@ -51,7 +66,7 @@ export class GameService {
       return;
     }
 
-    const letraMayuscula = letra.toUpperCase();
+    const letraMayuscula = this.normalizar(letra);
 
     if (estadoActual.lettersGuessed.has(letraMayuscula) ||
         estadoActual.lettersFailed.has(letraMayuscula)) {
@@ -60,15 +75,18 @@ export class GameService {
 
     const nuevoEstado = { ...estadoActual };
 
-    if (estadoActual.secretWord.includes(letraMayuscula)) {
+    if (this.normalizar(estadoActual.secretWord).includes(letraMayuscula)) {
       nuevoEstado.lettersGuessed = new Set(estadoActual.lettersGuessed);
       nuevoEstado.lettersGuessed.add(letraMayuscula);
       this.audioService.playSound('acierto');
       if (this.palabraCompletada(estadoActual.secretWord, nuevoEstado.lettersGuessed)) {
         nuevoEstado.gameOver = true;
         nuevoEstado.winner = true;
+        nuevoEstado.score += nuevoEstado.attemptsRemaining * 10;
+        nuevoEstado.streak += 1;
+        this.statsService.recordResult(true, nuevoEstado.streak);
+        if (this.currentLevel === 'diario') this.statsService.completeDaily();
         this.admobService.showBannerBottomCenter();
-        // this.admobService.showInterstitial();
         this.audioService.playSound('victoria');
       }
     } else {
@@ -79,7 +97,9 @@ export class GameService {
       if (nuevoEstado.attemptsRemaining === 0) {
         nuevoEstado.gameOver = true;
         nuevoEstado.winner = false;
-        // this.admobService.showInterstitial();
+        nuevoEstado.streak = 0;
+        this.statsService.recordResult(false, 0);
+        if (this.currentLevel === 'diario') this.statsService.completeDaily();
         this.audioService.playSound('derrota');
       }
     }
@@ -88,19 +108,17 @@ export class GameService {
   }
 
   private palabraCompletada(palabra: string, lettersGuessed: Set<string>): boolean {
-    return palabra.split('').every(letra => lettersGuessed.has(letra));
+    return this.normalizar(palabra).split('').every(letra => lettersGuessed.has(letra));
   }
 
   obtenerPalabraVisible(palabra: string, lettersGuessed: Set<string>): string {
     return palabra
       .split('')
-      .map(letra => lettersGuessed.has(letra) ? letra : '_')
+      .map(letra => lettersGuessed.has(this.normalizar(letra)) ? letra : '_')
       .join(' ');
   }
 
-  reiniciarJuego(): void {
-    const estadoInicial = this.crearEstadoInicial();
-    this.admobService.showInterstitial();
-    this.GameStateSubject.next(estadoInicial);
+  private normalizar(texto: string): string {
+    return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
   }
 }

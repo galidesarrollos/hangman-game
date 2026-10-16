@@ -1,116 +1,83 @@
+<ion-header class="settings-header">
+  <ion-toolbar>
+    <ion-title>Ajustes de sonido</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()" aria-label="Cerrar ajustes de sonido">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
 
-  <div class="settings-container">
-    <!-- Control de Volumen -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Volumen</ion-card-title>
-      </ion-card-header>
-      
-      <ion-card-content>
-        <ion-item>
-          <ion-icon slot="start" name="volume-low" *ngIf="volume <= 30"></ion-icon>
-          <ion-icon slot="start" name="volume-medium" *ngIf="volume > 30 && volume <= 70"></ion-icon>
-          <ion-icon slot="start" name="volume-high" *ngIf="volume > 70"></ion-icon>
-          
-          <ion-range 
-            [value]="volume"
-            (ionInput)="onVolumeChange($event)"
-            [pin]="true"
-            [pinFormatter]="volumeFormatter"
-            min="0" 
-            max="100"
-            color="primary">
-            <ion-label slot="start">0%</ion-label>
-            <ion-label slot="end">100%</ion-label>
-          </ion-range>
-        </ion-item>
+<ion-content class="settings-content">
+  <main class="settings-shell">
+    <header class="settings-intro">
+      <div class="sound-emblem" aria-hidden="true"><ion-icon name="musical-notes-outline"></ion-icon></div>
+      <span class="settings-kicker">A TU RITMO</span>
+      <h1>Que cada jugada <span>suene bien.</span></h1>
+      <p>Ajusta los efectos del juego y escucha cómo sonará cada momento de la partida.</p>
+    </header>
 
-        <ion-text color="medium">
-          <p class="volume-value">Volumen actual: {{ volume }}%</p>
-        </ion-text>
-      </ion-card-content>
-    </ion-card>
+    <section class="volume-panel" aria-labelledby="volume-title">
+      <div class="panel-heading">
+        <div>
+          <span class="panel-label">CONTROL PRINCIPAL</span>
+          <h2 id="volume-title">Volumen del juego</h2>
+        </div>
+        <div class="volume-badge" aria-live="polite">{{ volume }}%</div>
+      </div>
 
-    <!-- Prueba de Sonido -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Prueba de Sonido</ion-card-title>
-      </ion-card-header>
-      
-      <ion-card-content>
-        <ion-grid>
-          <ion-row>
-            <ion-col size="6">
-              <ion-button 
-                expand="block" 
-                color="success" 
-                (click)="audioService.playSound('acierto')"
-                fill="outline">
-                <ion-icon slot="start" name="checkmark-circle"></ion-icon>
-                Acierto
-              </ion-button>
-            </ion-col>
-            
-            <ion-col size="6">
-              <ion-button 
-                expand="block" 
-                color="danger" 
-                (click)="audioService.playSound('error')"
-                fill="outline">
-                <ion-icon slot="start" name="close-circle"></ion-icon>
-                Error
-              </ion-button>
-            </ion-col>
-          </ion-row>
-          
-          <ion-row>
-            <ion-col size="6">
-              <ion-button 
-                expand="block" 
-                color="warning" 
-                (click)="audioService.playSound('victoria')"
-                fill="outline">
-                <ion-icon slot="start" name="trophy"></ion-icon>
-                Victoria
-              </ion-button>
-            </ion-col>
-            
-            <ion-col size="6">
-              <ion-button 
-                expand="block" 
-                color="dark" 
-                (click)="audioService.playSound('derrota')"
-                fill="outline">
-                <ion-icon slot="start" name="sad"></ion-icon>
-                Derrota
-              </ion-button>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
+      <div class="range-wrap">
+        <ion-icon [name]="volume === 0 ? 'volume-mute-outline' : volume <= 50 ? 'volume-low-outline' : 'volume-high-outline'" aria-hidden="true"></ion-icon>
+        <ion-range
+          aria-label="Volumen del juego"
+          [value]="volume"
+          (ionInput)="onVolumeChange($event)"
+          [pin]="true"
+          [pinFormatter]="volumeFormatter"
+          min="0"
+          max="100">
+        </ion-range>
+        <ion-icon name="volume-high-outline" aria-hidden="true"></ion-icon>
+      </div>
+      <div class="range-labels"><span>Silencio</span><span>Máximo</span></div>
 
-        <ion-button 
-          expand="block" 
-          color="primary" 
-          (click)="testSound()"
-          class="ion-margin-top">
-          <ion-icon slot="start" name="play"></ion-icon>
-          Probar Sonido
-        </ion-button>
-      </ion-card-content>
-    </ion-card>
+      <button type="button" class="mute-action" (click)="toggleMute()" [attr.aria-label]="volume === 0 ? 'Activar sonido' : 'Silenciar juego'">
+        <ion-icon [name]="volume === 0 ? 'volume-medium-outline' : 'volume-mute-outline'" aria-hidden="true"></ion-icon>
+        {{ volume === 0 ? 'Activar sonido' : 'Silenciar juego' }}
+      </button>
+    </section>
 
-    <!-- Información -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Información</ion-card-title>
-      </ion-card-header>
-      
-      <ion-card-content>
-        <ion-text color="medium">
-          <p>
-            El volumen se guardará automáticamente y se aplicará a todos los sonidos del juego.
-          </p>
-        </ion-text>
-      </ion-card-content>
-    </ion-card>
-  </div>
+    <section class="preview-section" aria-labelledby="preview-title">
+      <div class="preview-heading">
+        <span class="panel-label">VISTA PREVIA</span>
+        <h2 id="preview-title">Prueba los sonidos</h2>
+        <p>Toca uno para escucharlo con el volumen elegido.</p>
+      </div>
+      <div class="preview-grid">
+        <button type="button" class="preview-button success" (click)="playPreview('acierto')">
+          <span class="preview-icon"><ion-icon name="checkmark-outline" aria-hidden="true"></ion-icon></span>
+          <span><strong>Acierto</strong><small>Una letra más</small></span>
+          <ion-icon class="play-icon" name="play-outline" aria-hidden="true"></ion-icon>
+        </button>
+        <button type="button" class="preview-button mistake" (click)="playPreview('error')">
+          <span class="preview-icon"><ion-icon name="close-outline" aria-hidden="true"></ion-icon></span>
+          <span><strong>Error</strong><small>Sigue intentando</small></span>
+          <ion-icon class="play-icon" name="play-outline" aria-hidden="true"></ion-icon>
+        </button>
+        <button type="button" class="preview-button win" (click)="playPreview('victoria')">
+          <span class="preview-icon"><ion-icon name="trophy-outline" aria-hidden="true"></ion-icon></span>
+          <span><strong>Victoria</strong><small>Palabra resuelta</small></span>
+          <ion-icon class="play-icon" name="play-outline" aria-hidden="true"></ion-icon>
+        </button>
+        <button type="button" class="preview-button lose" (click)="playPreview('derrota')">
+          <span class="preview-icon"><ion-icon name="heart-dislike-outline" aria-hidden="true"></ion-icon></span>
+          <span><strong>Derrota</strong><small>Fin de partida</small></span>
+          <ion-icon class="play-icon" name="play-outline" aria-hidden="true"></ion-icon>
+        </button>
+      </div>
+    </section>
+
+    <p class="save-note"><ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon> El volumen se guarda automáticamente en este dispositivo.</p>
+  </main>
+</ion-content>

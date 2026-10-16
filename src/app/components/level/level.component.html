@@ -1,75 +1,53 @@
-
-
-
-<ion-header [translucent]="false">
-
+<ion-header class="level-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()" aria-label="Volver a las temáticas">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title><span class="brand-mark" aria-hidden="true">A<span>?</span></span> El Ahorcado</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openVolumeSettings()" [attr.aria-label]="isMuted ? 'Activar sonido' : 'Ajustes de sonido'">
+        <ion-icon slot="icon-only" [name]="isMuted ? 'volume-mute-outline' : 'volume-medium-outline'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
 </ion-header>
 
+<ion-content class="level-content">
+  <main class="level-shell">
+    <nav class="steps" aria-label="Progreso de preparación">
+      <span class="step-done"><ion-icon name="checkmark-outline" aria-hidden="true"></ion-icon> Temática</span>
+      <span class="step-line" aria-hidden="true"></span>
+      <span class="step-current" aria-current="step">2 <span>Dificultad</span></span>
+      <span class="step-line" aria-hidden="true"></span>
+      <span class="step-next">3 <span>Jugar</span></span>
+    </nav>
 
-<ion-content [fullscreen]="true">
+    <section class="level-intro" aria-labelledby="level-title">
+      <div class="theme-badge"><span aria-hidden="true">{{ temaActual.icono }}</span> {{ temaActual.nombre }}</div>
+      <p class="intro-kicker">EL SIGUIENTE PASO</p>
+      <h1 id="level-title">Elige tu <span>nivel</span></h1>
+      <p class="intro-description">Tú decides cómo empieza el reto. Ambas opciones tienen siete intentos para descubrir la palabra.</p>
+    </section>
 
-<div class="container-nivel">
-<div class="content-wrapper">
-   <ion-buttons slot="end">
-<ion-button (click)="openVolumeSettings()" fill="clear">
-  <ion-icon slot="icon-only" name="volume-medium"></ion-icon>
-</ion-button>
-    </ion-buttons>
-        <div class="header-section">
-          <button (click)="volver()" class="btn-volver">
-            ← Volver al Menú
-          </button>
-          <h1 class="title">{{ tematica }}</h1>
-          <p class="subtitle">Selecciona el nivel de dificultad</p>
-        </div>
+    <section class="level-grid" aria-label="Niveles disponibles">
+      <button type="button" class="level-card normal" (click)="iniciarJuego('normal')" aria-label="Jugar en nivel normal">
+        <span class="level-card-top"><span class="level-tag">PARA EMPEZAR</span><span class="level-number">01 / 02</span></span>
+        <span class="level-art" aria-hidden="true"><span>C</span><span>A</span><span>S</span><span>A</span></span>
+        <span class="level-card-body"><strong>Normal</strong><span>Palabras habituales para entrar en ritmo y disfrutar cada acierto.</span></span>
+        <span class="level-card-bottom"><span>Empezar partida</span><span class="level-arrow"><ion-icon name="arrow-forward-outline"></ion-icon></span></span>
+      </button>
 
-        <div class="niveles-grid">
-          <button (click)="iniciarJuego('normal')" class="nivel-card">
-            <div class="icono">⭐</div>
-            <h2 class="nivel-nombre">Normal</h2>
-            <p class="nivel-desc">Palabras sencillas y comunes</p>
-          </button>
+      <button type="button" class="level-card advanced" (click)="iniciarJuego('avanzado')" aria-label="Jugar en nivel avanzado">
+        <span class="level-card-top"><span class="level-tag">UN RETO MAYOR</span><span class="level-number">02 / 02</span></span>
+        <span class="level-art" aria-hidden="true"><span>E</span><span class="unknown">?</span><span>G</span><span class="unknown">?</span></span>
+        <span class="level-card-body"><strong>Avanzado</strong><span>Palabras menos comunes para poner a prueba tu vocabulario.</span></span>
+        <span class="level-card-bottom"><span>Aceptar el reto</span><span class="level-arrow"><ion-icon name="arrow-forward-outline"></ion-icon></span></span>
+      </button>
+    </section>
 
-          <button (click)="iniciarJuego('avanzado')" class="nivel-card">
-            <div class="icono">🏆</div>
-            <h2 class="nivel-nombre">Avanzado</h2>
-            <p class="nivel-desc">Palabras más complejas</p>
-          </button>
-        </div>
-      </div>
-    </div>
-    <!-- FOOTER -->
-  <ion-footer class="custom-footer">
-    <div class="footer-content">
-      <div class="footer-section about">
-        <h2>El ahorcado</h2>
-        <p>Adivina la palabra antes de que sea demasiado tarde!!!</p>
-      </div>
-
-      <div class="footer-section links">
-        <h3>Enlaces útiles</h3>
-        <ul>
-          <li><a routerLink="">Inicio</a></li>
-          <li><a href="http://www.cifrasyletrasjuego.com/">cifras y letras el juego</a></li>
-
-        </ul>
-      </div>
-
-      <div class="footer-section social">
-        <h3>Síguenos</h3>
-        <div class="social-icons">
-          <ion-icon name="logo-facebook"></ion-icon>
-          <ion-icon name="logo-instagram"></ion-icon>
-          <ion-icon name="logo-twitter"></ion-icon>
-          <ion-icon name="logo-youtube"></ion-icon>
-        </div>
-      </div>
-    </div>
-
-    <div class="footer-bottom">
-      <a href="terminos-y-condiciones">Terminos y condiciones</a>
-      <p>© 2025 ... Todos los derechos reservados.</p>
-    </div>
-  </ion-footer>
-
+    <div class="level-help"><ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon> Puedes cambiar de temática volviendo a la pantalla anterior.</div>
+    <footer class="level-footer"><span>Una letra puede cambiarlo todo.</span><a routerLink="/terminos-y-condiciones">Términos y condiciones</a></footer>
+  </main>
 </ion-content>

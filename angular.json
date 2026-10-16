@@ -35,6 +35,11 @@
                 "glob": "app-ads.txt",
                 "input": "src",
                 "output": "./"
+              },
+              {
+                "glob": "politica-privacidad.html",
+                "input": "src",
+                "output": "./"
               }
             ],
             "styles": ["src/global.scss", "src/theme/variables.scss"],

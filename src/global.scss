@@ -1,3 +1,6 @@
+@use "./app/components/start/start.component";
+@use "./app/components/game/game.component";
+
 /*
  * App Global CSS
  * ----------------------------------------------------------------------------
@@ -81,12 +84,11 @@ body {
 
 /* In src/global.scss */
 .volume-sidebar-modal {
-  --height: 80vh; /* Control modal height */
-  // --border-radius: 16px 16px 0 0; /* Rounded top corners */
-
-  /* Ensures content is visible and scrollable */
+  --width: min(640px, 100%);
+  --height: min(720px, 92vh);
+  --border-radius: 24px 24px 0 0;
+  --box-shadow: 0 24px 70px rgba(0, 0, 0, .45);
   ion-content {
-    --background: var(--ion-background-color, #ffffff);
+    --background: #101322;
   }
-
 }

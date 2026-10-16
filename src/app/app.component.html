@@ -1,17 +1,17 @@
 <ion-app>
 
   <div
-    class="cookie-overlay" id="cookie-banner"
+    *ngIf="showPrivacyNotice && !router.url.startsWith('/politica-privacidad')" class="cookie-overlay"
   >
     <div class="cookie-box">
       <p>
-        Usamos cookies para mejorar tu experiencia en el juego.
-        Al continuar, aceptas nuestro uso de cookies.
+        El juego muestra anuncios de Google, que puede usar cookies o identificadores.
+        Este aviso no modifica tus preferencias publicitarias.
       </p>
-      <a routerLink="/terminos">Más información</a>
+      <a routerLink="/politica-privacidad">Política de privacidad</a>
 
-      <button id="accept-cookies" class="accept-btn">
-        Aceptar
+      <button type="button" (click)="dismissPrivacyNotice()" class="accept-btn">
+        Cerrar aviso
       </button>
     </div>
   </div>

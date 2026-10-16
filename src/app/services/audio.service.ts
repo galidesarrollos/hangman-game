@@ -6,7 +6,7 @@ import { Sounds } from '../models/game.model';
 })
 export class AudioService {
 
-    private volume: number = 1;
+  private volume = 1;
 
   private audios: { [key in Sounds]: HTMLAudioElement } = {
     acierto: new Audio('assets/sounds/acierto.mp3'),
@@ -16,14 +16,19 @@ export class AudioService {
   };
 
   constructor() {
-    // Correctly iterate over the audio objects
+    const savedVolume = localStorage.getItem('gameVolume');
+    if (savedVolume !== null) {
+      const percent = Number(savedVolume);
+      if (Number.isFinite(percent)) this.volume = Math.max(0, Math.min(100, percent)) / 100;
+    }
     Object.values(this.audios).forEach((audioElement: HTMLAudioElement) => {
-      audioElement.load(); // Preload the audio :cite[2]
+      audioElement.load();
     });
   }
 
-    setVolume(level: number): void {
-    this.volume = level;
+  setVolume(level: number): void {
+    this.volume = Math.max(0, Math.min(1, level));
+    localStorage.setItem('gameVolume', String(Math.round(this.volume * 100)));
   }
 
   getVolume(): number {
@@ -33,10 +38,7 @@ export class AudioService {
   public playSound(sound: Sounds): void {
     const audio = this.audios[sound];
     audio.volume = this.volume;
-    audio.currentTime = 0; // Reset to start
+    audio.currentTime = 0;
     audio.play().catch(error => console.log(`Error playing ${sound} sound:`, error));
-  }
-    volumeFormatter(value: number): string {
-    return `${value}%`;
   }
 }

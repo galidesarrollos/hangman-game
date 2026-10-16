@@ -1,5 +1,5 @@
-export type Theme = 'deportes' | 'ciencia' | 'infantil' | 'general';
-export type Level = 'normal' | 'avanzado';
+export type Theme = 'deportes' | 'ciencia' | 'infantil' | 'general' | 'animales' | 'comida' | 'naturaleza' | 'tecnologia';
+export type Level = 'normal' | 'avanzado' | 'diario';
 
 export type Sounds = 'acierto' | 'error' | 'victoria' | 'derrota';
 
@@ -16,4 +16,7 @@ export interface GameState {
   attemptsRemaining: number;
   gameOver: boolean;
   winner: boolean;
+  score: number;
+  streak: number;
+  theme?: Theme;
 }
