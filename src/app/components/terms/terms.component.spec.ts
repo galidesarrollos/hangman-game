@@ -9,9 +9,8 @@ describe('TermsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ TermsComponent ],
-      imports: [IonicModule.forRoot()]
-    }).compileComponents();
+      imports: [TermsComponent, IonicModule.forRoot()]
+    }).overrideComponent(TermsComponent, { set: { template: '' } }).compileComponents();
 
     fixture = TestBed.createComponent(TermsComponent);
     component = fixture.componentInstance;
