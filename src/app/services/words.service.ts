@@ -17,7 +17,10 @@ export class WordsService {
 
   obtenerPalabraAleatoria(tematica: Theme, nivel: Level): string {
     const clave = `${tematica}-${nivel}`;
-    const lista = (this.palabras[tematica]?.[nivel] ?? [])
+    const listaBase = nivel === 'facil'
+      ? (this.palabras[tematica]?.normal ?? []).filter(palabra => palabra.length <= 6)
+      : (this.palabras[tematica]?.[nivel] ?? []);
+    const lista = listaBase
       .filter(palabra => /^[a-záéíóúüñ]+$/i.test(palabra));
     if (lista.length === 0) return 'ERROR';
     let usadas = this.usadas.get(clave) ?? new Set<string>();

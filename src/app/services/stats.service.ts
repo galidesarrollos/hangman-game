@@ -12,6 +12,7 @@ const DEFAULT_STATS: GameStats = { gamesPlayed: 0, wins: 0, losses: 0, bestStrea
 @Injectable({ providedIn: 'root' })
 export class StatsService {
   private readonly storageKey = 'gameStats';
+  private readonly dailyRetryKey = 'dailyRewardedRetryDate';
 
   getStats(): GameStats {
     const stored = localStorage.getItem(this.storageKey);
@@ -47,6 +48,16 @@ export class StatsService {
 
   completeDaily(date = new Date()): void {
     localStorage.setItem('dailyChallengeDate', this.dailyKey(date));
+  }
+
+  isDailyRetryAvailable(date = new Date()): boolean {
+    return localStorage.getItem(this.dailyRetryKey) !== this.dailyKey(date);
+  }
+
+  useDailyRetry(date = new Date()): boolean {
+    if (!this.isDailyRetryAvailable(date)) return false;
+    localStorage.setItem(this.dailyRetryKey, this.dailyKey(date));
+    return true;
   }
 
   getDailyRemainingMs(date = new Date()): number {

@@ -1,12 +1,11 @@
 <ion-header class="start-header">
   <ion-toolbar>
     <ion-title>
-      <span class="brand-mark" aria-hidden="true">A<span>?</span></span>
       <span>El Ahorcado</span>
     </ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="openVolumeSettings()" aria-label="Ajustes de sonido">
-        <ion-icon slot="icon-only" [name]="isMuted ? 'volume-mute-outline' : 'volume-medium-outline'"></ion-icon>
+      <ion-button (click)="openUserSettings()" aria-label="Ajustes de usuario">
+        <ion-icon slot="icon-only" name="person-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -24,61 +23,23 @@
       <p *ngIf="!retoDiarioDisponible" class="daily-modal-complete"><ion-icon name="checkmark-circle-outline"></ion-icon> Reto completado. Vuelve en {{ dailyCountdown }}.</p>
     </section>
   </div>
-  <main class="start-shell">
+  <main class="start-shell" [class.native-shell]="platform.is('hybrid')">
     <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-copy">
-        <span class="eyebrow"><span class="eyebrow-dot"></span> UN CLÁSICO PARA JUGAR A TU MANERA</span>
-        <h1 id="hero-title">Una palabra.<br><span>Muchas posibilidades.</span></h1>
-        <p>Adivina las letras, descubre la palabra y pon a prueba tu ingenio. Cada partida es un nuevo reto.</p>
-        <a class="hero-action" href="#tematicas">Elegir temática <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon></a>
-        <div class="hero-note"><ion-icon name="sparkles-outline" aria-hidden="true"></ion-icon> Cuatro temáticas · Dos niveles</div>
-      </div>
-
-      <div class="hero-art" aria-hidden="true">
-        <div class="art-orbit orbit-one"></div>
-        <div class="art-orbit orbit-two"></div>
-        <div class="preview-card">
-          <div class="preview-top"><span class="preview-label">PARTIDA EN CURSO</span><span class="preview-lives">♥ ♥ ♥ ♥ ♥ ♥ ♥</span></div>
-          <div class="preview-symbol">?</div>
-          <div class="preview-word"><span>J</span><span>U</span><span class="empty"></span><span>G</span><span class="empty"></span></div>
-          <div class="preview-caption">¿SABES QUÉ PALABRA ES?</div>
-        </div>
-        <div class="floating-tile tile-a">A</div>
-        <div class="floating-tile tile-e">E</div>
+      <div class="hero-content">
+        <div class="hangman-art" aria-hidden="true"><div class="hangman-rope"></div><div class="hangman-head"></div><div class="hangman-body"></div><div class="hangman-arm hangman-arm-left"></div><div class="hangman-arm hangman-arm-right"></div><div class="hangman-leg hangman-leg-left"></div><div class="hangman-leg hangman-leg-right"></div></div>
+        <button type="button" class="hero-action" (click)="openThemeSelector()">Elegir temática <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon></button>
       </div>
     </section>
 
-    <section class="stats-overview" aria-labelledby="stats-title">
-      <div class="stats-overview-heading"><div><span class="section-kicker">TU PROGRESO</span><h2 id="stats-title">Tus estadísticas</h2></div><span class="stats-caption">Guardadas en este dispositivo</span></div>
-      <div class="stats-grid">
-        <div class="overview-stat"><ion-icon name="game-controller-outline" aria-hidden="true"></ion-icon><span><strong>{{ estadisticas.gamesPlayed }}</strong><small>Partidas</small></span></div>
-        <div class="overview-stat win"><ion-icon name="trophy-outline" aria-hidden="true"></ion-icon><span><strong>{{ estadisticas.wins }}</strong><small>Victorias</small></span></div>
-        <div class="overview-stat loss"><ion-icon name="close-circle-outline" aria-hidden="true"></ion-icon><span><strong>{{ estadisticas.losses }}</strong><small>Derrotas</small></span></div>
-        <div class="overview-stat streak"><ion-icon name="flame-outline" aria-hidden="true"></ion-icon><span><strong>{{ estadisticas.bestStreak }}</strong><small>Mejor racha</small></span></div>
-      </div>
-    </section>
-
+    <div class="daily-divider"><span>O TAMBIÉN</span></div>
     <button type="button" class="daily-challenge" [class.completed]="!retoDiarioDisponible" (click)="openDailyModal()">
       <span class="daily-icon"><ion-icon name="calendar-outline" aria-hidden="true"></ion-icon></span>
       <span class="daily-copy"><span class="section-kicker">{{ retoDiarioDisponible ? 'RETO DE HOY' : 'RETO COMPLETADO' }}</span><strong>{{ retoDiarioDisponible ? '¿Puedes descubrir la palabra del día?' : 'Vuelve en ' + dailyCountdown }}</strong><small>{{ retoDiarioDisponible ? 'Una palabra compartida con todos. Cambia cada día.' : 'El próximo reto estará disponible mañana.' }}</small></span>
       <ion-icon class="daily-arrow" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
     </button>
-    <section class="themes" id="tematicas" aria-labelledby="themes-title">
-      <div class="themes-heading">
-        <div>
-          <span class="section-kicker">ELIGE TU RETO</span>
-          <h2 id="themes-title">¿Qué te apetece descubrir?</h2>
-        </div>
-        <p>Selecciona una temática para empezar.</p>
-      </div>
-      <div class="themes-grid">
-        <button *ngFor="let tematica of tematicas" type="button" class="theme-card" [ngClass]="'theme-' + tematica.id" (click)="seleccionarTematica(tematica.id)" [attr.aria-label]="'Jugar con la temática ' + tematica.nombre">
-          <span class="theme-icon" aria-hidden="true">{{ tematica.icono }}</span>
-          <span class="theme-body"><strong>{{ tematica.nombre }}</strong><span>{{ tematica.descripcion }}</span></span>
-          <span class="theme-arrow" aria-hidden="true"><ion-icon name="arrow-forward-outline"></ion-icon></span>
-        </button>
-      </div>
-    </section>
-    <footer class="start-footer"><span>Una letra puede cambiarlo todo.</span><div class="start-footer-links"><a routerLink="/terminos-y-condiciones">Términos y condiciones</a><a routerLink="/politica-privacidad">Política de privacidad</a></div></footer>
+    <div class="web-ad-slot" *ngIf="!platform.is('hybrid')" aria-label="Publicidad">
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6536506161156686" data-ad-slot="REEMPLAZAR_CON_SLOT_ADSENSE" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    </div>
+    <app-footer></app-footer>
   </main>
 </ion-content>

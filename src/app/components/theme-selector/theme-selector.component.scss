@@ -1,0 +1,13 @@
+.theme-selector-header ion-toolbar { --background: #101322; --color: #fff; --border-color: rgba(255,255,255,.08); --min-height: 62px; padding: 0 12px; }
+.theme-selector-header ion-title { font-size: 1rem; font-weight: 800; }
+.theme-selector-content { --background: #101322; color: #e9ecfa; }
+.theme-selector-shell { padding: 24px; }
+.theme-selector-shell.native-shell { padding-bottom: calc(115px + env(safe-area-inset-bottom)); }
+.themes-heading { margin-bottom: 22px; }
+.section-kicker { color: #b5f566; font-size: .72rem; font-weight: 800; letter-spacing: .16em; }
+.themes-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.theme-ad-slot { grid-column: 1 / -1; min-height: 90px; display: grid; place-items: center; overflow: hidden; }
+.theme-ad-slot .adsbygoogle { width: 100%; min-height: 90px; }
+.theme-card { --accent: #b5f566; position: relative; width: 100%; min-height: 126px; display: flex; flex-direction: column; align-items: start; gap: 10px; padding: 15px 46px 14px 15px; border: 1px solid #353b57; border-radius: 15px; background: #20243b; color: #fff; text-align: left; }.theme-card:active { border-color: var(--accent); }.theme-ciencia { --accent: #8cb7ff; }.theme-infantil { --accent: #ffc27c; }.theme-general { --accent: #d9a2ff; }.theme-animales { --accent: #ff9caa; }.theme-comida { --accent: #ffbd72; }.theme-naturaleza { --accent: #8ce0b0; }.theme-tecnologia { --accent: #75dbe8; }
+.theme-info { display: flex; flex-direction: column; align-items: start; gap: 8px; }.theme-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: color-mix(in srgb, var(--accent) 17%, #20243b); font-size: 1.65rem; }.theme-info strong { color: #fff; font-size: 1.1rem; }.theme-arrow { position: absolute; top: 50%; right: 14px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #b5f566; color: #18221a; font-size: 1.05rem; transform: translateY(-50%); }
+@media (max-width: 420px) { .theme-selector-shell { padding: 18px; }.themes-grid { gap: 8px; }.theme-card { min-height: 115px; padding: 13px 40px 12px 13px; }.theme-icon { width: 40px; height: 40px; font-size: 1.5rem; }.theme-info strong { font-size: 1.02rem; }.theme-arrow { right: 10px; } }

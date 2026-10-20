@@ -2,7 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { GameService } from './game.service';
 import { WordsService } from './words.service';
 import { AudioService } from './audio.service';
-import { AdmobService } from './admob.service';
 import { StatsService } from './stats.service';
 
 describe('GameService', () => {
@@ -10,14 +9,12 @@ describe('GameService', () => {
   let state: any;
   let words: jasmine.SpyObj<WordsService>;
   let audio: jasmine.SpyObj<AudioService>;
-  let ads: jasmine.SpyObj<AdmobService>;
   let stats: jasmine.SpyObj<StatsService>;
 
   beforeEach(() => {
     words = jasmine.createSpyObj<WordsService>('WordsService', ['obtenerPalabraAleatoria', 'obtenerRetoDiario']);
     audio = jasmine.createSpyObj<AudioService>('AudioService', ['playSound']);
-    ads = jasmine.createSpyObj<AdmobService>('AdmobService', ['showBannerBottomCenter']);
-    stats = jasmine.createSpyObj<StatsService>('StatsService', ['recordResult', 'completeDaily']);
+    stats = jasmine.createSpyObj<StatsService>('StatsService', ['recordResult', 'completeDaily', 'useDailyRetry']);
     words.obtenerPalabraAleatoria.and.returnValue('CASA');
     words.obtenerRetoDiario.and.returnValue({ theme: 'animales', word: 'GATO' });
 
@@ -26,7 +23,6 @@ describe('GameService', () => {
         GameService,
         { provide: WordsService, useValue: words },
         { provide: AudioService, useValue: audio },
-        { provide: AdmobService, useValue: ads },
         { provide: StatsService, useValue: stats }
       ]
     });
@@ -72,7 +68,6 @@ describe('GameService', () => {
     expect(state.score).toBe(70);
     expect(state.streak).toBe(1);
     expect(stats.recordResult).toHaveBeenCalledWith(true, 1);
-    expect(ads.showBannerBottomCenter).toHaveBeenCalled();
   });
 
   it('uses and completes the daily challenge when the daily game ends', () => {
@@ -82,6 +77,27 @@ describe('GameService', () => {
     expect(words.obtenerRetoDiario).toHaveBeenCalled();
     expect(state.theme).toBe('animales');
     expect(stats.completeDaily).toHaveBeenCalled();
+  });
+
+  it('restarts the same daily word only after an available rewarded retry', () => {
+    stats.useDailyRetry.and.returnValue(true);
+    service.iniciarNuevoJuego('general', 'diario');
+    for (const letter of ['B', 'C', 'D', 'E', 'F', 'H', 'I']) service.adivinarLetra(letter);
+
+    expect(service.reintentarRetoDiario()).toBeTrue();
+    expect(state.secretWord).toBe('GATO');
+    expect(state.attemptsRemaining).toBe(7);
+    expect(state.gameOver).toBeFalse();
+    expect(stats.useDailyRetry).toHaveBeenCalledTimes(1);
+    expect(service.reintentarRetoDiario()).toBeFalse();
+  });
+
+  it('does not retry a normal game through the daily reward', () => {
+    service.iniciarNuevoJuego('general', 'normal');
+    for (const letter of ['B', 'D', 'E', 'F', 'G', 'H', 'I']) service.adivinarLetra(letter);
+
+    expect(service.reintentarRetoDiario()).toBeFalse();
+    expect(stats.useDailyRetry).not.toHaveBeenCalled();
   });
 
   it('shows guessed letters and masks the rest', () => {

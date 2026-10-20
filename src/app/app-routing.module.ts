@@ -5,6 +5,7 @@ import { LevelComponent } from './components/level/level.component';
 import { GameComponent } from './components/game/game.component';
 import { TermsComponent } from './components/terms/terms.component';
 import { PrivacyComponent } from './components/privacy/privacy.component';
+import { ThemeSelectorComponent } from './components/theme-selector/theme-selector.component';
 
 
 const routes: Routes = [
@@ -13,6 +14,7 @@ const routes: Routes = [
     component: StartComponent
   },
   { path: 'level/:theme', component: LevelComponent },
+  { path: 'tematicas', component: ThemeSelectorComponent },
   { path: 'game/:theme/:level', component: GameComponent },
   { path: 'reto-diario', component: GameComponent },
   { path: 'terminos-y-condiciones', component: TermsComponent },

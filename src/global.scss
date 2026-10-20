@@ -46,6 +46,8 @@
   box-sizing: border-box;
 }
 
+.body-back-button { display: grid; place-items: center; width: 42px; height: 42px; margin: 14px max(16px, calc((100vw - 1160px) / 2)); border: 0; border-radius: 12px; background: #20243b; color: #dce1f5; font-size: 1.35rem; cursor: pointer; }
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
@@ -91,4 +93,32 @@ body {
   ion-content {
     --background: #101322;
   }
+}
+
+.game-result-alert {
+  --backdrop-opacity: .72;
+  --width: min(360px, calc(100% - 32px));
+  --box-shadow: 0 24px 70px rgba(0, 0, 0, .5);
+  .alert-wrapper {
+    border: 1px solid #454d70;
+    border-radius: 22px;
+    background: linear-gradient(145deg, #292e4b, #1c2036);
+    overflow: hidden;
+  }
+  .alert-head { padding: 25px 24px 8px; }
+  .alert-title { color: #fff; font-size: 1.35rem; font-weight: 850; letter-spacing: -.03em; }
+  .alert-message { padding: 8px 24px 18px; color: #b7c1d8; font-size: .95rem; line-height: 1.7; white-space: pre-line; }
+  .alert-button-group { border-top: 1px solid rgba(255,255,255,.1); padding: 8px 12px 12px; }
+  .alert-button { min-height: 44px; color: #b5f566; font-weight: 800; }
+  .alert-button:last-child { color: #d9a2ff; }
+}
+
+.game-result-alert-won .alert-wrapper {
+  border-color: #628b4b;
+  background: linear-gradient(145deg, #294532, #1d3029);
+}
+
+.game-result-alert-lost .alert-wrapper {
+  border-color: #925363;
+  background: linear-gradient(145deg, #482d3a, #30222f);
 }

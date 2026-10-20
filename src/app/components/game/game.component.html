@@ -1,24 +1,20 @@
 <ion-header class="game-header">
   <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button (click)="volverAlMenu()" aria-label="Volver al menú principal">
-        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-    <ion-title><span class="brand-mark" aria-hidden="true">A<span>?</span></span> El Ahorcado</ion-title>
+    <ion-title>El Ahorcado</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="openVolumeSettings()" [attr.aria-label]="isMuted ? 'Activar sonido' : 'Ajustes de sonido'">
-        <ion-icon slot="icon-only" [name]="isMuted ? 'volume-mute-outline' : 'volume-medium-outline'"></ion-icon>
+      <ion-button (click)="openUserSettings()" aria-label="Ajustes de usuario">
+        <ion-icon slot="icon-only" name="person-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="game-content">
-  <main class="game-shell" *ngIf="estado">
+  <button type="button" class="body-back-button" (click)="volverAlMenu()" aria-label="Volver al menú principal"><ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon></button>
+  <main class="game-shell" *ngIf="estado" [class.native-shell]="platform.is('hybrid')">
     <div class="game-heading">
       <div><span class="game-kicker">PARTIDA EN CURSO</span><h1>Adivina la palabra</h1></div>
-      <div class="game-tags"><span>{{ nivel === 'diario' ? 'Reto diario' : nombresTematica[tematica] }}</span><span>{{ nivel === 'diario' ? nombresTematica[tematica] : (nivel === 'normal' ? 'Normal' : 'Avanzado') }}</span></div>
+      <div class="game-tags"><span>{{ nivel === 'diario' ? 'Reto diario' : nombresTematica[tematica] }}</span><span>{{ nivel === 'diario' ? nombresTematica[tematica] : (nivel === 'facil' ? 'Fácil' : (nivel === 'normal' ? 'Normal' : 'Avanzado')) }}</span></div>
     </div>
 
     <section class="game-stats" aria-label="Estado de la partida">
@@ -28,7 +24,7 @@
     </section>
 
     <div class="game-layout">
-      <section class="figure-panel" aria-label="Dibujo del ahorcado">
+      <section class="figure-panel" [class.long-word]="casillas.length > 7" aria-label="Dibujo del ahorcado">
         <div class="panel-title"><span>EL AHORCADO</span><span>{{ fallos }} / 7 fallos</span></div>
         <svg class="hangman" viewBox="0 0 200 220" role="img" [attr.aria-label]="'Dibujo del ahorcado con ' + fallos + ' de 7 fallos'">
           <g class="gallows">
@@ -44,19 +40,12 @@
             <path *ngIf="fallos >= 7" d="M114 64 h1 M131 64 h1 M116 77 Q123 71 130 77" />
           </g>
         </svg>
-        <div class="mistake-track" aria-hidden="true"><span *ngFor="let paso of [1,2,3,4,5,6,7]" [class.used]="fallos >= paso"></span></div>
-        <p class="figure-caption">{{ estado.gameOver ? (estado.winner ? '¡Lo conseguiste!' : 'La próxima será tuya') : (fallos === 0 ? 'Tienes siete oportunidades' : 'Sigue intentando, tú puedes') }}</p>
+        <div class="figure-word-panel">
+          <div class="word-slots" [class.long-word-slots]="casillas.length > 7" aria-live="polite"><span *ngFor="let casilla of casillas" class="letter-slot" [class.revealed]="casilla !== '_'">{{ casilla === '_' ? '' : casilla }}</span></div>
+        </div>
       </section>
 
       <section class="play-panel" aria-label="Palabra y teclado">
-        <div class="word-panel">
-          <div class="panel-title"><span>LA PALABRA</span><span>{{ casillas.length }} letras</span></div>
-          <div class="word-slots" aria-live="polite">
-            <span *ngFor="let casilla of casillas" class="letter-slot" [class.revealed]="casilla !== '_'">{{ casilla === '_' ? '' : casilla }}</span>
-          </div>
-          <p>{{ estado.gameOver ? 'Partida finalizada' : 'Selecciona una letra para descubrir la palabra' }}</p>
-        </div>
-
         <div class="keyboard-panel" *ngIf="!estado.gameOver">
           <div class="panel-title"><span>ELIGE UNA LETRA</span><span>{{ estado.lettersGuessed.size + estado.lettersFailed.size }} usadas</span></div>
           <div class="keyboard-grid">
@@ -68,20 +57,8 @@
           </div>
         </div>
 
-        <div class="result-panel" *ngIf="estado.gameOver" [class.lost]="!estado.winner" [class.won]="estado.winner" aria-live="polite">
-          <div class="celebration" *ngIf="estado.winner" aria-hidden="true"><span *ngFor="let confetti of [1,2,3,4,5,6,7,8,9,10,11,12]" [class]="'confetti c' + confetti"></span></div>
-          <span class="result-icon" aria-hidden="true">{{ estado.winner ? '✦' : '↻' }}</span>
-          <div><span class="result-kicker">{{ estado.winner ? 'RONDA COMPLETADA' : 'FIN DE LA PARTIDA' }}</span>
-            <h2>{{ estado.winner ? '¡Palabra descubierta!' : 'Esta vez no pudo ser' }}</h2>
-            <p>La palabra era <strong>{{ estado.secretWord }}</strong>.</p>
-          </div>
-          <div class="result-summary"><span>PUNTUACIÓN <strong>{{ estado.score }}</strong></span><span>RACHA <strong>{{ estado.streak }}</strong></span></div>
-          <div class="result-actions">
-            <button *ngIf="!(nivel === 'diario' && estado.winner)" type="button" class="play-again" (click)="jugarDeNuevo()">Jugar otra vez <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon></button>
-            <button type="button" class="back-menu" (click)="volverAlMenu()">Volver al menú</button>
-          </div>
-        </div>
       </section>
     </div>
+    <app-footer></app-footer>
   </main>
 </ion-content>

@@ -1,0 +1,20 @@
+<ion-header class="user-settings-header">
+  <ion-toolbar>
+    <ion-title>Ajustes de usuario</ion-title>
+    <ion-buttons slot="end"><ion-button (click)="close()" aria-label="Cerrar ajustes"><ion-icon slot="icon-only" name="close-outline"></ion-icon></ion-button></ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="user-settings-content">
+  <main class="user-settings-shell">
+    <button type="button" class="settings-option" (click)="openVolumeSettings()"><span class="settings-option-icon"><ion-icon name="volume-medium-outline"></ion-icon></span><span><strong>Ajustes de sonido</strong><small>Configura el volumen y los efectos</small></span><ion-icon name="chevron-forward-outline"></ion-icon></button>
+    <section class="user-stats" aria-labelledby="user-stats-title">
+      <div class="stats-overview-heading"><div><span class="section-kicker">TU PROGRESO</span><h2 id="user-stats-title">Mis estadísticas</h2></div><span class="stats-caption">Guardadas en este dispositivo</span></div>
+      <div class="stats-grid">
+        <div class="overview-stat"><ion-icon name="game-controller-outline"></ion-icon><span><strong>{{ estadisticas.gamesPlayed }}</strong><small>Partidas</small></span></div>
+        <div class="overview-stat win"><ion-icon name="trophy-outline"></ion-icon><span><strong>{{ estadisticas.wins }}</strong><small>Victorias</small></span></div>
+        <div class="overview-stat loss"><ion-icon name="close-circle-outline"></ion-icon><span><strong>{{ estadisticas.losses }}</strong><small>Derrotas</small></span></div>
+        <div class="overview-stat streak"><ion-icon name="flame-outline"></ion-icon><span><strong>{{ estadisticas.bestStreak }}</strong><small>Mejor racha</small></span></div>
+      </div>
+    </section>
+  </main>
+</ion-content>

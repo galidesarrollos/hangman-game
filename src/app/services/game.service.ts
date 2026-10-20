@@ -3,7 +3,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { WordsService } from './words.service';
 import { Theme, Level, GameState } from '../models/game.model';
 import { AudioService } from 'src/app/services/audio.service';
-import { AdmobService } from 'src/app/services/admob.service';
 import { StatsService } from './stats.service';
 
 @Injectable({
@@ -12,7 +11,6 @@ import { StatsService } from './stats.service';
 export class GameService {
   private readonly palabrasService = inject(WordsService);
   private readonly audioService = inject(AudioService);
-  private readonly admobService = inject(AdmobService);
   private readonly statsService = inject(StatsService);
 
   private readonly MAX_INTENTOS = 7;
@@ -59,6 +57,13 @@ export class GameService {
     this.GameStateSubject.next(nuevoEstado);
   }
 
+  reintentarRetoDiario(): boolean {
+    const estado = this.GameStateSubject.value;
+    if (this.currentLevel !== 'diario' || !estado.gameOver || estado.winner || !this.statsService.useDailyRetry()) return false;
+    this.iniciarNuevoJuego(estado.theme ?? 'general', 'diario');
+    return true;
+  }
+
   adivinarLetra(letra: string): void {
     const estadoActual = this.GameStateSubject.value;
 
@@ -86,7 +91,6 @@ export class GameService {
         nuevoEstado.streak += 1;
         this.statsService.recordResult(true, nuevoEstado.streak);
         if (this.currentLevel === 'diario') this.statsService.completeDaily();
-        this.admobService.showBannerBottomCenter();
         this.audioService.playSound('victoria');
       }
     } else {

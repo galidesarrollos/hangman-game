@@ -32,4 +32,14 @@ describe('StatsService', () => {
     expect(service.isDailyAvailable(date)).toBeFalse();
     expect(service.getDailyRemainingMs(date)).toBe(12 * 60 * 60 * 1000);
   });
+
+  it('allows only one rewarded retry per day', () => {
+    const today = new Date(2026, 4, 17, 12);
+    const tomorrow = new Date(2026, 4, 18, 12);
+    expect(service.isDailyRetryAvailable(today)).toBeTrue();
+    expect(service.useDailyRetry(today)).toBeTrue();
+    expect(service.isDailyRetryAvailable(today)).toBeFalse();
+    expect(service.useDailyRetry(today)).toBeFalse();
+    expect(service.isDailyRetryAvailable(tomorrow)).toBeTrue();
+  });
 });

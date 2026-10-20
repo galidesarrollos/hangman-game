@@ -2,14 +2,17 @@ import { AfterViewInit, Component, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ViewWillEnter } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { ModalController, Platform } from '@ionic/angular';
 import { VolumeSidebarComponent } from '../volume-sidebar/volume-sidebar.component';
+import { UserSettingsComponent } from '../user-settings/user-settings.component';
+import { ThemeSelectorComponent } from '../theme-selector/theme-selector.component';
 import { IonRouterOutlet } from '@ionic/angular';
 
 import { AdmobService } from 'src/app/services/admob.service';
 import { AudioService } from 'src/app/services/audio.service';
 import { GameStats, StatsService } from 'src/app/services/stats.service';
+import { AppFooterComponent } from '../app-footer/app-footer.component';
 
 @Component({
   selector: 'app-start',
@@ -19,7 +22,7 @@ import { GameStats, StatsService } from 'src/app/services/stats.service';
     CommonModule,
     FormsModule,
     IonicModule,
-    RouterLink
+    AppFooterComponent
   ]
 })
 export class StartComponent implements ViewWillEnter, AfterViewInit, OnDestroy {
@@ -27,7 +30,7 @@ export class StartComponent implements ViewWillEnter, AfterViewInit, OnDestroy {
   private readonly modalController = inject(ModalController);
   private readonly routerOutlet = inject(IonRouterOutlet);
   private readonly admobService = inject(AdmobService);
-  private readonly platform = inject(Platform);
+  readonly platform = inject(Platform);
   private readonly audioService = inject(AudioService);
   private readonly statsService = inject(StatsService);
 
@@ -93,6 +96,22 @@ export class StartComponent implements ViewWillEnter, AfterViewInit, OnDestroy {
     });
     await modal.present();
     await modal.onDidDismiss();
+  }
+
+  async openUserSettings(): Promise<void> {
+    const modal = await this.modalController.create({
+      component: UserSettingsComponent,
+      componentProps: { estadisticas: this.estadisticas },
+      cssClass: 'user-settings-modal',
+      breakpoints: [0, 0.8, 1],
+      initialBreakpoint: 1,
+      presentingElement: this.routerOutlet.nativeEl
+    });
+    await modal.present();
+  }
+
+  async openThemeSelector(): Promise<void> {
+    await this.router.navigate(['/tematicas']);
   }
 
   seleccionarTematica(tematica: string): void {

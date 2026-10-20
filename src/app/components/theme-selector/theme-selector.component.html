@@ -1,0 +1,23 @@
+<ion-header class="theme-selector-header">
+  <ion-toolbar>
+    <ion-title>Elegir temática</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="theme-selector-content">
+  <button type="button" class="body-back-button" (click)="volver()" aria-label="Volver al inicio"><ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon></button>
+  <main class="theme-selector-shell" [class.native-shell]="platform.is('hybrid')">
+    <header class="themes-heading"><span class="section-kicker">SELECCIONA UNA TEMÁTICA PARA EMPEZAR</span></header>
+    <div class="themes-grid">
+      <ng-container *ngFor="let tematica of tematicas; let i = index">
+        <button type="button" class="theme-card" [ngClass]="'theme-' + tematica.id" (click)="seleccionar(tematica.id)" [attr.aria-label]="'Jugar con la temática ' + tematica.nombre">
+          <span class="theme-info"><span class="theme-icon" aria-hidden="true">{{ tematica.icono }}</span><strong>{{ tematica.nombre }}</strong></span>
+          <span class="theme-arrow" aria-hidden="true"><ion-icon name="arrow-forward-outline"></ion-icon></span>
+        </button>
+        <div *ngIf="!platform.is('hybrid') && (i === 3 || i === 7)" class="theme-ad-slot" aria-label="Publicidad">
+          <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6536506161156686" data-ad-slot="REEMPLAZAR_CON_SLOT_ADSENSE" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        </div>
+      </ng-container>
+    </div>
+    <app-footer></app-footer>
+  </main>
+</ion-content>
