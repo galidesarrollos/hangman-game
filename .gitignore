@@ -77,6 +77,9 @@ key.properties
 android/app/release/
 src/assets/keys/
 
+# Documentación local de auditoría
+AUDITORIA_CODIGO.md
+
 # Local environment and credentials
 .env
 .env.*
