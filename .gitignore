@@ -76,3 +76,34 @@ android/upload_certificate.pem
 key.properties
 android/app/release/
 src/assets/keys/
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+local.properties
+google-services.json
+*.p12
+*.pfx
+*.pem
+*.cer
+*.crt
+*.der
+*.mobileprovision
+
+# Android and iOS generated output
+android/.gradle/
+android/**/build/
+android/.cxx/
+android/**/.cxx/
+android/app/src/main/assets/public/
+*.apk
+*.aab
+*.ipa
+*.xcarchive
+
+# Local IDE and tooling state
+.fleet/
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.gradle/
