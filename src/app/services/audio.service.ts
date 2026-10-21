@@ -7,6 +7,7 @@ import { Sounds } from '../models/game.model';
 export class AudioService {
 
   private volume = 1;
+  private lastAudibleVolume = 1;
 
   private audios: { [key in Sounds]: HTMLAudioElement } = {
     acierto: new Audio('assets/sounds/acierto.mp3'),
@@ -21,6 +22,7 @@ export class AudioService {
       const percent = Number(savedVolume);
       if (Number.isFinite(percent)) this.volume = Math.max(0, Math.min(100, percent)) / 100;
     }
+    if (this.volume > 0) this.lastAudibleVolume = this.volume;
     Object.values(this.audios).forEach((audioElement: HTMLAudioElement) => {
       audioElement.load();
     });
@@ -28,11 +30,16 @@ export class AudioService {
 
   setVolume(level: number): void {
     this.volume = Math.max(0, Math.min(1, level));
+    if (this.volume > 0) this.lastAudibleVolume = this.volume;
     localStorage.setItem('gameVolume', String(Math.round(this.volume * 100)));
   }
 
   getVolume(): number {
     return this.volume;
+  }
+
+  toggleMute(): void {
+    this.setVolume(this.volume > 0 ? 0 : this.lastAudibleVolume);
   }
 
   public playSound(sound: Sounds): void {

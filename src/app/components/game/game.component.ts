@@ -9,13 +9,12 @@ import { AdmobService } from 'src/app/services/admob.service';
 import { VolumeSidebarComponent } from '../volume-sidebar/volume-sidebar.component';
 import { UserSettingsComponent } from '../user-settings/user-settings.component';
 import { AudioService } from 'src/app/services/audio.service';
-import { AppFooterComponent } from '../app-footer/app-footer.component';
 import { StatsService } from 'src/app/services/stats.service';
 
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
-  imports: [CommonModule, IonicModule, AppFooterComponent]
+  imports: [CommonModule, IonicModule]
 })
 export class GameComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
@@ -54,6 +53,10 @@ export class GameComponent implements OnInit, OnDestroy {
     return this.audioService.getVolume() === 0;
   }
 
+  toggleMute(): void {
+    this.audioService.toggleMute();
+  }
+
   get fallos(): number {
     return 7 - (this.estado?.attemptsRemaining ?? 7);
   }
@@ -71,7 +74,9 @@ export class GameComponent implements OnInit, OnDestroy {
     if (this.platform.is('hybrid')) this.admobService.showBannerBottomCenter();
 
     this.subscription.add(this.juegoService.GameState$.subscribe(estado => {
-      if (estado.gameOver && !this.partidaFinalizadaMostrada) void this.mostrarResultado(estado);
+      if (estado.gameOver && !this.partidaFinalizadaMostrada) {
+        void (estado.winner ? this.mostrarResultado(estado) : this.mostrarDerrota(estado));
+      }
       this.partidaFinalizadaMostrada = estado.gameOver;
       this.estado = estado;
       if (estado.theme) this.tematica = estado.theme;
@@ -120,6 +125,87 @@ export class GameComponent implements OnInit, OnDestroy {
     this.admobService.showInterstitial();
     this.partidaFinalizadaMostrada = false;
     this.juegoService.iniciarNuevoJuego(this.tematica, this.nivel);
+  }
+
+  get puedePedirPista(): boolean {
+    return !!this.estado && !this.estado.gameOver && this.estado.lettersGuessed.size < new Set(this.estado.secretWord).size;
+  }
+
+  async confirmarPista(): Promise<void> {
+    if (!this.puedePedirPista || this.anuncioRecompensadoEnCurso) return;
+    const aviso = await this.alertController.create({
+      header: '¿Pedir una pista?',
+      message: 'Una pista revelará una letra de la palabra. Para obtenerla debes ver un anuncio recompensado.',
+      cssClass: 'hint-alert',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Ver anuncio', handler: () => this.verAnuncioYPedirPista() }
+      ]
+    });
+    await aviso.present();
+  }
+
+  private async verAnuncioYPedirPista(): Promise<boolean> {
+    if (this.anuncioRecompensadoEnCurso) return false;
+    this.anuncioRecompensadoEnCurso = true;
+    try {
+      const recompensaObtenida = await this.admobService.showRewardedVideo();
+      if (recompensaObtenida && this.juegoService.usarPista()) return true;
+      await this.mostrarAvisoAnuncioFallido();
+      return false;
+    } catch (error) {
+      console.warn('No se ha podido obtener la pista:', error);
+      await this.mostrarAvisoAnuncioFallido();
+      return false;
+    } finally {
+      this.anuncioRecompensadoEnCurso = false;
+    }
+  }
+
+  private async solicitarReintento(): Promise<boolean> {
+    if (this.anuncioRecompensadoEnCurso || !this.estado?.gameOver || this.estado.winner) return false;
+    this.anuncioRecompensadoEnCurso = true;
+    try {
+      const recompensaObtenida = await this.admobService.showRewardedVideo();
+      const reintentoAceptado = this.nivel === 'diario'
+        ? recompensaObtenida && this.juegoService.reintentarRetoDiario()
+        : recompensaObtenida;
+      if (reintentoAceptado) {
+        this.partidaFinalizadaMostrada = false;
+        if (this.nivel !== 'diario') this.juegoService.iniciarNuevoJuego(this.tematica, this.nivel);
+        return true;
+      } else {
+        await this.mostrarAvisoAnuncioFallido();
+        return false;
+      }
+    } catch (error) {
+      console.warn('No se ha podido completar el reintento:', error);
+      await this.mostrarAvisoAnuncioFallido();
+      return false;
+    } finally {
+      this.anuncioRecompensadoEnCurso = false;
+    }
+  }
+
+  private async mostrarAvisoAnuncioFallido(): Promise<void> {
+    const aviso = await this.toastController.create({ message: 'No se completó el anuncio. Puedes intentarlo de nuevo.', duration: 3000, position: 'top' });
+    await aviso.present();
+  }
+
+  private async mostrarDerrota(estado: GameState): Promise<void> {
+    const puedeReintentar = this.platform.is('hybrid') &&
+      (this.nivel !== 'diario' || this.statsService.isDailyRetryAvailable());
+    const aviso = await this.alertController.create({
+      header: 'Esta vez no pudo ser',
+      backdropDismiss: false,
+      message: `La palabra era ${estado.secretWord}.\n\nPuntuación: ${estado.score}\nRacha: ${estado.streak}`,
+      cssClass: 'game-result-alert game-result-alert-lost',
+      buttons: [
+        ...(puedeReintentar ? [{ text: 'Ver anuncio y reintentar', handler: () => this.solicitarReintento() }] : []),
+        { text: 'Volver al menú', handler: () => this.volverAlMenu() }
+      ]
+    });
+    await aviso.present();
   }
 
   private async verAnuncioYReintentar(): Promise<boolean> {
@@ -171,5 +257,9 @@ export class GameComponent implements OnInit, OnDestroy {
 
   volverAlMenu(): void {
     this.router.navigate(['/']);
+  }
+
+  volverANiveles(): void {
+    this.router.navigate(['/level', this.tematica]);
   }
 }

@@ -122,3 +122,21 @@ body {
   border-color: #925363;
   background: linear-gradient(145deg, #482d3a, #30222f);
 }
+
+.hint-alert {
+  --backdrop-opacity: .72;
+  --width: min(360px, calc(100% - 32px));
+  --box-shadow: 0 24px 70px rgba(0, 0, 0, .5);
+  .alert-wrapper {
+    border: 1px solid #628b4b;
+    border-radius: 22px;
+    background: linear-gradient(145deg, #294532, #1d3029);
+    overflow: hidden;
+  }
+  .alert-head { padding: 25px 24px 8px; }
+  .alert-title { color: #fff; font-size: 1.35rem; font-weight: 850; letter-spacing: -.03em; }
+  .alert-message { padding: 8px 24px 18px; color: #c4d5c2; font-size: .95rem; line-height: 1.7; }
+  .alert-button-group { border-top: 1px solid rgba(255,255,255,.1); padding: 8px 12px 12px; }
+  .alert-button { min-height: 44px; color: #b5f566; font-weight: 800; }
+  .alert-button:first-child { color: #c2cadb; }
+}

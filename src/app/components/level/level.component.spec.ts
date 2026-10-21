@@ -35,4 +35,12 @@ describe('LevelComponent', () => {
     expect(fixture.componentInstance.temaActual.nombre).toBe('Animales');
     expect(admob.showBannerBottomCenter).toHaveBeenCalled();
   });
+
+  it('returns to theme selection or home from the navigation controls', () => {
+    fixture.componentInstance.volver();
+    expect(router.navigate).toHaveBeenCalledWith(['/tematicas']);
+
+    fixture.componentInstance.irAlInicio();
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
+  });
 });

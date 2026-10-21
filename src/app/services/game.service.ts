@@ -64,6 +64,19 @@ export class GameService {
     return true;
   }
 
+  usarPista(): boolean {
+    const estado = this.GameStateSubject.value;
+    if (estado.gameOver) return false;
+
+    const letrasPendientes = Array.from(new Set(this.normalizar(estado.secretWord).split('')))
+      .filter(letra => !estado.lettersGuessed.has(letra));
+    if (letrasPendientes.length === 0) return false;
+
+    const letra = letrasPendientes[Math.floor(Math.random() * letrasPendientes.length)];
+    this.adivinarLetra(letra);
+    return true;
+  }
+
   adivinarLetra(letra: string): void {
     const estadoActual = this.GameStateSubject.value;
 
@@ -123,6 +136,12 @@ export class GameService {
   }
 
   private normalizar(texto: string): string {
-    return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+    const enyeProtegida = '\uE000';
+    return texto
+      .replace(/ñ/gi, enyeProtegida)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .split(enyeProtegida).join('Ñ')
+      .toUpperCase();
   }
 }

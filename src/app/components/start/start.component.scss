@@ -16,7 +16,7 @@
 .hero-content > p { max-width: 440px; margin: 0 auto; color: #a8b1c8; font-size: 1.05rem; line-height: 1.65; }
 .hero-action { display: inline-flex; align-items: center; gap: 38px; margin-top: 16px; padding: 15px 19px; border-radius: 14px; background: #b5f566; box-shadow: 0 10px 30px rgba(181,245,102,.16); color: #142016; font-weight: 800; text-decoration: none; transition: transform .2s, box-shadow .2s; }
 .hero-action:hover { transform: translateY(-3px); box-shadow: 0 15px 34px rgba(181,245,102,.24); }
-.hangman-art { position: relative; width: 190px; height: 220px; margin: 8px auto 0; border-bottom: 8px solid #b5f566; }
+.hangman-art { position: relative; width: 190px; height: 220px; margin: 8px auto 0; border-bottom: 8px solid #fff; }
 .hangman-art::before, .hangman-art::after { content: ''; position: absolute; background: #fff; }
 .hangman-art::before { left: 28px; bottom: 0; width: 8px; height: 205px; }
 .hangman-art::after { left: 28px; top: 7px; width: 118px; height: 8px; }

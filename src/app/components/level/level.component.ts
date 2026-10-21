@@ -92,6 +92,10 @@ async openUserSettings() {
   }
 
   volver(): void {
+    this.router.navigate(['/tematicas']);
+  }
+
+  irAlInicio(): void {
     this.router.navigate(['/']);
   }
 }

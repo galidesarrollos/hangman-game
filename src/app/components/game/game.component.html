@@ -10,10 +10,22 @@
 </ion-header>
 
 <ion-content class="game-content">
-  <button type="button" class="body-back-button" (click)="volverAlMenu()" aria-label="Volver al menú principal"><ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon></button>
+  <div class="game-navigation">
+    <button type="button" class="body-back-button" (click)="volverANiveles()" aria-label="Volver a la selección de dificultad"><ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon></button>
+    <button type="button" class="body-back-button" (click)="volverAlMenu()" aria-label="Ir al inicio"><ion-icon name="home-outline" aria-hidden="true"></ion-icon></button>
+  </div>
   <main class="game-shell" *ngIf="estado" [class.native-shell]="platform.is('hybrid')">
     <div class="game-heading">
-      <div><span class="game-kicker">PARTIDA EN CURSO</span><h1>Adivina la palabra</h1></div>
+      <button type="button" class="game-hint-button" (click)="confirmarPista()" [disabled]="!puedePedirPista" aria-label="Pedir una pista viendo un anuncio">
+        <ion-icon name="bulb-outline" aria-hidden="true"></ion-icon>
+        <span>Pedir pista</span>
+      </button>
+      <div class="game-audio-control">
+        <span class="game-kicker">PARTIDA EN CURSO</span>
+        <button type="button" class="game-sound-toggle" [class.muted]="isMuted" (click)="toggleMute()" [attr.aria-label]="isMuted ? 'Activar sonidos' : 'Silenciar todos los sonidos'">
+          <ion-icon [name]="isMuted ? 'volume-mute-outline' : 'volume-high-outline'" aria-hidden="true"></ion-icon>
+        </button>
+      </div>
       <div class="game-tags"><span>{{ nivel === 'diario' ? 'Reto diario' : nombresTematica[tematica] }}</span><span>{{ nivel === 'diario' ? nombresTematica[tematica] : (nivel === 'facil' ? 'Fácil' : (nivel === 'normal' ? 'Normal' : 'Avanzado')) }}</span></div>
     </div>
 
@@ -59,6 +71,5 @@
 
       </section>
     </div>
-    <app-footer></app-footer>
   </main>
 </ion-content>

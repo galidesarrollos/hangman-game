@@ -103,4 +103,24 @@ describe('GameService', () => {
   it('shows guessed letters and masks the rest', () => {
     expect(service.obtenerPalabraVisible('CASA', new Set(['A', 'S']))).toBe('_ A S A');
   });
+
+  it('treats Ñ as a different letter from N', () => {
+    words.obtenerPalabraAleatoria.and.returnValue('NIÑO');
+    service.iniciarNuevoJuego('general', 'normal');
+
+    service.adivinarLetra('N');
+    expect(service.obtenerPalabraVisible(state.secretWord, state.lettersGuessed)).toBe('N _ _ _');
+
+    service.adivinarLetra('Ñ');
+    expect(service.obtenerPalabraVisible(state.secretWord, state.lettersGuessed)).toBe('N _ Ñ _');
+  });
+
+  it('reveals an unguessed letter when using a hint', () => {
+    service.iniciarNuevoJuego('general', 'normal');
+    spyOn(Math, 'random').and.returnValue(0);
+
+    expect(service.usarPista()).toBeTrue();
+    expect(state.lettersGuessed.has('C')).toBeTrue();
+    expect(state.attemptsRemaining).toBe(7);
+  });
 });

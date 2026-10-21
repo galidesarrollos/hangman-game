@@ -2,6 +2,8 @@
 .level-header ion-title { font-size: 1rem; font-weight: 800; letter-spacing: -.02em; }
 .level-header ion-button { --color: #dce1f5; }
 .level-content { --background: #101322; color: #e9ecfa; }
+.level-navigation { display: flex; gap: 8px; margin: 14px max(16px, calc((100vw - 1160px) / 2)); }
+.level-navigation .body-back-button { margin: 0; }
 .level-shell { width: min(100%, 990px); margin: auto; padding: 36px 24px 0; }
 .level-shell.native-shell { padding-bottom: calc(115px + env(safe-area-inset-bottom)); }
 .level-intro { max-width: 610px; margin: 16px auto 25px; text-align: center; }
@@ -12,7 +14,7 @@
 .level-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
 .level-card { display: flex; flex-direction: column; align-items: stretch; min-height: 190px; padding: 20px; border: 1px solid #3b4364; border-radius: 23px; background: linear-gradient(145deg, #292f4c, #20243b); color: #fff; text-align: left; cursor: pointer; transition: transform .2s, border-color .2s; }
 .level-card:hover, .level-card:focus-visible { transform: translateY(-5px); border-color: var(--accent); outline: none; }
-.easy { --accent: #b5f566; } .normal { --accent: #8ce0b0; } .advanced { --accent: #c6a7ff; }
+.easy, .normal, .advanced { --accent: #b5f566; }
 .level-card-body { display: flex; flex-direction: column; gap: 7px; }
 .level-card-body strong { font-size: 1.65rem; letter-spacing: -.04em; }
 .level-card-body > span { max-width: 330px; color: #adb6cf; font-size: .89rem; line-height: 1.5; }

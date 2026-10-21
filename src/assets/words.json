@@ -30,7 +30,8 @@
       "maratón",
       "árbitro",
       "equipo",
-      "carrera"
+      "carrera",
+      "puño"
     ],
     "avanzado": [
       "esgrima",
@@ -62,7 +63,8 @@
       "paralímpico",
       "esprint",
       "resistencia",
-      "velódromo"
+      "velódromo",
+      "montañismo"
     ]
   },
   "ciencia": {
@@ -96,7 +98,8 @@
       "sonido",
       "materia",
       "inercia",
-      "química"
+      "química",
+      "piñón"
     ],
     "avanzado": [
       "bioquímica",
@@ -128,7 +131,8 @@
       "fisiología",
       "biofísica",
       "microscopía",
-      "nanómetro"
+      "nanómetro",
+      "neutrón"
     ]
   },
   "infantil": {
@@ -162,7 +166,8 @@
       "cocina",
       "amabilidad",
       "colores",
-      "paraguas"
+      "paraguas",
+      "niñez"
     ],
     "avanzado": [
       "dinosaurio",
@@ -194,7 +199,8 @@
       "escondite",
       "gigante",
       "pirueta",
-      "telescopio"
+      "telescopio",
+      "compañerismo"
     ]
   },
   "general": {
@@ -228,7 +234,8 @@
       "teatro",
       "madera",
       "botella",
-      "sombrero"
+      "sombrero",
+      "baño"
     ],
     "avanzado": [
       "arquitectura",
@@ -260,43 +267,44 @@
       "periodismo",
       "agricultura",
       "patrimonio",
-      "meteorología"
+      "meteorología",
+      "compañerismo"
     ]
   },
   "animales": {
     "normal": [
       "perro", "gato", "caballo", "conejo", "tortuga", "jirafa", "elefante", "mono", "león", "tigre",
-      "delfín", "ballena", "tiburón", "águila", "pájaro", "oveja", "vaca", "cerdo", "gallina", "pato"
+      "delfín", "ballena", "tiburón", "águila", "pájaro", "oveja", "vaca", "cerdo", "gallina", "pato", "ñandú"
     ],
     "avanzado": [
       "ornitorrinco", "camaleón", "cocodrilo", "hipopótamo", "rinoceronte", "murciélago", "chimpancé", "avestruz", "flamenco", "canguro",
-      "iguana", "escorpión", "medusa", "erizo", "gorila", "pantera", "leopardo", "jaguar", "salamandra", "albatros"
+      "iguana", "escorpión", "medusa", "erizo", "gorila", "pantera", "leopardo", "jaguar", "salamandra", "albatros", "ñu"
     ]
   },
   "comida": {
     "normal": [
       "manzana", "plátano", "naranja", "pera", "fresa", "cereza", "tomate", "patata", "queso", "pan",
-      "arroz", "pasta", "sopa", "huevo", "leche", "yogur", "galleta", "chocolate", "pescado", "carne"
+      "arroz", "pasta", "sopa", "huevo", "leche", "yogur", "galleta", "chocolate", "pescado", "carne", "piñón"
     ],
     "avanzado": [
       "berenjena", "calabacín", "espárrago", "alcachofa", "mandarina", "frambuesa", "arándano", "avellana", "garbanzo", "lenteja",
-      "macarrón", "espinaca", "coliflor", "remolacha", "salmón", "merluza", "canela", "vainilla", "tortilla", "croqueta"
+      "macarrón", "espinaca", "coliflor", "remolacha", "salmón", "merluza", "canela", "vainilla", "tortilla", "croqueta", "buñuelo"
     ]
   },
   "naturaleza": {
     "normal": [
       "bosque", "río", "montaña", "playa", "nube", "lluvia", "viento", "árbol", "flor", "piedra",
-      "arena", "isla", "valle", "lago", "nieve", "campo", "selva", "cielo", "fuego", "pradera"
+      "arena", "isla", "valle", "lago", "nieve", "campo", "selva", "cielo", "fuego", "pradera", "cañón"
     ],
     "avanzado": [
       "archipiélago", "cordillera", "acantilado", "cascada", "glaciar", "península", "manantial", "humedal", "sabana", "biodiversidad",
-      "ecosistema", "atmósfera", "marea", "huracán", "tormenta", "relámpago", "terremoto", "estuario", "precipicio", "vegetación"
+      "ecosistema", "atmósfera", "marea", "huracán", "tormenta", "relámpago", "terremoto", "estuario", "precipicio", "vegetación", "cañaveral"
     ]
   },
   "tecnologia": {
     "normal": [
       "teclado", "pantalla", "ratón", "cámara", "móvil", "tableta", "correo", "internet", "robot", "memoria",
-      "archivo", "batería", "cable", "wifi", "dato", "programa", "código", "ventana", "botón", "auricular"
+      "archivo", "batería", "cable", "wifi", "dato", "programa", "código", "ventana", "botón", "auricular", "señal"
     ],
     "avanzado": [
       "algoritmo", "procesador", "contraseña", "programación", "dispositivo", "servidor", "navegador", "aplicación", "conexión", "encriptación",

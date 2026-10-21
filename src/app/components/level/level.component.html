@@ -10,7 +10,10 @@
 </ion-header>
 
 <ion-content class="level-content">
-  <button type="button" class="body-back-button" (click)="volver()" aria-label="Volver a las temáticas"><ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon></button>
+  <div class="level-navigation">
+    <button type="button" class="body-back-button" (click)="volver()" aria-label="Volver a las temáticas"><ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon></button>
+    <button type="button" class="body-back-button" (click)="irAlInicio()" aria-label="Ir al inicio"><ion-icon name="home-outline" aria-hidden="true"></ion-icon></button>
+  </div>
   <main class="level-shell" [class.native-shell]="platform.is('hybrid')">
     <section class="level-intro" aria-labelledby="level-title">
       <div class="theme-badge"><span aria-hidden="true">{{ temaActual.icono }}</span> {{ temaActual.nombre }}</div>

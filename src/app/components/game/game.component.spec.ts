@@ -12,12 +12,13 @@ import { GameComponent } from './game.component';
 describe('GameComponent', () => {
   let fixture: ComponentFixture<GameComponent>;
   let gameStates: Subject<GameState>;
-  const game = { GameState$: new Subject<GameState>(), iniciarNuevoJuego: jasmine.createSpy(), reintentarRetoDiario: jasmine.createSpy(), obtenerPalabraVisible: () => '_ _ _ _', adivinarLetra: jasmine.createSpy() };
+  const game = { GameState$: new Subject<GameState>(), iniciarNuevoJuego: jasmine.createSpy(), reintentarRetoDiario: jasmine.createSpy(), usarPista: jasmine.createSpy(), obtenerPalabraVisible: () => '_ _ _ _', adivinarLetra: jasmine.createSpy() };
   const alert = jasmine.createSpyObj<AlertController>('AlertController', ['create']);
   const admob = jasmine.createSpyObj<AdmobService>('AdmobService', ['showBannerBottomCenter', 'showInterstitial', 'showRewardedVideo']);
   const stats = jasmine.createSpyObj<StatsService>('StatsService', ['isDailyRetryAvailable']);
   const platform = jasmine.createSpyObj<Platform>('Platform', ['is']);
   const toast = jasmine.createSpyObj<ToastController>('ToastController', ['create']);
+  const audio = jasmine.createSpyObj<AudioService>('AudioService', ['getVolume', 'toggleMute']);
 
   beforeEach(async () => {
     game.iniciarNuevoJuego.calls.reset();
@@ -28,6 +29,7 @@ describe('GameComponent', () => {
     toast.create.and.resolveTo({ present: () => Promise.resolve() } as HTMLIonToastElement);
     stats.isDailyRetryAvailable.and.returnValue(true);
     platform.is.and.returnValue(false);
+    audio.getVolume.and.returnValue(1);
     gameStates = new Subject<GameState>();
     game.GameState$ = gameStates;
     alert.create.calls.reset();
@@ -45,7 +47,7 @@ describe('GameComponent', () => {
         { provide: StatsService, useValue: stats },
         { provide: Platform, useValue: platform },
         { provide: ToastController, useValue: toast },
-        { provide: AudioService, useValue: { getVolume: () => 1 } }
+        { provide: AudioService, useValue: audio }
       ]
     }).overrideComponent(GameComponent, { set: { template: '' } }).compileComponents();
 
@@ -56,6 +58,27 @@ describe('GameComponent', () => {
   it('starts a game using the route theme and level', () => {
     expect(fixture.componentInstance).toBeTruthy();
     expect(game.iniciarNuevoJuego).toHaveBeenCalledWith('general', 'normal');
+  });
+
+  it('toggles all game sounds from the game header control', () => {
+    fixture.componentInstance.toggleMute();
+    expect(audio.toggleMute).toHaveBeenCalled();
+  });
+
+  it('returns to the selected theme levels from the back control', () => {
+    const router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    fixture.componentInstance.volverANiveles();
+    expect(router.navigate).toHaveBeenCalledWith(['/level', 'general']);
+  });
+
+  it('asks for confirmation before requesting a rewarded hint', async () => {
+    gameStates.next({
+      secretWord: 'CASA', lettersGuessed: new Set<string>(), lettersFailed: new Set<string>(),
+      attemptsRemaining: 7, gameOver: false, winner: false, score: 0, streak: 0
+    });
+
+    await fixture.componentInstance.confirmarPista();
+    expect(alert.create.calls.mostRecent().args[0]?.header).toBe('¿Pedir una pista?');
   });
 
   it('requires a result action instead of dismissing the alert by tapping outside', async () => {
