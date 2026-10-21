@@ -2,3 +2,9 @@
 footer { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px 20px; padding: 22px 0 36px; border-top: 1px solid #31364e; font-size: .83rem; }
 a { color: #b7c2dd; text-decoration: none; }
 a:hover { text-decoration: underline; }
+a { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 4px; text-align: center; }
+a:focus-visible { outline: 2px solid #b5f566; outline-offset: 3px; }
+
+@media (max-width: 380px) {
+  footer { gap: 0 12px; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+}

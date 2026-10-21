@@ -35,10 +35,18 @@ Este documento recoge los hallazgos de la revisión del código Angular, los rec
 ## Validación
 
 - `npm.cmd run lint`: correcto.
-- `npm.cmd run build`: correcto, con tres avisos de presupuesto SCSS existentes en nivel, selector de temáticas y volumen.
+- `npm.cmd run build`: correcto; los avisos de presupuesto SCSS afectan a nivel, selector de temáticas y ajustes de usuario tras las mejoras responsive. Son avisos, no errores de compilación.
 - `npm.cmd test -- --watch=false`: 38 pruebas correctas.
 - `git diff --check` y `git diff --cached --check`: correctos.
 - Las 16 listas de `words.json` no tenían entradas inválidas ni duplicados internos en la auditoría inicial.
+
+## Adaptación a móviles y web
+
+- Inicio, niveles y selector de temáticas: separación y columnas ajustadas según el ancho, botones táctiles de al menos 44 px y respeto por las áreas seguras del dispositivo.
+- Partida: dibujo y palabra se apilan en móviles; las palabras largas pueden ocupar varias filas y el teclado pasa de nueve a seis o cinco columnas según el ancho.
+- Ajustes de sonido y usuario, reto diario y páginas legales: contenido desplazable en pantallas pequeñas, paneles compactos y enlaces cómodos de pulsar.
+- El viewport permite ampliar la página y usa `viewport-fit=cover` para aprovechar pantallas con recortes. Los modales se adaptan a la altura disponible.
+- Verificación en navegador de las seis rutas principales a 320, 360, 390, 768 y 1280 px: sin desplazamiento horizontal de página. El índice de los textos legales conserva desplazamiento horizontal propio en móvil.
 
 ## Decisiones pendientes
 

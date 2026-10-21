@@ -23,3 +23,21 @@
 .level-ad-slot { min-height: 70px; display: grid; place-items: center; margin: 12px 0 0; overflow: hidden; }.level-ad-slot .adsbygoogle { width: 100%; min-height: 70px; }
 @media (max-width: 820px) { .level-grid { grid-template-columns: 1fr; gap: 13px; } }
 @media (max-width: 620px) { .level-shell { padding: 20px 18px 0; } .level-intro { margin: 12px auto 20px; } .level-card { min-height: 155px; padding: 17px; } .level-card-body strong { font-size: 1.4rem; } .level-card-body > span { font-size: .82rem; } .level-card-bottom { padding-top: 12px; } }
+
+@media (min-width: 621px) and (max-width: 820px) {
+  .level-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 620px) {
+  .level-navigation { margin-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right)); }
+  .level-shell { padding-inline: max(18px, env(safe-area-inset-left)) max(18px, env(safe-area-inset-right)); }
+  .level-shell:not(.native-shell) { padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
+  .level-intro h1 { font-size: clamp(2rem, 9vw, 3rem); }
+  .level-card { min-width: 0; }
+  .level-arrow { flex: none; width: 44px; height: 44px; }
+}
+
+@media (max-width: 360px) {
+  .level-shell { padding-top: 12px; }
+  .level-card { min-height: 140px; padding: 14px; }
+}

@@ -37,3 +37,20 @@
 .save-note ion-icon { flex: none; color: #b5f566; font-size: 1.1rem; }
 @media (max-width: 500px) { .settings-shell { padding: 20px 18px 36px; } .volume-panel { padding: 20px; } .preview-grid { gap: 8px; } .preview-button { gap: 8px; padding: 9px; } .preview-icon { width: 37px; height: 37px; } .play-icon { display: none; } }
 @media (prefers-reduced-motion: reduce) { .preview-button { transition: none; } }
+
+.range-wrap ion-range { min-width: 0; }
+.mute-action { min-height: 44px; }
+
+@media (max-width: 500px) {
+  .settings-shell { padding-inline: max(18px, env(safe-area-inset-left)) max(18px, env(safe-area-inset-right)); padding-bottom: calc(36px + env(safe-area-inset-bottom)); }
+  .preview-button span:nth-child(2) { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 350px) {
+  .settings-shell { padding-top: 14px; }
+  .settings-intro { margin-bottom: 18px; }
+  .sound-emblem { width: 48px; height: 48px; margin-bottom: 12px; }
+  .volume-panel { padding: 15px; }
+  .preview-grid { grid-template-columns: 1fr; }
+  .preview-button { min-height: 58px; }
+}

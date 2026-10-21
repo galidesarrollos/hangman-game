@@ -8,7 +8,6 @@ import { Sounds } from 'src/app/models/game.model';
 @Component({
   selector: 'app-volume-sidebar',
   templateUrl: './volume-sidebar.component.html',
-  styleUrls: ['./volume-sidebar.component.scss'],
   imports: [IonicModule, CommonModule]
 })
 export class VolumeSidebarComponent implements OnInit {

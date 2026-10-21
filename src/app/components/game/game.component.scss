@@ -84,3 +84,41 @@
 @keyframes win-pulse { 0% { transform: scale(.97); box-shadow: 0 0 0 rgba(181,245,102,0); } 55% { transform: scale(1.01); box-shadow: 0 0 30px rgba(181,245,102,.22); } 100% { transform: scale(1); box-shadow: none; } }
 @keyframes confetti-fall { 0% { opacity: 0; transform: translateY(-12px) rotate(0); } 15% { opacity: 1; } 100% { opacity: 0; transform: translateY(215px) rotate(240deg); } }
 @media (prefers-reduced-motion: reduce) { .letter-key, .result-panel.won, .confetti { animation: none; transition: none; } }
+
+.figure-word-panel, .figure-panel.long-word .figure-word-panel { min-width: 0; }
+.word-slots { flex-wrap: wrap; align-content: center; overflow: visible; }
+.letter-slot { flex: 0 1 25px; min-width: 20px; }
+.long-word-slots .letter-slot { flex-basis: 23px; min-width: 19px; }
+.result-summary { flex-wrap: wrap; }
+.result-actions button { min-height: 44px; }
+
+@media (max-width: 760px) {
+  .game-shell { padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right)); }
+  .game-shell:not(.native-shell) { padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+  .game-navigation { margin-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right)); }
+  .game-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+  .game-audio-control { order: 0; grid-column: 1; grid-row: 1; }
+  .game-hint-button { order: 0; grid-column: 2; grid-row: 1; min-height: 44px; }
+  .figure-panel { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 8px; }
+  .figure-panel > .panel-title { grid-column: 1; }
+  .hangman, .figure-panel.long-word .hangman { width: min(45%, 180px); height: auto; max-height: 180px; margin: 0; }
+  .figure-word-panel, .figure-panel.long-word .figure-word-panel { width: 100%; margin: 0; }
+  .word-slots { align-items: center; gap: 5px; min-height: 44px; padding: 6px 0 3px; }
+  .letter-slot { flex: 0 1 26px; width: 26px; height: 35px; }
+  .long-word-slots .letter-slot { flex-basis: 23px; width: 23px; }
+  .keyboard-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .letter-key { min-height: 44px; }
+}
+
+@media (max-width: 380px) {
+  .game-shell { padding-inline: max(11px, env(safe-area-inset-left)) max(11px, env(safe-area-inset-right)); }
+  .game-navigation { margin-inline: max(11px, env(safe-area-inset-left)) max(11px, env(safe-area-inset-right)); }
+  .figure-panel, .play-panel { padding: 13px; }
+  .game-stats { gap: 5px; }
+  .stat { min-width: 0; padding: 9px; }
+  .stat > span { font-size: .58rem; letter-spacing: .06em; }
+  .stat strong { font-size: 1.15rem; }
+  .stat small { font-size: .58rem; }
+  .keyboard-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .result-panel { padding: 14px; }
+}

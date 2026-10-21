@@ -14,3 +14,23 @@
 .overview-stat { display: flex; align-items: center; gap: 11px; min-height: 76px; padding: 14px; border: 1px solid #363e5b; border-radius: 15px; background: #20243b; }
 .overview-stat ion-icon { color: #b5f566; font-size: 1.35rem; }.overview-stat.win ion-icon { color: #ffc27c; }.overview-stat.loss ion-icon { color: #ff8795; }.overview-stat.streak ion-icon { color: #bea6ff; }
 .overview-stat span { display: flex; flex-direction: column; gap: 3px; }.overview-stat strong { color: #fff; font-size: 1.35rem; }.overview-stat small { color: #9da8c1; font-size: .7rem; }
+
+.user-settings-shell { max-width: 660px; margin: auto; padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+.settings-option { min-height: 66px; cursor: pointer; }
+.settings-option span:nth-child(2), .overview-stat span { min-width: 0; }
+.settings-option:focus-visible { outline: 2px solid #b5f566; outline-offset: 3px; }
+
+@media (max-width: 600px) {
+  .user-settings-shell { padding-inline: max(18px, env(safe-area-inset-left)) max(18px, env(safe-area-inset-right)); }
+  .stats-overview-heading { display: block; }
+  .stats-caption { display: block; margin-top: 5px; }
+}
+
+@media (max-width: 360px) {
+  .user-settings-shell { padding-top: 18px; }
+  .stats-grid { gap: 7px; }
+  .overview-stat { min-width: 0; gap: 7px; padding: 10px; }
+  .overview-stat ion-icon { flex: none; font-size: 1.1rem; }
+  .overview-stat strong { font-size: 1.15rem; }
+  .overview-stat small { font-size: .65rem; }
+}

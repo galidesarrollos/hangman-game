@@ -28,3 +28,18 @@
 .terms-document a { color: #b5f566; overflow-wrap: anywhere; text-underline-offset: 3px; }
 .terms-document footer { padding: 24px 0; color: #8995b1; font-size: .8rem; }
 @media (max-width: 760px) { .terms-shell { padding: 31px 18px 55px; } .terms-intro { margin-bottom: 24px; } .terms-layout { grid-template-columns: 1fr; gap: 15px; } .terms-index { position: static; flex-direction: row; overflow-x: auto; padding: 11px; white-space: nowrap; } .terms-index > span { display: none; } .terms-index button { flex: none; padding: 9px 11px; background: #303652; } .terms-document { padding: 0 18px; } .terms-document section { padding: 22px 0; } }
+
+@media (max-width: 760px) {
+  .terms-shell { padding-inline: max(18px, env(safe-area-inset-left)) max(18px, env(safe-area-inset-right)); padding-bottom: calc(55px + env(safe-area-inset-bottom)); }
+  .terms-index { min-width: 0; scrollbar-width: thin; }
+  .terms-index button { min-height: 44px; align-items: center; }
+  .terms-intro h1 { font-size: clamp(2rem, 9vw, 3rem); overflow-wrap: anywhere; }
+  .terms-document { min-width: 0; overflow-wrap: break-word; }
+}
+
+@media (max-width: 380px) {
+  .terms-shell { padding-top: 20px; }
+  .terms-document { padding-inline: 14px; }
+  .terms-document h2 { gap: 9px; font-size: 1.08rem; }
+  .terms-document h2 span { width: 30px; height: 30px; }
+}
