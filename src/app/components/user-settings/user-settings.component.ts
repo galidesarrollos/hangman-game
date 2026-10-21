@@ -3,6 +3,7 @@ import { IonicModule, ModalController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { StatsService } from 'src/app/services/stats.service';
 import { VolumeSidebarComponent } from '../volume-sidebar/volume-sidebar.component';
+import { openSettingsModal } from 'src/app/services/settings-modal';
 
 @Component({
   selector: 'app-user-settings',
@@ -16,8 +17,7 @@ export class UserSettingsComponent {
   private readonly modalController = inject(ModalController);
 
   async openVolumeSettings(): Promise<void> {
-    const modal = await this.modalController.create({ component: VolumeSidebarComponent, cssClass: 'volume-sidebar-modal', breakpoints: [0, 0.8, 1], initialBreakpoint: 1 });
-    await modal.present();
+    await openSettingsModal(this.modalController, VolumeSidebarComponent, 'volume-sidebar-modal');
   }
 
   close(): void { void this.modalController.dismiss(); }

@@ -1,23 +1,23 @@
 import { AfterViewInit, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, Platform } from '@ionic/angular';
-import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Theme } from 'src/app/models/game.model';
-import { VolumeSidebarComponent } from '../volume-sidebar/volume-sidebar.component';
+import { THEME_DETAILS } from 'src/app/models/theme-options';
 import { UserSettingsComponent } from '../user-settings/user-settings.component';
 import { ModalController } from '@ionic/angular';
 import { IonRouterOutlet } from '@ionic/angular';
 import { AdmobService } from 'src/app/services/admob.service';
-import { AudioService } from 'src/app/services/audio.service';
+import { openSettingsModal } from 'src/app/services/settings-modal';
+import { WebAdsService } from 'src/app/services/web-ads.service';
 import { AppFooterComponent } from '../app-footer/app-footer.component';
 
 @Component({
   selector: 'app-level',
   templateUrl: './level.component.html',
   styleUrls: ['./level.component.scss'],
-  imports: [   CommonModule,
-    FormsModule,
+  imports: [
+    CommonModule,
     IonicModule,
     AppFooterComponent,
   ]
@@ -28,61 +28,27 @@ export class LevelComponent  implements OnInit, AfterViewInit {
   private readonly route = inject(ActivatedRoute);
   private readonly modalController = inject(ModalController);
   private readonly routerOutlet = inject(IonRouterOutlet);
-  private readonly audioService = inject(AudioService);
+  private readonly webAdsService = inject(WebAdsService);
   readonly platform = inject(Platform);
 
- tematica: Theme = 'general';
-  readonly temas: Record<Theme, { nombre: string; icono: string }> = {
-    deportes: { nombre: 'Deportes', icono: '⚽' },
-    ciencia: { nombre: 'Ciencia', icono: '🔬' },
-    infantil: { nombre: 'Infantil', icono: '🎨' },
-    general: { nombre: 'General', icono: '📚' },
-    animales: { nombre: 'Animales', icono: '🐾' },
-    comida: { nombre: 'Comida', icono: '🍓' },
-    naturaleza: { nombre: 'Naturaleza', icono: '🌿' },
-    tecnologia: { nombre: 'Tecnología', icono: '💻' }
-  };
+  tematica: Theme = 'general';
 
   ngAfterViewInit(): void {
-    if (!this.platform.is('hybrid')) {
-      try {
-        (window as any).adsbygoogle = (window as any).adsbygoogle || [];
-        (window as any).adsbygoogle.push({});
-      } catch (error) {
-        console.error('Error cargando el anuncio de dificultad', error);
-      }
-    }
+    this.webAdsService.requestAd();
   }
 
   get temaActual(): { nombre: string; icono: string } {
-    return this.temas[this.tematica] ?? this.temas.general;
+    return THEME_DETAILS[this.tematica];
   }
 
-
-async openVolumeSettings() {
-  const modal = await this.modalController.create({
-    component: VolumeSidebarComponent,
-    cssClass: 'volume-sidebar-modal',
-    breakpoints: [0, 0.8, 1],
-    initialBreakpoint: 1,
-    presentingElement: this.routerOutlet.nativeEl
-  });
-  await modal.present();
-  await modal.onDidDismiss();
-}
-
-async openUserSettings() {
-  const modal = await this.modalController.create({ component: UserSettingsComponent, cssClass: 'user-settings-modal', breakpoints: [0, 0.8, 1], initialBreakpoint: 1, presentingElement: this.routerOutlet.nativeEl });
-  await modal.present();
-}
-  get isMuted(): boolean {
-    return this.audioService.getVolume() === 0;
+  async openUserSettings(): Promise<void> {
+    await openSettingsModal(this.modalController, UserSettingsComponent, 'user-settings-modal', this.routerOutlet.nativeEl);
   }
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       const tema = params['theme'] as Theme;
-      this.tematica = tema in this.temas ? tema : 'general';
+      this.tematica = tema in THEME_DETAILS ? tema : 'general';
       this.admobService.showBannerBottomCenter();
     });
   }

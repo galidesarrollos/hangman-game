@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { GameState, Theme } from '../models/game.model';
 
 export interface GameStats {
   gamesPlayed: number;
@@ -13,6 +14,7 @@ const DEFAULT_STATS: GameStats = { gamesPlayed: 0, wins: 0, losses: 0, bestStrea
 export class StatsService {
   private readonly storageKey = 'gameStats';
   private readonly dailyRetryKey = 'dailyRewardedRetryDate';
+  private readonly dailyProgressKey = 'dailyChallengeProgress';
 
   getStats(): GameStats {
     const stored = localStorage.getItem(this.storageKey);
@@ -43,11 +45,66 @@ export class StatsService {
   }
 
   isDailyAvailable(date = new Date()): boolean {
-    return localStorage.getItem('dailyChallengeDate') !== this.dailyKey(date);
+    return this.getDailyProgress(date) !== null || localStorage.getItem('dailyChallengeDate') !== this.dailyKey(date);
   }
 
   completeDaily(date = new Date()): void {
     localStorage.setItem('dailyChallengeDate', this.dailyKey(date));
+    this.clearDailyProgress();
+  }
+
+  getDailyProgress(date = new Date()): GameState | null {
+    const stored = localStorage.getItem(this.dailyProgressKey);
+    if (!stored) return null;
+    try {
+      const progress = JSON.parse(stored) as {
+        date: string;
+        secretWord: string;
+        theme: Theme;
+        lettersGuessed: string[];
+        lettersFailed: string[];
+        attemptsRemaining: number;
+        score: number;
+        streak: number;
+      };
+      if (progress.date !== this.dailyKey(date) ||
+          typeof progress.secretWord !== 'string' ||
+          !Array.isArray(progress.lettersGuessed) ||
+          !Array.isArray(progress.lettersFailed) ||
+          !Number.isInteger(progress.attemptsRemaining) ||
+          progress.attemptsRemaining < 1 || progress.attemptsRemaining > 7 ||
+          !Number.isFinite(progress.score) || !Number.isFinite(progress.streak)) return null;
+      return {
+        secretWord: progress.secretWord,
+        theme: progress.theme,
+        lettersGuessed: new Set(progress.lettersGuessed),
+        lettersFailed: new Set(progress.lettersFailed),
+        attemptsRemaining: progress.attemptsRemaining,
+        score: progress.score,
+        streak: progress.streak,
+        gameOver: false,
+        winner: false
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  saveDailyProgress(state: GameState, date = new Date()): void {
+    localStorage.setItem(this.dailyProgressKey, JSON.stringify({
+      date: this.dailyKey(date),
+      secretWord: state.secretWord,
+      theme: state.theme,
+      lettersGuessed: Array.from(state.lettersGuessed),
+      lettersFailed: Array.from(state.lettersFailed),
+      attemptsRemaining: state.attemptsRemaining,
+      score: state.score,
+      streak: state.streak
+    }));
+  }
+
+  clearDailyProgress(): void {
+    localStorage.removeItem(this.dailyProgressKey);
   }
 
   isDailyRetryAvailable(date = new Date()): boolean {

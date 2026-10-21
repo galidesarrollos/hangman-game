@@ -66,13 +66,6 @@ export class AdmobService {
     return this.bannerRequest;
   }
 
-  async hideBanner(): Promise<void> {
-    if (!Capacitor.isNativePlatform() || !this.bannerVisible) return;
-    this.clearRetry();
-    await AdMob.hideBanner();
-    this.bannerVisible = false;
-  }
-
   private scheduleRetry(): void {
     if (this.retryTimer) return;
     this.retryTimer = setTimeout(() => {
@@ -88,7 +81,9 @@ export class AdmobService {
     this.retryTimer = undefined;
   }
 
-  async showInterstitial() {
+  async showInterstitial(): Promise<void> {
+    if (!Capacitor.isNativePlatform()) return;
+    await this.initialize();
     await AdMob.prepareInterstitial({
       adId: this.interstitialId,
       isTesting: false,

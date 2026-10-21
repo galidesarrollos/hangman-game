@@ -34,10 +34,9 @@ describe('StartComponent', () => {
     fixture.detectChanges();
   });
 
-  it('loads saved progress and routes to the chosen theme', () => {
+  it('routes to theme selection', async () => {
     const component = fixture.componentInstance;
-    expect(component.estadisticas.gamesPlayed).toBe(2);
-    component.seleccionarTematica('animales');
-    expect(router.navigate).toHaveBeenCalledWith(['/level', 'animales']);
+    await component.openThemeSelector();
+    expect(router.navigate).toHaveBeenCalledWith(['/tematicas']);
   });
 });

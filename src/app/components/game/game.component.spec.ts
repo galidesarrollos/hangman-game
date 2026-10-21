@@ -116,7 +116,7 @@ describe('GameComponent', () => {
     await fixture.whenStable();
     const buttons = alert.create.calls.mostRecent().args[0]?.buttons ?? [];
     expect(buttons.some(button => typeof button !== 'string' && button.text === 'Ver anuncio y reintentar')).toBeTrue();
-    expect(await fixture.componentInstance['verAnuncioYReintentar']()).toBeTrue();
+    expect(await fixture.componentInstance['solicitarReintento']()).toBeTrue();
     expect(admob.showRewardedVideo).toHaveBeenCalledTimes(1);
     expect(game.reintentarRetoDiario).toHaveBeenCalledTimes(1);
   });
@@ -135,8 +135,21 @@ describe('GameComponent', () => {
       streak: 0
     });
 
-    expect(await fixture.componentInstance['verAnuncioYReintentar']()).toBeFalse();
+    expect(await fixture.componentInstance['solicitarReintento']()).toBeFalse();
     expect(game.reintentarRetoDiario).not.toHaveBeenCalled();
     expect(toast.create).toHaveBeenCalled();
+  });
+
+  it('waits for the interstitial before starting another game', async () => {
+    let finishAd!: () => void;
+    admob.showInterstitial.and.returnValue(new Promise<void>(resolve => { finishAd = resolve; }));
+    game.iniciarNuevoJuego.calls.reset();
+
+    const replay = fixture.componentInstance.jugarDeNuevo();
+    expect(game.iniciarNuevoJuego).not.toHaveBeenCalled();
+    finishAd();
+    await replay;
+
+    expect(game.iniciarNuevoJuego).toHaveBeenCalledWith('general', 'normal');
   });
 });

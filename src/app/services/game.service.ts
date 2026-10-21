@@ -37,7 +37,22 @@ export class GameService {
     };
   }
 
-  iniciarNuevoJuego(tematica: Theme, level: Level): void {
+  iniciarNuevoJuego(tematica: Theme, level: Level): boolean {
+    if (level === 'diario') {
+      const reto = this.palabrasService.obtenerRetoDiario();
+      const progreso = this.statsService.getDailyProgress();
+      if (progreso?.secretWord === reto.word && progreso.theme === reto.theme) {
+        this.currentLevel = 'diario';
+        this.GameStateSubject.next(progreso);
+        return true;
+      }
+      if (!this.statsService.isDailyAvailable()) return false;
+    }
+    this.crearPartida(tematica, level);
+    return true;
+  }
+
+  private crearPartida(tematica: Theme, level: Level): void {
     this.currentLevel = level;
     const retoDiario = level === 'diario' ? this.palabrasService.obtenerRetoDiario() : undefined;
     const palabra = retoDiario?.word ?? this.palabrasService.obtenerPalabraAleatoria(tematica, level);
@@ -55,12 +70,13 @@ export class GameService {
       theme: temaPartida
     };
     this.GameStateSubject.next(nuevoEstado);
+    if (level === 'diario') this.statsService.saveDailyProgress(nuevoEstado);
   }
 
   reintentarRetoDiario(): boolean {
     const estado = this.GameStateSubject.value;
     if (this.currentLevel !== 'diario' || !estado.gameOver || estado.winner || !this.statsService.useDailyRetry()) return false;
-    this.iniciarNuevoJuego(estado.theme ?? 'general', 'diario');
+    this.crearPartida(estado.theme ?? 'general', 'diario');
     return true;
   }
 
@@ -122,6 +138,7 @@ export class GameService {
     }
 
     this.GameStateSubject.next(nuevoEstado);
+    if (this.currentLevel === 'diario' && !nuevoEstado.gameOver) this.statsService.saveDailyProgress(nuevoEstado);
   }
 
   private palabraCompletada(palabra: string, lettersGuessed: Set<string>): boolean {

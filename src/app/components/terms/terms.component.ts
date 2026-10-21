@@ -5,7 +5,6 @@ import { IonicModule } from '@ionic/angular';
 @Component({
   selector: 'app-terms',
   templateUrl: './terms.component.html',
-  styleUrls: ['./terms.component.scss'],
   imports: [IonicModule, RouterLink]
 })
 export class TermsComponent {

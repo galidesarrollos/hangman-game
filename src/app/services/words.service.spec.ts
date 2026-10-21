@@ -50,9 +50,9 @@ describe('WordsService', () => {
 
   it('includes a word with Ñ for every theme and difficulty', () => {
     for (const theme of Object.keys(bank) as Theme[]) {
-      expect(bank[theme].normal.some(word => word.includes('ñ'))).withContext(`${theme} normal`).toBeTrue();
-      expect(bank[theme].normal.some(word => word.includes('ñ') && word.length <= 6)).withContext(`${theme} fácil`).toBeTrue();
-      expect(bank[theme].avanzado.some(word => word.includes('ñ'))).withContext(`${theme} avanzado`).toBeTrue();
+      expect(bank[theme]['normal'].some(word => word.includes('ñ'))).withContext(`${theme} normal`).toBeTrue();
+      expect(bank[theme]['normal'].some(word => word.includes('ñ') && word.length <= 6)).withContext(`${theme} fácil`).toBeTrue();
+      expect(bank[theme]['avanzado'].some(word => word.includes('ñ'))).withContext(`${theme} avanzado`).toBeTrue();
     }
   });
 });

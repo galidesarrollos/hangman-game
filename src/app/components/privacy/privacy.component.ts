@@ -5,7 +5,6 @@ import { IonicModule } from '@ionic/angular';
 @Component({
   selector: 'app-privacy',
   templateUrl: './privacy.component.html',
-  styleUrls: ['./privacy.component.scss'],
   imports: [IonicModule, RouterLink]
 })
 export class PrivacyComponent {

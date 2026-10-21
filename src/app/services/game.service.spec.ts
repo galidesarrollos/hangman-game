@@ -3,6 +3,7 @@ import { GameService } from './game.service';
 import { WordsService } from './words.service';
 import { AudioService } from './audio.service';
 import { StatsService } from './stats.service';
+import { GameState } from '../models/game.model';
 
 describe('GameService', () => {
   let service: GameService;
@@ -14,7 +15,11 @@ describe('GameService', () => {
   beforeEach(() => {
     words = jasmine.createSpyObj<WordsService>('WordsService', ['obtenerPalabraAleatoria', 'obtenerRetoDiario']);
     audio = jasmine.createSpyObj<AudioService>('AudioService', ['playSound']);
-    stats = jasmine.createSpyObj<StatsService>('StatsService', ['recordResult', 'completeDaily', 'useDailyRetry']);
+    stats = jasmine.createSpyObj<StatsService>('StatsService', [
+      'recordResult', 'completeDaily', 'useDailyRetry', 'isDailyAvailable', 'getDailyProgress', 'saveDailyProgress'
+    ]);
+    stats.isDailyAvailable.and.returnValue(true);
+    stats.getDailyProgress.and.returnValue(null);
     words.obtenerPalabraAleatoria.and.returnValue('CASA');
     words.obtenerRetoDiario.and.returnValue({ theme: 'animales', word: 'GATO' });
 
@@ -77,6 +82,30 @@ describe('GameService', () => {
     expect(words.obtenerRetoDiario).toHaveBeenCalled();
     expect(state.theme).toBe('animales');
     expect(stats.completeDaily).toHaveBeenCalled();
+  });
+
+  it('rejects a completed daily challenge even when started directly', () => {
+    stats.isDailyAvailable.and.returnValue(false);
+
+    expect(service.iniciarNuevoJuego('general', 'diario')).toBeFalse();
+    expect(words.obtenerRetoDiario).toHaveBeenCalled();
+    expect(state.secretWord).toBe('');
+    expect(stats.recordResult).not.toHaveBeenCalled();
+  });
+
+  it('resumes an unfinished daily challenge instead of resetting its guesses', () => {
+    const progress: GameState = {
+      secretWord: 'GATO', theme: 'animales', lettersGuessed: new Set(['G']), lettersFailed: new Set(['Z']),
+      attemptsRemaining: 6, gameOver: false, winner: false, score: 0, streak: 0
+    };
+    stats.getDailyProgress.and.returnValue(progress);
+    stats.isDailyAvailable.and.returnValue(false);
+
+    expect(service.iniciarNuevoJuego('general', 'diario')).toBeTrue();
+    expect(state.lettersGuessed.has('G')).toBeTrue();
+    expect(state.lettersFailed.has('Z')).toBeTrue();
+    expect(state.attemptsRemaining).toBe(6);
+    expect(stats.saveDailyProgress).not.toHaveBeenCalled();
   });
 
   it('restarts the same daily word only after an available rewarded retry', () => {

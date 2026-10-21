@@ -4,12 +4,13 @@ import { CommonModule } from '@angular/common';
 import { AlertController, IonicModule, IonRouterOutlet, ModalController, Platform, ToastController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { Theme, Level, GameState } from 'src/app/models/game.model';
+import { THEME_DETAILS } from 'src/app/models/theme-options';
 import { GameService } from 'src/app/services/game.service';
 import { AdmobService } from 'src/app/services/admob.service';
-import { VolumeSidebarComponent } from '../volume-sidebar/volume-sidebar.component';
 import { UserSettingsComponent } from '../user-settings/user-settings.component';
 import { AudioService } from 'src/app/services/audio.service';
 import { StatsService } from 'src/app/services/stats.service';
+import { openSettingsModal } from 'src/app/services/settings-modal';
 
 @Component({
   selector: 'app-game',
@@ -29,16 +30,7 @@ export class GameComponent implements OnInit, OnDestroy {
   private readonly audioService = inject(AudioService);
   private readonly statsService = inject(StatsService);
   readonly letras = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
-  readonly nombresTematica: Record<Theme, string> = {
-    deportes: 'Deportes',
-    ciencia: 'Ciencia',
-    infantil: 'Infantil',
-    general: 'General',
-    animales: 'Animales',
-    comida: 'Comida',
-    naturaleza: 'Naturaleza',
-    tecnologia: 'Tecnología'
-  };
+  readonly temas = THEME_DETAILS;
 
   tematica: Theme = 'general';
   nivel: Level = 'normal';
@@ -66,9 +58,11 @@ export class GameComponent implements OnInit, OnDestroy {
       const esRetoDiario = !params['theme'] && !params['level'];
       const tema = params['theme'] as Theme;
       const nivel = params['level'] as Level;
-      this.tematica = tema in this.nombresTematica ? tema : 'general';
+      this.tematica = tema in THEME_DETAILS ? tema : 'general';
       this.nivel = esRetoDiario || nivel === 'diario' ? 'diario' : (nivel === 'avanzado' ? 'avanzado' : (nivel === 'facil' ? 'facil' : 'normal'));
-      this.juegoService.iniciarNuevoJuego(this.tematica, this.nivel);
+      if (!this.juegoService.iniciarNuevoJuego(this.tematica, this.nivel) && this.nivel === 'diario') {
+        void this.router.navigate(['/']);
+      }
     }));
 
     if (this.platform.is('hybrid')) this.admobService.showBannerBottomCenter();
@@ -90,21 +84,8 @@ export class GameComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  async openVolumeSettings(): Promise<void> {
-    const modal = await this.modalController.create({
-      component: VolumeSidebarComponent,
-      cssClass: 'volume-sidebar-modal',
-      breakpoints: [0, 0.8, 1],
-      initialBreakpoint: 1,
-      presentingElement: this.routerOutlet.nativeEl
-    });
-    await modal.present();
-    await modal.onDidDismiss();
-  }
-
   async openUserSettings(): Promise<void> {
-    const modal = await this.modalController.create({ component: UserSettingsComponent, cssClass: 'user-settings-modal', breakpoints: [0, 0.8, 1], initialBreakpoint: 1, presentingElement: this.routerOutlet.nativeEl });
-    await modal.present();
+    await openSettingsModal(this.modalController, UserSettingsComponent, 'user-settings-modal', this.routerOutlet.nativeEl);
   }
 
   seleccionarLetra(letra: string): void {
@@ -122,7 +103,11 @@ export class GameComponent implements OnInit, OnDestroy {
   async jugarDeNuevo(): Promise<void> {
     if (this.nivel === 'diario') return;
 
-    this.admobService.showInterstitial();
+    try {
+      await this.admobService.showInterstitial();
+    } catch (error) {
+      console.warn('No se ha podido mostrar el anuncio intersticial:', error);
+    }
     this.partidaFinalizadaMostrada = false;
     this.juegoService.iniciarNuevoJuego(this.tematica, this.nivel);
   }
@@ -208,47 +193,14 @@ export class GameComponent implements OnInit, OnDestroy {
     await aviso.present();
   }
 
-  private async verAnuncioYReintentar(): Promise<boolean> {
-    if (this.anuncioRecompensadoEnCurso) return false;
-    if (this.nivel !== 'diario' || !this.estado?.gameOver || this.estado.winner || !this.statsService.isDailyRetryAvailable()) return false;
-
-    this.anuncioRecompensadoEnCurso = true;
-    try {
-      try {
-        const recompensaObtenida = await this.admobService.showRewardedVideo();
-        if (recompensaObtenida && this.juegoService.reintentarRetoDiario()) return true;
-      } catch (error) {
-        console.warn('No se ha podido completar el reintento diario:', error);
-      }
-
-      try {
-        const aviso = await this.toastController.create({
-          message: 'No se completó el anuncio. Puedes intentarlo de nuevo.',
-          duration: 3000,
-          position: 'top'
-        });
-        await aviso.present();
-      } catch (error) {
-        console.warn('No se ha podido mostrar el aviso del anuncio:', error);
-      }
-      return false;
-    } finally {
-      this.anuncioRecompensadoEnCurso = false;
-    }
-  }
-
   private async mostrarResultado(estado: GameState): Promise<void> {
     const aviso = await this.alertController.create({
-      header: estado.winner ? '¡Palabra descubierta!' : 'Esta vez no pudo ser',
+      header: '¡Palabra descubierta!',
       backdropDismiss: false,
       message: `La palabra era ${estado.secretWord}.\n\nPuntuación: ${estado.score}\nRacha: ${estado.streak}`,
-      cssClass: `game-result-alert ${estado.winner ? 'game-result-alert-won' : 'game-result-alert-lost'}`,
+      cssClass: 'game-result-alert game-result-alert-won',
       buttons: [
-        ...(this.nivel === 'diario'
-          ? (!estado.winner && this.platform.is('hybrid') && this.statsService.isDailyRetryAvailable()
-            ? [{ text: 'Ver anuncio y reintentar', handler: () => this.verAnuncioYReintentar() }]
-            : [])
-          : [{ text: 'Jugar otra vez', handler: () => void this.jugarDeNuevo() }]),
+        ...(this.nivel === 'diario' ? [] : [{ text: 'Jugar otra vez', handler: () => void this.jugarDeNuevo() }]),
         { text: 'Volver al menú', handler: () => this.volverAlMenu() }
       ]
     });

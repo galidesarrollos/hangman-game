@@ -3,12 +3,6 @@ export type Level = 'facil' | 'normal' | 'avanzado' | 'diario';
 
 export type Sounds = 'acierto' | 'error' | 'victoria' | 'derrota';
 
-export interface WordData {
-  theme: Theme;
-  level: Level;
-  words: string[];
-}
-
 export interface GameState {
   secretWord: string;
   lettersGuessed: Set<string>;

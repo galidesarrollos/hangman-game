@@ -1,17 +1,15 @@
 import { AfterViewInit, Component, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ViewWillEnter } from '@ionic/angular';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ModalController, Platform } from '@ionic/angular';
-import { VolumeSidebarComponent } from '../volume-sidebar/volume-sidebar.component';
 import { UserSettingsComponent } from '../user-settings/user-settings.component';
-import { ThemeSelectorComponent } from '../theme-selector/theme-selector.component';
 import { IonRouterOutlet } from '@ionic/angular';
 
 import { AdmobService } from 'src/app/services/admob.service';
-import { AudioService } from 'src/app/services/audio.service';
-import { GameStats, StatsService } from 'src/app/services/stats.service';
+import { StatsService } from 'src/app/services/stats.service';
+import { openSettingsModal } from 'src/app/services/settings-modal';
+import { WebAdsService } from 'src/app/services/web-ads.service';
 import { AppFooterComponent } from '../app-footer/app-footer.component';
 
 @Component({
@@ -20,7 +18,6 @@ import { AppFooterComponent } from '../app-footer/app-footer.component';
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     IonicModule,
     AppFooterComponent
   ]
@@ -31,38 +28,20 @@ export class StartComponent implements ViewWillEnter, AfterViewInit, OnDestroy {
   private readonly routerOutlet = inject(IonRouterOutlet);
   private readonly admobService = inject(AdmobService);
   readonly platform = inject(Platform);
-  private readonly audioService = inject(AudioService);
   private readonly statsService = inject(StatsService);
+  private readonly webAdsService = inject(WebAdsService);
 
-  estadisticas: GameStats;
   retoDiarioDisponible = true;
   showDailyModal = false;
   dailyCountdown = '';
   private dailyTimer?: ReturnType<typeof setInterval>;
 
-  tematicas = [
-    { id: 'deportes', nombre: 'Deportes', icono: '⚽', descripcion: 'Palabras relacionadas con deportes' },
-    { id: 'ciencia', nombre: 'Ciencia', icono: '🔬', descripcion: 'Términos científicos y naturales' },
-    { id: 'infantil', nombre: 'Infantil', icono: '🎨', descripcion: 'Palabras divertidas para los más pequeños' },
-    { id: 'general', nombre: 'General', icono: '📚', descripcion: 'Vocabulario general y cotidiano' },
-    { id: 'animales', nombre: 'Animales', icono: '🐾', descripcion: 'Animales de todo el mundo' },
-    { id: 'comida', nombre: 'Comida', icono: '🍓', descripcion: 'Ingredientes y platos para abrir el apetito' },
-    { id: 'naturaleza', nombre: 'Naturaleza', icono: '🌿', descripcion: 'Paisajes, clima y vida natural' },
-    { id: 'tecnologia', nombre: 'Tecnología', icono: '💻', descripcion: 'Objetos y conceptos digitales' }
-  ];
-
   constructor() {
-    this.estadisticas = this.statsService.getStats();
     this.retoDiarioDisponible = this.statsService.isDailyAvailable();
     this.startDailyClock();
   }
 
-  get isMuted(): boolean {
-    return this.audioService.getVolume() === 0;
-  }
-
   async ionViewWillEnter() {
-    this.estadisticas = this.statsService.getStats();
     this.retoDiarioDisponible = this.statsService.isDailyAvailable();
     this.showDailyModal = this.retoDiarioDisponible && sessionStorage.getItem(this.dailyPromptKey()) !== 'shown';
     if (this.showDailyModal) sessionStorage.setItem(this.dailyPromptKey(), 'shown');
@@ -74,48 +53,15 @@ export class StartComponent implements ViewWillEnter, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    // Solo inicializa AdSense si NO es app (es decir, si es navegador web)
-    if (!this.platform.is('hybrid')) {
-      try {
-        (window as any).adsbygoogle = (window as any).adsbygoogle || [];
-        (window as any).adsbygoogle.push({});
-        console.log('AdSense cargado en versión web.');
-      } catch (e) {
-        console.error('Error cargando AdSense', e);
-      }
-    }
-  }
-
-  async openVolumeSettings() {
-    const modal = await this.modalController.create({
-      component: VolumeSidebarComponent,
-      cssClass: 'volume-sidebar-modal',
-      breakpoints: [0, 0.8, 1],
-      initialBreakpoint: 1,
-      presentingElement: this.routerOutlet.nativeEl
-    });
-    await modal.present();
-    await modal.onDidDismiss();
+    this.webAdsService.requestAd();
   }
 
   async openUserSettings(): Promise<void> {
-    const modal = await this.modalController.create({
-      component: UserSettingsComponent,
-      componentProps: { estadisticas: this.estadisticas },
-      cssClass: 'user-settings-modal',
-      breakpoints: [0, 0.8, 1],
-      initialBreakpoint: 1,
-      presentingElement: this.routerOutlet.nativeEl
-    });
-    await modal.present();
+    await openSettingsModal(this.modalController, UserSettingsComponent, 'user-settings-modal', this.routerOutlet.nativeEl);
   }
 
   async openThemeSelector(): Promise<void> {
     await this.router.navigate(['/tematicas']);
-  }
-
-  seleccionarTematica(tematica: string): void {
-    this.router.navigate(['/level', tematica]);
   }
 
   iniciarRetoDiario(): void {

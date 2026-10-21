@@ -26,7 +26,7 @@
           <ion-icon [name]="isMuted ? 'volume-mute-outline' : 'volume-high-outline'" aria-hidden="true"></ion-icon>
         </button>
       </div>
-      <div class="game-tags"><span>{{ nivel === 'diario' ? 'Reto diario' : nombresTematica[tematica] }}</span><span>{{ nivel === 'diario' ? nombresTematica[tematica] : (nivel === 'facil' ? 'Fácil' : (nivel === 'normal' ? 'Normal' : 'Avanzado')) }}</span></div>
+      <div class="game-tags"><span>{{ nivel === 'diario' ? 'Reto diario' : temas[tematica].nombre }}</span><span>{{ nivel === 'diario' ? temas[tematica].nombre : (nivel === 'facil' ? 'Fácil' : (nivel === 'normal' ? 'Normal' : 'Avanzado')) }}</span></div>
     </div>
 
     <section class="game-stats" aria-label="Estado de la partida">

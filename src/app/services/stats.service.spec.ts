@@ -42,4 +42,21 @@ describe('StatsService', () => {
     expect(service.useDailyRetry(today)).toBeFalse();
     expect(service.isDailyRetryAvailable(tomorrow)).toBeTrue();
   });
+
+  it('saves an unfinished daily challenge and clears it on completion', () => {
+    const today = new Date(2026, 4, 17, 12);
+    const state = {
+      secretWord: 'GATO', theme: 'animales' as const, lettersGuessed: new Set(['G']), lettersFailed: new Set(['Z']),
+      attemptsRemaining: 6, gameOver: false, winner: false, score: 0, streak: 0
+    };
+    service.saveDailyProgress(state, today);
+
+    expect(service.getDailyProgress(today)).toEqual(state);
+    expect(service.getDailyProgress(new Date(2026, 4, 18))).toBeNull();
+    localStorage.setItem('dailyChallengeDate', '2026-5-17');
+    expect(service.isDailyAvailable(today)).toBeTrue();
+    service.completeDaily(today);
+    expect(service.getDailyProgress(today)).toBeNull();
+    expect(service.isDailyAvailable(today)).toBeFalse();
+  });
 });
