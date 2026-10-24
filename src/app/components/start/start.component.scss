@@ -38,6 +38,8 @@
 .daily-challenge { width: 100%; display: flex; align-items: center; gap: 12px; margin: 0 0 9px; padding: 12px 14px; border: 1px solid #3d405d; border-radius: 13px; background: #1a1e32; color: #dce1f5; text-align: left; cursor: pointer; transition: transform .2s, border-color .2s; }
 .daily-challenge.completed { border-color: #40573d; background: #1b2925; }
 .daily-challenge:hover, .daily-challenge:focus-visible { transform: translateY(-2px); border-color: #bea6ff; outline: none; }
+.daily-challenge.available { outline: 2px solid #b5f566; outline-offset: 3px; animation: daily-challenge-breathe 2.5s ease-in-out infinite; }
+@keyframes daily-challenge-breathe { 0%, 100% { box-shadow: 0 0 0 0 rgba(181,245,102,.12); } 50% { box-shadow: 0 0 0 7px rgba(181,245,102,.32); } }
 .daily-icon { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 10px; background: #39364e; color: #bea6ff; font-size: 1.1rem; }
 .daily-copy { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .daily-copy strong { font-size: .88rem; font-weight: 700; }
@@ -50,7 +52,9 @@
 .daily-modal h2 { margin: 10px auto; color: #fff; font-size: 1.75rem; line-height: 1.1; letter-spacing: -.04em; }
 .daily-modal p { margin: 0 auto 22px; max-width: 320px; color: #bcc3d7; font-size: .9rem; line-height: 1.6; }
 .daily-modal-action { display: inline-flex; align-items: center; gap: 16px; padding: 13px 17px; border: 0; border-radius: 12px; background: #b5f566; color: #192518; font: inherit; font-weight: 850; cursor: pointer; }
-.daily-modal-complete { display: flex; align-items: center; justify-content: center; gap: 7px; margin-bottom: 0 !important; color: #b5f566 !important; font-weight: 700; }
+.daily-modal-complete { display: flex; align-items: center; justify-content: center; gap: 7px; margin-bottom: 0 !important; color: #bcc3d7 !important; font-weight: 700; }
+.daily-modal-complete.won { color: #b5f566 !important; }
+.daily-modal-complete.failed { color: #ff8795 !important; }
 .daily-modal-complete ion-icon { font-size: 1.2rem; }
 .stats-overview-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 .stats-overview-heading h2 { margin: 7px 0 0; color: #fff; font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -.04em; }
@@ -80,7 +84,7 @@
 .web-ad-slot .adsbygoogle { width: 100%; min-height: 90px; }
 @media (max-width: 850px) { .hero { padding-top: 10px; } .themes-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
 @media (max-width: 540px) { .start-shell { padding: 0 18px 24px; } .hero { padding: 8px 0 16px; } .hangman-art { transform: scale(.85); margin-top: 2px; } .themes-heading, .stats-overview-heading { display: block; } .themes-heading > p { margin-top: 8px; } .stats-caption { display: block; margin-top: 8px; } .stats-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; } .themes-grid { gap: 10px; } .theme-card { min-height: 190px; padding: 15px; } .theme-icon { width: 44px; height: 44px; font-size: 1.5rem; } .theme-body strong { font-size: 1rem; } .theme-body > span { font-size: .75rem; } }
-@media (prefers-reduced-motion: reduce) { .hero-action, .theme-card, .daily-challenge { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .hero-action, .theme-card, .daily-challenge { transition: none; } .daily-challenge.available { animation: none; } }
 @keyframes daily-modal-in { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (prefers-reduced-motion: reduce) { .daily-modal { animation: none; } }
 

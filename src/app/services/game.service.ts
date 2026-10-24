@@ -119,7 +119,7 @@ export class GameService {
         nuevoEstado.score += nuevoEstado.attemptsRemaining * 10;
         nuevoEstado.streak += 1;
         this.statsService.recordResult(true, nuevoEstado.streak);
-        if (this.currentLevel === 'diario') this.statsService.completeDaily();
+        if (this.currentLevel === 'diario') this.statsService.completeDaily(true);
         this.audioService.playSound('victoria');
       }
     } else {
@@ -132,7 +132,7 @@ export class GameService {
         nuevoEstado.winner = false;
         nuevoEstado.streak = 0;
         this.statsService.recordResult(false, 0);
-        if (this.currentLevel === 'diario') this.statsService.completeDaily();
+        if (this.currentLevel === 'diario') this.statsService.completeDaily(false);
         this.audioService.playSound('derrota');
       }
     }

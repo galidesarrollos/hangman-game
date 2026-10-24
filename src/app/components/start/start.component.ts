@@ -32,19 +32,20 @@ export class StartComponent implements ViewWillEnter, AfterViewInit, OnDestroy {
   private readonly webAdsService = inject(WebAdsService);
 
   retoDiarioDisponible = true;
+  dailyResult: 'won' | 'lost' | null = null;
   showDailyModal = false;
   dailyCountdown = '';
   private dailyTimer?: ReturnType<typeof setInterval>;
 
   constructor() {
     this.retoDiarioDisponible = this.statsService.isDailyAvailable();
+    this.dailyResult = this.statsService.getDailyResult();
     this.startDailyClock();
   }
 
   async ionViewWillEnter() {
     this.retoDiarioDisponible = this.statsService.isDailyAvailable();
-    this.showDailyModal = this.retoDiarioDisponible && sessionStorage.getItem(this.dailyPromptKey()) !== 'shown';
-    if (this.showDailyModal) sessionStorage.setItem(this.dailyPromptKey(), 'shown');
+    this.dailyResult = this.statsService.getDailyResult();
     this.startDailyClock();
     if (this.platform.is('hybrid')) {
       this.admobService.showBannerBottomCenter();
@@ -88,11 +89,7 @@ export class StartComponent implements ViewWillEnter, AfterViewInit, OnDestroy {
     const seconds = Math.floor((remaining % 60000) / 1000);
     this.dailyCountdown = `${hours} h ${String(minutes).padStart(2, '0')} min ${String(seconds).padStart(2, '0')} s`;
     this.retoDiarioDisponible = this.statsService.isDailyAvailable();
-  }
-
-  private dailyPromptKey(): string {
-    const today = new Date();
-    return `dailyPrompt-${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    this.dailyResult = this.statsService.getDailyResult();
   }
 
   ngOnDestroy(): void {

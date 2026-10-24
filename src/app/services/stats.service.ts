@@ -15,6 +15,7 @@ export class StatsService {
   private readonly storageKey = 'gameStats';
   private readonly dailyRetryKey = 'dailyRewardedRetryDate';
   private readonly dailyProgressKey = 'dailyChallengeProgress';
+  private readonly dailyResultKey = 'dailyChallengeResult';
 
   getStats(): GameStats {
     const stored = localStorage.getItem(this.storageKey);
@@ -48,9 +49,17 @@ export class StatsService {
     return this.getDailyProgress(date) !== null || localStorage.getItem('dailyChallengeDate') !== this.dailyKey(date);
   }
 
-  completeDaily(date = new Date()): void {
+  completeDaily(won: boolean, date = new Date()): void {
     localStorage.setItem('dailyChallengeDate', this.dailyKey(date));
+    localStorage.setItem(this.dailyResultKey, `${this.dailyKey(date)}:${won ? 'won' : 'lost'}`);
     this.clearDailyProgress();
+  }
+
+  getDailyResult(date = new Date()): 'won' | 'lost' | null {
+    const result = localStorage.getItem(this.dailyResultKey);
+    if (result === `${this.dailyKey(date)}:won`) return 'won';
+    if (result === `${this.dailyKey(date)}:lost`) return 'lost';
+    return null;
   }
 
   getDailyProgress(date = new Date()): GameState | null {

@@ -81,7 +81,15 @@ describe('GameService', () => {
 
     expect(words.obtenerRetoDiario).toHaveBeenCalled();
     expect(state.theme).toBe('animales');
-    expect(stats.completeDaily).toHaveBeenCalled();
+    expect(stats.completeDaily).toHaveBeenCalledWith(false);
+  });
+
+  it('saves a daily win separately from a daily loss', () => {
+    service.iniciarNuevoJuego('general', 'diario');
+    for (const letter of ['G', 'A', 'T', 'O']) service.adivinarLetra(letter);
+
+    expect(state.winner).toBeTrue();
+    expect(stats.completeDaily).toHaveBeenCalledWith(true);
   });
 
   it('rejects a completed daily challenge even when started directly', () => {

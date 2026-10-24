@@ -20,7 +20,10 @@
       <h2 id="daily-modal-title">Una palabra. Un intento diario.</h2>
       <p>Todo el mundo juega con la misma palabra. ¿Serás capaz de descubrirla?</p>
       <button *ngIf="retoDiarioDisponible" type="button" class="daily-modal-action" (click)="iniciarRetoDiario()">Jugar ahora <ion-icon name="arrow-forward-outline"></ion-icon></button>
-      <p *ngIf="!retoDiarioDisponible" class="daily-modal-complete"><ion-icon name="checkmark-circle-outline"></ion-icon> Reto completado. Vuelve en {{ dailyCountdown }}.</p>
+      <p *ngIf="!retoDiarioDisponible" class="daily-modal-complete" [class.won]="dailyResult === 'won'" [class.failed]="dailyResult === 'lost'">
+        <ion-icon [name]="dailyResult === 'won' ? 'checkmark-circle-outline' : dailyResult === 'lost' ? 'close-circle-outline' : 'time-outline'" aria-hidden="true"></ion-icon>
+        {{ dailyResult === 'won' ? '¡Reto superado!' : dailyResult === 'lost' ? 'Has fallado el reto.' : 'Reto finalizado.' }} Vuelve en {{ dailyCountdown }}.
+      </p>
     </section>
   </div>
   <main class="start-shell" [class.native-shell]="platform.is('hybrid')">
@@ -32,9 +35,9 @@
     </section>
 
     <div class="daily-divider"><span>O TAMBIÉN</span></div>
-    <button type="button" class="daily-challenge" [class.completed]="!retoDiarioDisponible" (click)="openDailyModal()">
+    <button type="button" class="daily-challenge" [class.available]="retoDiarioDisponible" [class.completed]="!retoDiarioDisponible" (click)="openDailyModal()">
       <span class="daily-icon"><ion-icon name="calendar-outline" aria-hidden="true"></ion-icon></span>
-      <span class="daily-copy"><span class="section-kicker">{{ retoDiarioDisponible ? 'RETO DE HOY' : 'RETO COMPLETADO' }}</span><strong>{{ retoDiarioDisponible ? '¿Puedes descubrir la palabra del día?' : 'Vuelve en ' + dailyCountdown }}</strong><small>{{ retoDiarioDisponible ? 'Una palabra compartida con todos. Cambia cada día.' : 'El próximo reto estará disponible mañana.' }}</small></span>
+      <span class="daily-copy"><span class="section-kicker">{{ retoDiarioDisponible ? 'RETO DE HOY' : dailyResult === 'lost' ? 'RETO FALLADO' : dailyResult === 'won' ? 'RETO SUPERADO' : 'RETO FINALIZADO' }}</span><strong>{{ retoDiarioDisponible ? '¿Puedes descubrir la palabra del día?' : 'Vuelve en ' + dailyCountdown }}</strong><small>{{ retoDiarioDisponible ? 'Una palabra compartida con todos. Cambia cada día.' : 'El próximo reto estará disponible mañana.' }}</small></span>
       <ion-icon class="daily-arrow" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
     </button>
     <div class="web-ad-slot" *ngIf="!platform.is('hybrid')" aria-label="Publicidad">
