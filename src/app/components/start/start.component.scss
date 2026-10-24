@@ -16,20 +16,7 @@
 .hero-content > p { max-width: 440px; margin: 0 auto; color: #a8b1c8; font-size: 1.05rem; line-height: 1.65; }
 .hero-action { display: inline-flex; align-items: center; gap: 38px; margin-top: 16px; padding: 15px 19px; border-radius: 14px; background: #b5f566; box-shadow: 0 10px 30px rgba(181,245,102,.16); color: #142016; font-weight: 800; text-decoration: none; transition: transform .2s, box-shadow .2s; }
 .hero-action:hover { transform: translateY(-3px); box-shadow: 0 15px 34px rgba(181,245,102,.24); }
-.hangman-art { position: relative; width: 190px; height: 220px; margin: 8px auto 0; border-bottom: 8px solid #fff; }
-.hangman-art::before, .hangman-art::after { content: ''; position: absolute; background: #fff; }
-.hangman-art::before { left: 28px; bottom: 0; width: 8px; height: 205px; }
-.hangman-art::after { left: 28px; top: 7px; width: 118px; height: 8px; }
-.hangman-rope { position: absolute; top: 11px; right: 36px; width: 6px; height: 34px; background: #fff; }
-.hangman-head { position: absolute; top: 43px; right: 17px; width: 44px; height: 44px; border: 6px solid #b5f566; border-radius: 50%; }
-.hangman-body, .hangman-arm, .hangman-leg { position: absolute; width: 6px; background: #b5f566; transform-origin: top center; }
-.hangman-body { top: 93px; right: 36px; height: 65px; }
-.hangman-arm { top: 101px; right: 36px; height: 52px; }
-.hangman-arm-left { transform: rotate(55deg); }
-.hangman-arm-right { transform: rotate(-55deg); }
-.hangman-leg { top: 151px; right: 36px; height: 58px; }
-.hangman-leg-left { transform: rotate(35deg); }
-.hangman-leg-right { transform: rotate(-35deg); }
+.hangman-art { display: block; width: min(190px, 48vw); height: auto; margin: 8px auto 0; }
 .hero-action { border: 0; cursor: pointer; }
 .themes { padding: 22px 0 80px; scroll-margin-top: 80px; }
 .stats-overview { padding: 5px 0 15px; }
@@ -83,7 +70,7 @@
 .web-ad-slot { min-height: 100px; display: grid; place-items: center; margin: 12px 0 0; padding: 4px 0; overflow: hidden; }
 .web-ad-slot .adsbygoogle { width: 100%; min-height: 90px; }
 @media (max-width: 850px) { .hero { padding-top: 10px; } .themes-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
-@media (max-width: 540px) { .start-shell { padding: 0 18px 24px; } .hero { padding: 8px 0 16px; } .hangman-art { transform: scale(.85); margin-top: 2px; } .themes-heading, .stats-overview-heading { display: block; } .themes-heading > p { margin-top: 8px; } .stats-caption { display: block; margin-top: 8px; } .stats-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; } .themes-grid { gap: 10px; } .theme-card { min-height: 190px; padding: 15px; } .theme-icon { width: 44px; height: 44px; font-size: 1.5rem; } .theme-body strong { font-size: 1rem; } .theme-body > span { font-size: .75rem; } }
+@media (max-width: 540px) { .start-shell { padding: 0 18px 24px; } .hero { padding: 8px 0 16px; } .hangman-art { margin-top: 2px; } .themes-heading, .stats-overview-heading { display: block; } .themes-heading > p { margin-top: 8px; } .stats-caption { display: block; margin-top: 8px; } .stats-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; } .themes-grid { gap: 10px; } .theme-card { min-height: 190px; padding: 15px; } .theme-icon { width: 44px; height: 44px; font-size: 1.5rem; } .theme-body strong { font-size: 1rem; } .theme-body > span { font-size: .75rem; } }
 @media (prefers-reduced-motion: reduce) { .hero-action, .theme-card, .daily-challenge { transition: none; } .daily-challenge.available { animation: none; } }
 @keyframes daily-modal-in { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (prefers-reduced-motion: reduce) { .daily-modal { animation: none; } }
@@ -99,7 +86,6 @@
 }
 
 @media (max-width: 380px) {
-  .hangman-art { transform: scale(.74); transform-origin: bottom center; height: 180px; }
   .daily-challenge { padding: 10px; gap: 10px; }
   .daily-arrow { display: none; }
   .stats-grid, .themes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
