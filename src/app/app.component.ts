@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { AdmobService } from './services/admob.service';
 import { Router } from '@angular/router';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 @Component({
   selector: 'app-root',
@@ -22,6 +23,16 @@ export class AppComponent {
 
   async initializeApp() {
     await this.platform.ready();
+
+    if (this.platform.is('hybrid') && this.platform.is('android')) {
+      try {
+        await StatusBar.setOverlaysWebView({ overlay: false });
+        await StatusBar.setBackgroundColor({ color: '#101322' });
+        await StatusBar.setStyle({ style: Style.Dark });
+      } catch (err) {
+        console.error('Error al configurar la barra de estado:', err);
+      }
+    }
 
     try {
       await this.admobService.initialize();
