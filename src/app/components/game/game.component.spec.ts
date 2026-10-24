@@ -96,6 +96,25 @@ describe('GameComponent', () => {
     await fixture.whenStable();
     expect(alert.create).toHaveBeenCalled();
     expect(alert.create.calls.mostRecent().args[0]?.backdropDismiss).toBeFalse();
+    expect(alert.create.calls.mostRecent().args[0]?.message).toContain('Puntuación: 0');
+    expect(alert.create.calls.mostRecent().args[0]?.message).toContain('Racha: 0');
+  });
+
+  it('shows score and streak after a won level', async () => {
+    gameStates.next({
+      secretWord: 'CASA',
+      lettersGuessed: new Set(['C', 'A', 'S']),
+      lettersFailed: new Set<string>(),
+      attemptsRemaining: 7,
+      gameOver: true,
+      winner: true,
+      score: 70,
+      streak: 2
+    });
+
+    await fixture.whenStable();
+    expect(alert.create.calls.mostRecent().args[0]?.message).toContain('Puntuación: 70');
+    expect(alert.create.calls.mostRecent().args[0]?.message).toContain('Racha: 2');
   });
 
   it('offers a rewarded retry only for a lost daily challenge and restarts after the reward', async () => {
