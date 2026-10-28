@@ -1,0 +1,8 @@
+.screen-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: min(calc(100% - 32px), 1160px); min-height: 44px; margin: 14px auto 0; }
+.screen-actions-start, .screen-actions-end { display: flex; align-items: center; gap: 8px; }
+.screen-actions-end { margin-left: auto; }
+.screen-action { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid #3d4665; border-radius: 12px; background: #20243b; color: #dce1f5; font-size: 1.35rem; cursor: pointer; transition: transform .15s, border-color .15s, color .15s; }
+.screen-action:hover, .screen-action:focus-visible { transform: translateY(-2px); border-color: #b5f566; color: #b5f566; outline: none; }
+.screen-action.sound { color: #b5f566; }
+.screen-action.sound.muted { border-color: #ff6d7e; color: #ff6d7e; }
+@media (max-width: 600px) { .screen-actions { width: auto; margin-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right)); } }

@@ -1,0 +1,10 @@
+<nav class="screen-actions" aria-label="Acciones de la pantalla">
+  <div class="screen-actions-start">
+    <button *ngIf="backUrl" type="button" class="screen-action" (click)="navigateBack()" [attr.aria-label]="backLabel"><ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon></button>
+    <button *ngIf="showHome" type="button" class="screen-action" (click)="navigateHome()" aria-label="Ir al inicio"><ion-icon name="home-outline" aria-hidden="true"></ion-icon></button>
+  </div>
+  <div class="screen-actions-end">
+    <button *ngIf="showSound" type="button" class="screen-action sound" [class.muted]="isMuted" (click)="toggleMute()" [attr.aria-label]="isMuted ? 'Activar sonidos' : 'Silenciar sonidos'"><ion-icon [name]="isMuted ? 'volume-mute-outline' : 'volume-high-outline'" aria-hidden="true"></ion-icon></button>
+    <button *ngIf="showProfile" type="button" class="screen-action" (click)="openUserSettings()" aria-label="Ver estadísticas y ajustes"><ion-icon name="person-outline" aria-hidden="true"></ion-icon></button>
+  </div>
+</nav>

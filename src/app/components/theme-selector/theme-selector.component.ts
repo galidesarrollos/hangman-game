@@ -7,11 +7,12 @@ import { THEME_OPTIONS } from 'src/app/models/theme-options';
 import { Theme } from 'src/app/models/game.model';
 import { WebAdsService } from 'src/app/services/web-ads.service';
 import { AppFooterComponent } from '../app-footer/app-footer.component';
+import { ScreenActionsComponent } from '../screen-actions/screen-actions.component';
 
 @Component({
   selector: 'app-theme-selector',
   standalone: true,
-  imports: [CommonModule, IonicModule, AppFooterComponent],
+  imports: [CommonModule, IonicModule, AppFooterComponent, ScreenActionsComponent],
   templateUrl: './theme-selector.component.html',
   styleUrls: ['./theme-selector.component.scss']
 })

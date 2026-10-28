@@ -1,19 +1,5 @@
-<ion-header class="level-header">
-  <ion-toolbar>
-    <ion-title>Elegir nivel</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="openUserSettings()" aria-label="Ajustes de usuario">
-        <ion-icon slot="icon-only" name="person-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content class="level-content">
-  <div class="level-navigation">
-    <button type="button" class="body-back-button" (click)="volver()" aria-label="Volver a las temáticas"><ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon></button>
-    <button type="button" class="body-back-button" (click)="irAlInicio()" aria-label="Ir al inicio"><ion-icon name="home-outline" aria-hidden="true"></ion-icon></button>
-  </div>
+  <app-screen-actions backUrl="/tematicas" backLabel="Volver a las temáticas"></app-screen-actions>
   <main class="level-shell" [class.native-shell]="platform.is('hybrid')">
     <section class="level-intro" aria-labelledby="level-title">
       <div class="theme-badge"><span aria-hidden="true">{{ temaActual.icono }}</span> {{ temaActual.nombre }}</div>

@@ -11,6 +11,7 @@ import { AdmobService } from 'src/app/services/admob.service';
 import { openSettingsModal } from 'src/app/services/settings-modal';
 import { WebAdsService } from 'src/app/services/web-ads.service';
 import { AppFooterComponent } from '../app-footer/app-footer.component';
+import { ScreenActionsComponent } from '../screen-actions/screen-actions.component';
 
 @Component({
   selector: 'app-level',
@@ -20,6 +21,7 @@ import { AppFooterComponent } from '../app-footer/app-footer.component';
     CommonModule,
     IonicModule,
     AppFooterComponent,
+    ScreenActionsComponent,
   ]
 })
 export class LevelComponent  implements OnInit, AfterViewInit {
@@ -32,6 +34,7 @@ export class LevelComponent  implements OnInit, AfterViewInit {
   readonly platform = inject(Platform);
 
   tematica: Theme = 'general';
+  private startingGame = false;
 
   ngAfterViewInit(): void {
     this.webAdsService.requestAd();
@@ -53,8 +56,17 @@ export class LevelComponent  implements OnInit, AfterViewInit {
     });
   }
 
-  iniciarJuego(nivel: string): void {
-    this.router.navigate(['/game', this.tematica, nivel]);
+  async iniciarJuego(nivel: string): Promise<void> {
+    if (this.startingGame) return;
+    this.startingGame = true;
+    try {
+      await this.admobService.showInterstitial();
+    } catch (error) {
+      console.warn('No se ha podido mostrar el anuncio intersticial:', error);
+    } finally {
+      await this.router.navigate(['/game', this.tematica, nivel]);
+      this.startingGame = false;
+    }
   }
 
   volver(): void {

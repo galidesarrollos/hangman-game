@@ -9,11 +9,13 @@ import { LevelComponent } from './level.component';
 describe('LevelComponent', () => {
   let fixture: ComponentFixture<LevelComponent>;
   const router = jasmine.createSpyObj('Router', ['navigate']);
-  const admob = jasmine.createSpyObj('AdmobService', ['showBannerBottomCenter']);
+  const admob = jasmine.createSpyObj('AdmobService', ['showBannerBottomCenter', 'showInterstitial']);
 
   beforeEach(async () => {
     router.navigate.calls.reset();
     admob.showBannerBottomCenter.calls.reset();
+    admob.showInterstitial.calls.reset();
+    admob.showInterstitial.and.resolveTo();
     await TestBed.configureTestingModule({
       imports: [LevelComponent, IonicModule.forRoot()],
       providers: [
@@ -42,5 +44,12 @@ describe('LevelComponent', () => {
 
     fixture.componentInstance.irAlInicio();
     expect(router.navigate).toHaveBeenCalledWith(['/']);
+  });
+
+  it('shows an interstitial before starting the selected level', async () => {
+    await fixture.componentInstance.iniciarJuego('facil');
+
+    expect(admob.showInterstitial).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledWith(['/game', 'animales', 'facil']);
   });
 });
