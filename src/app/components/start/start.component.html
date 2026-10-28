@@ -1,30 +1,7 @@
-<ion-header class="start-header">
-  <ion-toolbar>
-    <ion-title>
-      <span>El Ahorcado</span>
-    </ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="openUserSettings()" aria-label="Ajustes de usuario">
-        <ion-icon slot="icon-only" name="person-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content class="start-content">
-  <div class="daily-modal-backdrop" *ngIf="showDailyModal" role="presentation" (click)="closeDailyModal()">
-    <section class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="daily-modal-title" (click)="$event.stopPropagation()">
-      <button type="button" class="daily-modal-close" (click)="closeDailyModal()" aria-label="Cerrar reto diario"><ion-icon name="close-outline"></ion-icon></button>
-      <span class="daily-modal-icon"><ion-icon name="calendar-outline"></ion-icon></span>
-      <span class="section-kicker">RETO DE HOY</span>
-      <h2 id="daily-modal-title">Una palabra. Un intento diario.</h2>
-      <p>Todo el mundo juega con la misma palabra. ¿Serás capaz de descubrirla?</p>
-      <button *ngIf="retoDiarioDisponible" type="button" class="daily-modal-action" (click)="iniciarRetoDiario()">Jugar ahora <ion-icon name="arrow-forward-outline"></ion-icon></button>
-      <p *ngIf="!retoDiarioDisponible" class="daily-modal-complete" [class.won]="dailyResult === 'won'" [class.failed]="dailyResult === 'lost'">
-        <ion-icon [name]="dailyResult === 'won' ? 'checkmark-circle-outline' : dailyResult === 'lost' ? 'close-circle-outline' : 'time-outline'" aria-hidden="true"></ion-icon>
-        {{ dailyResult === 'won' ? '¡Reto superado!' : dailyResult === 'lost' ? 'Has fallado el reto.' : 'Reto finalizado.' }} Vuelve en {{ dailyCountdown }}.
-      </p>
-    </section>
+  <div class="start-brand-row">
+    <h1 class="start-brand">Ahorcado</h1>
+    <button type="button" class="start-profile" (click)="openUserSettings()" aria-label="Ver estadísticas y ajustes"><ion-icon name="person-outline" aria-hidden="true"></ion-icon></button>
   </div>
   <main class="start-shell" [class.native-shell]="platform.is('hybrid')">
     <section class="hero" aria-labelledby="hero-title">
@@ -35,9 +12,9 @@
     </section>
 
     <div class="daily-divider"><span>O TAMBIÉN</span></div>
-    <button type="button" class="daily-challenge" [class.available]="retoDiarioDisponible" [class.completed]="!retoDiarioDisponible" (click)="openDailyModal()">
-      <span class="daily-icon"><ion-icon name="calendar-outline" aria-hidden="true"></ion-icon></span>
-      <span class="daily-copy"><span class="section-kicker">{{ retoDiarioDisponible ? 'RETO DE HOY' : dailyResult === 'lost' ? 'RETO FALLADO' : dailyResult === 'won' ? 'RETO SUPERADO' : 'RETO FINALIZADO' }}</span><strong>{{ retoDiarioDisponible ? '¿Puedes descubrir la palabra del día?' : 'Vuelve en ' + dailyCountdown }}</strong><small>{{ retoDiarioDisponible ? 'Una palabra compartida con todos. Cambia cada día.' : 'El próximo reto estará disponible mañana.' }}</small></span>
+    <button type="button" class="daily-challenge" [class.available]="timeTrialAvailable" [class.completed]="!timeTrialAvailable" (click)="startTimeTrial()" [disabled]="!timeTrialAvailable">
+      <span class="daily-icon"><ion-icon name="timer-outline" aria-hidden="true"></ion-icon></span>
+      <span class="daily-copy"><span class="section-kicker">MODO CONTRARRELOJ</span><strong>{{ timeTrialAvailable ? (timeTrialNeedsAd ? 'Ver anuncio para desbloquear 2 reintentos' : 'Supera 5 niveles antes de que se agote el tiempo') : timeTrialResult === 'won' ? 'Contrarreloj superado hoy' : 'Intentos agotados por hoy' }}</strong></span>
       <ion-icon class="daily-arrow" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
     </button>
     <div class="web-ad-slot" *ngIf="!platform.is('hybrid')" aria-label="Publicidad">

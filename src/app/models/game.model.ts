@@ -1,5 +1,5 @@
 export type Theme = 'deportes' | 'ciencia' | 'infantil' | 'general' | 'animales' | 'comida' | 'naturaleza' | 'tecnologia';
-export type Level = 'facil' | 'normal' | 'avanzado' | 'diario';
+export type Level = 'facil' | 'normal' | 'avanzado' | 'diario' | 'contrarreloj';
 
 export type Sounds = 'acierto' | 'error' | 'victoria' | 'derrota';
 

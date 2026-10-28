@@ -160,4 +160,14 @@ describe('GameService', () => {
     expect(state.lettersGuessed.has('C')).toBeTrue();
     expect(state.attemptsRemaining).toBe(7);
   });
+
+  it('ends an active game when the time trial expires', () => {
+    service.iniciarContrarreloj(1);
+    service.finalizarPorTiempo();
+
+    expect(state.gameOver).toBeTrue();
+    expect(state.winner).toBeFalse();
+    expect(state.attemptsRemaining).toBe(0);
+    expect(stats.recordResult).toHaveBeenCalledWith(false, 0);
+  });
 });

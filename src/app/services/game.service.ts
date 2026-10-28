@@ -52,6 +52,21 @@ export class GameService {
     return true;
   }
 
+  iniciarContrarreloj(etapa: number): void {
+    const dificultad: Level = etapa <= 2 ? 'facil' : etapa <= 4 ? 'normal' : 'avanzado';
+    const tematicas: Theme[] = ['general', 'animales', 'comida', 'naturaleza', 'tecnologia'];
+    this.crearPartida(tematicas[Math.max(0, Math.min(etapa - 1, tematicas.length - 1))], dificultad);
+    this.currentLevel = 'contrarreloj';
+  }
+
+  finalizarPorTiempo(): void {
+    const estado = this.GameStateSubject.value;
+    if (estado.gameOver) return;
+    this.GameStateSubject.next({ ...estado, attemptsRemaining: 0, gameOver: true, winner: false, streak: 0 });
+    this.statsService.recordResult(false, 0);
+    this.audioService.playSound('derrota');
+  }
+
   private crearPartida(tematica: Theme, level: Level): void {
     this.currentLevel = level;
     const retoDiario = level === 'diario' ? this.palabrasService.obtenerRetoDiario() : undefined;

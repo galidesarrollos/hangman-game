@@ -17,6 +17,7 @@ const routes: Routes = [
   { path: 'tematicas', component: ThemeSelectorComponent },
   { path: 'game/:theme/:level', component: GameComponent },
   { path: 'reto-diario', component: GameComponent },
+  { path: 'contrarreloj', component: GameComponent },
   { path: 'terminos-y-condiciones', component: TermsComponent },
   { path: 'politica-privacidad', component: PrivacyComponent },
   { path: '**', redirectTo: '' }

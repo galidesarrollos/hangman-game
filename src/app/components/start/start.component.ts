@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, inject, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ViewWillEnter } from '@ionic/angular';
 import { Router } from '@angular/router';
@@ -22,7 +22,7 @@ import { AppFooterComponent } from '../app-footer/app-footer.component';
     AppFooterComponent
   ]
 })
-export class StartComponent implements ViewWillEnter, AfterViewInit, OnDestroy {
+export class StartComponent implements ViewWillEnter, AfterViewInit {
   private readonly router = inject(Router);
   private readonly modalController = inject(ModalController);
   private readonly routerOutlet = inject(IonRouterOutlet);
@@ -31,22 +31,17 @@ export class StartComponent implements ViewWillEnter, AfterViewInit, OnDestroy {
   private readonly statsService = inject(StatsService);
   private readonly webAdsService = inject(WebAdsService);
 
-  retoDiarioDisponible = true;
-  dailyResult: 'won' | 'lost' | null = null;
-  showDailyModal = false;
-  dailyCountdown = '';
-  private dailyTimer?: ReturnType<typeof setInterval>;
+  timeTrialAvailable = true;
+  timeTrialNeedsAd = false;
+  timeTrialResult: 'won' | 'lost' | null = null;
+  private timeTrialStarting = false;
 
   constructor() {
-    this.retoDiarioDisponible = this.statsService.isDailyAvailable();
-    this.dailyResult = this.statsService.getDailyResult();
-    this.startDailyClock();
+    this.refreshTimeTrial();
   }
 
   async ionViewWillEnter() {
-    this.retoDiarioDisponible = this.statsService.isDailyAvailable();
-    this.dailyResult = this.statsService.getDailyResult();
-    this.startDailyClock();
+    this.refreshTimeTrial();
     if (this.platform.is('hybrid')) {
       this.admobService.showBannerBottomCenter();
       // Solo muestra el banner de AdMob si es app nativa (Android/iOS)
@@ -65,34 +60,26 @@ export class StartComponent implements ViewWillEnter, AfterViewInit, OnDestroy {
     await this.router.navigate(['/tematicas']);
   }
 
-  iniciarRetoDiario(): void {
-    this.router.navigate(['/reto-diario']);
+  async startTimeTrial(): Promise<void> {
+    if (!this.timeTrialAvailable || this.timeTrialStarting) return;
+    this.timeTrialStarting = true;
+    try {
+      if (this.timeTrialNeedsAd) {
+        if (!await this.admobService.showRewardedVideo()) return;
+        this.statsService.unlockTimeTrialRetries();
+        this.refreshTimeTrial();
+      }
+      await this.router.navigate(['/contrarreloj']);
+    } finally {
+      this.timeTrialStarting = false;
+    }
   }
 
-  openDailyModal(): void {
-    this.showDailyModal = true;
-  }
-
-  closeDailyModal(): void {
-    this.showDailyModal = false;
-  }
-
-  private startDailyClock(): void {
-    this.updateDailyClock();
-    if (!this.dailyTimer) this.dailyTimer = setInterval(() => this.updateDailyClock(), 1000);
-  }
-
-  private updateDailyClock(): void {
-    const remaining = this.statsService.getDailyRemainingMs();
-    const hours = Math.floor(remaining / 3600000);
-    const minutes = Math.floor((remaining % 3600000) / 60000);
-    const seconds = Math.floor((remaining % 60000) / 1000);
-    this.dailyCountdown = `${hours} h ${String(minutes).padStart(2, '0')} min ${String(seconds).padStart(2, '0')} s`;
-    this.retoDiarioDisponible = this.statsService.isDailyAvailable();
-    this.dailyResult = this.statsService.getDailyResult();
-  }
-
-  ngOnDestroy(): void {
-    if (this.dailyTimer) clearInterval(this.dailyTimer);
+  private refreshTimeTrial(): void {
+    this.timeTrialResult = this.statsService.getTimeTrialResult();
+    const attempts = this.statsService.getTimeTrialAttempts();
+    this.timeTrialNeedsAd = attempts > 0 && !this.statsService.areTimeTrialRetriesUnlocked();
+    this.timeTrialAvailable = attempts < 3 && this.timeTrialResult !== 'won' &&
+      (!this.timeTrialNeedsAd || this.platform.is('hybrid'));
   }
 }

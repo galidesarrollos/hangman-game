@@ -12,10 +12,10 @@ import { GameComponent } from './game.component';
 describe('GameComponent', () => {
   let fixture: ComponentFixture<GameComponent>;
   let gameStates: Subject<GameState>;
-  const game = { GameState$: new Subject<GameState>(), iniciarNuevoJuego: jasmine.createSpy(), reintentarRetoDiario: jasmine.createSpy(), usarPista: jasmine.createSpy(), obtenerPalabraVisible: () => '_ _ _ _', adivinarLetra: jasmine.createSpy() };
+  const game = { GameState$: new Subject<GameState>(), iniciarNuevoJuego: jasmine.createSpy(), iniciarContrarreloj: jasmine.createSpy(), reintentarRetoDiario: jasmine.createSpy(), usarPista: jasmine.createSpy(), obtenerPalabraVisible: () => '_ _ _ _', adivinarLetra: jasmine.createSpy() };
   const alert = jasmine.createSpyObj<AlertController>('AlertController', ['create']);
   const admob = jasmine.createSpyObj<AdmobService>('AdmobService', ['showBannerBottomCenter', 'showInterstitial', 'showRewardedVideo']);
-  const stats = jasmine.createSpyObj<StatsService>('StatsService', ['isDailyRetryAvailable']);
+  const stats = jasmine.createSpyObj<StatsService>('StatsService', ['isDailyRetryAvailable', 'consumeDailyGamesInterstitial', 'areTimeTrialRetriesUnlocked', 'unlockTimeTrialRetries', 'startTimeTrialAttempt', 'getTimeTrialRetriesRemaining', 'completeTimeTrial']);
   const platform = jasmine.createSpyObj<Platform>('Platform', ['is']);
   const toast = jasmine.createSpyObj<ToastController>('ToastController', ['create']);
   const audio = jasmine.createSpyObj<AudioService>('AudioService', ['getVolume', 'toggleMute']);
@@ -24,10 +24,18 @@ describe('GameComponent', () => {
     game.iniciarNuevoJuego.calls.reset();
     game.reintentarRetoDiario.calls.reset();
     game.reintentarRetoDiario.and.returnValue(true);
+    game.usarPista.calls.reset();
+    game.usarPista.and.returnValue(true);
+    admob.showInterstitial.calls.reset();
+    admob.showInterstitial.and.resolveTo();
     admob.showRewardedVideo.calls.reset();
     toast.create.calls.reset();
     toast.create.and.resolveTo({ present: () => Promise.resolve() } as HTMLIonToastElement);
     stats.isDailyRetryAvailable.and.returnValue(true);
+    stats.consumeDailyGamesInterstitial.and.returnValue(false);
+    stats.areTimeTrialRetriesUnlocked.and.returnValue(false);
+    stats.startTimeTrialAttempt.and.returnValue(true);
+    stats.getTimeTrialRetriesRemaining.and.returnValue(2);
     platform.is.and.returnValue(false);
     audio.getVolume.and.returnValue(1);
     gameStates = new Subject<GameState>();
@@ -38,7 +46,7 @@ describe('GameComponent', () => {
       imports: [GameComponent, IonicModule.forRoot()],
       providers: [
         { provide: Router, useValue: jasmine.createSpyObj('Router', ['navigate']) },
-        { provide: ActivatedRoute, useValue: { params: of({ theme: 'general', level: 'normal' }) } },
+        { provide: ActivatedRoute, useValue: { params: of({ theme: 'general', level: 'normal' }), snapshot: { routeConfig: { path: 'game/:theme/:level' } } } },
         { provide: GameService, useValue: game },
         { provide: ModalController, useValue: {} },
         { provide: AlertController, useValue: alert },
@@ -71,7 +79,7 @@ describe('GameComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/level', 'general']);
   });
 
-  it('asks for confirmation before requesting a rewarded hint', async () => {
+  it('asks for confirmation before requesting a rewarded hint outside time trial', async () => {
     gameStates.next({
       secretWord: 'CASA', lettersGuessed: new Set<string>(), lettersFailed: new Set<string>(),
       attemptsRemaining: 7, gameOver: false, winner: false, score: 0, streak: 0
@@ -79,6 +87,38 @@ describe('GameComponent', () => {
 
     await fixture.componentInstance.confirmarPista();
     expect(alert.create.calls.mostRecent().args[0]?.header).toBe('¿Pedir una pista?');
+    expect(alert.create.calls.mostRecent().args[0]?.message).toContain('anuncio recompensado');
+  });
+
+  it('highlights the hint only with one attempt left in an active regular game', () => {
+    const component = fixture.componentInstance;
+    const state: GameState = {
+      secretWord: 'CASA', lettersGuessed: new Set<string>(), lettersFailed: new Set<string>(),
+      attemptsRemaining: 2, gameOver: false, winner: false, score: 0, streak: 0
+    };
+
+    gameStates.next(state);
+    expect(component.pistaEnUltimoIntento).toBeFalse();
+
+    gameStates.next({ ...state, attemptsRemaining: 1 });
+    expect(component.pistaEnUltimoIntento).toBeTrue();
+
+    component.isTimeTrial = true;
+    expect(component.pistaEnUltimoIntento).toBeFalse();
+
+    component.isTimeTrial = false;
+    gameStates.next({ ...state, attemptsRemaining: 0, gameOver: true });
+    expect(component.pistaEnUltimoIntento).toBeFalse();
+  });
+
+  it('shows a rewarded ad before revealing a hint at any regular difficulty', async () => {
+    fixture.componentInstance.nivel = 'facil';
+    admob.showRewardedVideo.and.resolveTo(true);
+    expect(await fixture.componentInstance['verAnuncioYPedirPista']()).toBeTrue();
+
+    expect(admob.showInterstitial).not.toHaveBeenCalled();
+    expect(admob.showRewardedVideo).toHaveBeenCalledTimes(1);
+    expect(game.usarPista).toHaveBeenCalledTimes(1);
   });
 
   it('requires a result action instead of dismissing the alert by tapping outside', async () => {
@@ -136,7 +176,7 @@ describe('GameComponent', () => {
     const buttons = alert.create.calls.mostRecent().args[0]?.buttons ?? [];
     expect(buttons.some(button => typeof button !== 'string' && button.text === 'Ver anuncio y reintentar')).toBeTrue();
     expect(await fixture.componentInstance['solicitarReintento']()).toBeTrue();
-    expect(admob.showRewardedVideo).toHaveBeenCalledTimes(1);
+    expect(admob.showRewardedVideo).toHaveBeenCalledTimes(2);
     expect(game.reintentarRetoDiario).toHaveBeenCalledTimes(1);
   });
 
@@ -159,16 +199,39 @@ describe('GameComponent', () => {
     expect(toast.create).toHaveBeenCalled();
   });
 
-  it('waits for the interstitial before starting another game', async () => {
-    let finishAd!: () => void;
-    admob.showInterstitial.and.returnValue(new Promise<void>(resolve => { finishAd = resolve; }));
+  it('unlocks both time trial retries with one rewarded ad', async () => {
+    const component = fixture.componentInstance;
+    component.isTimeTrial = true;
+    component.nivel = 'contrarreloj';
+    admob.showRewardedVideo.and.resolveTo(true);
+    gameStates.next({
+      secretWord: 'GATO', lettersGuessed: new Set<string>(), lettersFailed: new Set<string>(),
+      attemptsRemaining: 0, gameOver: true, winner: false, score: 0, streak: 0
+    });
+
+    expect(await component['solicitarReintento']()).toBeTrue();
+    expect(admob.showRewardedVideo).toHaveBeenCalledTimes(1);
+    expect(stats.unlockTimeTrialRetries).toHaveBeenCalledTimes(1);
+    expect(stats.startTimeTrialAttempt).toHaveBeenCalledTimes(1);
+    expect(game.iniciarContrarreloj).toHaveBeenCalledWith(1);
+
+    stats.areTimeTrialRetriesUnlocked.and.returnValue(true);
+    gameStates.next({
+      secretWord: 'GATO', lettersGuessed: new Set<string>(), lettersFailed: new Set<string>(),
+      attemptsRemaining: 0, gameOver: true, winner: false, score: 0, streak: 0
+    });
+    expect(await component['solicitarReintento']()).toBeTrue();
+    expect(admob.showRewardedVideo).toHaveBeenCalledTimes(1);
+    expect(stats.startTimeTrialAttempt).toHaveBeenCalledTimes(2);
+  });
+
+  it('starts another word without showing an ad after winning', async () => {
     game.iniciarNuevoJuego.calls.reset();
 
-    const replay = fixture.componentInstance.jugarDeNuevo();
-    expect(game.iniciarNuevoJuego).not.toHaveBeenCalled();
-    finishAd();
-    await replay;
+    await fixture.componentInstance.jugarDeNuevo();
 
     expect(game.iniciarNuevoJuego).toHaveBeenCalledWith('general', 'normal');
+    expect(admob.showInterstitial).not.toHaveBeenCalled();
+    expect(admob.showRewardedVideo).not.toHaveBeenCalled();
   });
 });

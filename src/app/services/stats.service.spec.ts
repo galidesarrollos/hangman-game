@@ -25,6 +25,13 @@ describe('StatsService', () => {
     expect(service.getStats()).toEqual({ gamesPlayed: 0, wins: 0, losses: 0, bestStreak: 0 });
   });
 
+  it('requests one interstitial after more than ten completed words in a day', () => {
+    for (let index = 0; index < 11; index += 1) service.recordResult(index % 2 === 0, 0);
+
+    expect(service.consumeDailyGamesInterstitial()).toBeTrue();
+    expect(service.consumeDailyGamesInterstitial()).toBeFalse();
+  });
+
   it('tracks completion and remaining time for a daily challenge', () => {
     const date = new Date(2026, 4, 17, 12);
     expect(service.isDailyAvailable(date)).toBeTrue();
@@ -52,6 +59,30 @@ describe('StatsService', () => {
     expect(service.isDailyRetryAvailable(today)).toBeFalse();
     expect(service.useDailyRetry(today)).toBeFalse();
     expect(service.isDailyRetryAvailable(tomorrow)).toBeTrue();
+  });
+
+  it('limits the time trial to three attempts per day', () => {
+    const today = new Date(2026, 4, 17, 12);
+    const tomorrow = new Date(2026, 4, 18, 12);
+    expect(service.startTimeTrialAttempt(today)).toBeTrue();
+    expect(service.startTimeTrialAttempt(today)).toBeFalse();
+    expect(service.getTimeTrialRetriesRemaining(today)).toBe(2);
+    service.unlockTimeTrialRetries(today);
+    expect(service.areTimeTrialRetriesUnlocked(today)).toBeTrue();
+    expect(service.startTimeTrialAttempt(today)).toBeTrue();
+    expect(service.startTimeTrialAttempt(today)).toBeTrue();
+    expect(service.startTimeTrialAttempt(today)).toBeFalse();
+    expect(service.getTimeTrialRetriesRemaining(today)).toBe(0);
+    expect(service.getTimeTrialAttempts(tomorrow)).toBe(0);
+    expect(service.areTimeTrialRetriesUnlocked(tomorrow)).toBeFalse();
+  });
+
+  it('stores the daily time trial result', () => {
+    const today = new Date(2026, 4, 17, 12);
+    service.completeTimeTrial(false, today);
+    expect(service.getTimeTrialResult(today)).toBe('lost');
+    service.completeTimeTrial(true, today);
+    expect(service.getTimeTrialResult(today)).toBe('won');
   });
 
   it('saves an unfinished daily challenge and clears it on completion', () => {

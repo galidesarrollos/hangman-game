@@ -1,9 +1,10 @@
 .start-content { color: #e9ecfa; }
-.start-header ion-toolbar { --background: #101322; --color: #fff; --border-color: rgba(255,255,255,.08); --min-height: 64px; padding: 0 max(8px, calc((100vw - 1160px)/2)); }
-.start-header ion-title { margin-left: 10px; font-size: 1.12rem; font-weight: 800; letter-spacing: -.02em; }
-.start-header ion-title span { vertical-align: middle; }
-.start-header ion-button, .start-header ion-menu-button { --color: #dce1f5; }
 .start-content { --background: #101322; }
+.start-brand-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: min(calc(100% - 32px), 1160px); margin: 14px auto 0; }
+.start-brand { margin: 0; color: #fff; font-size: clamp(2.2rem, 7vw, 4.8rem); font-weight: 950; line-height: 1; letter-spacing: -.075em; text-shadow: 0 5px 24px rgba(181,245,102,.12); }
+.start-brand::first-letter { color: #b5f566; }
+.start-profile { display: grid; place-items: center; flex: none; width: 48px; height: 48px; padding: 0; border: 1px solid #3d4665; border-radius: 14px; background: #20243b; color: #dce1f5; font-size: 1.4rem; cursor: pointer; }
+.start-profile:hover, .start-profile:focus-visible { border-color: #b5f566; color: #b5f566; outline: none; }
 .start-shell { max-width: 1160px; margin: auto; padding: 0 24px 24px; }
 .start-shell.native-shell { padding-bottom: 115px; }
 .hero { min-height: 0; display: grid; place-items: center; padding: 14px 0 20px; }
@@ -76,6 +77,7 @@
 @media (prefers-reduced-motion: reduce) { .daily-modal { animation: none; } }
 
 @media (max-width: 540px) {
+  .start-brand-row { width: auto; margin-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right)); }
   .start-shell { padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right)); }
   .start-shell:not(.native-shell) { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
   .hero-action { min-height: 48px; gap: 22px; }

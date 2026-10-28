@@ -16,6 +16,11 @@ export class StatsService {
   private readonly dailyRetryKey = 'dailyRewardedRetryDate';
   private readonly dailyProgressKey = 'dailyChallengeProgress';
   private readonly dailyResultKey = 'dailyChallengeResult';
+  private readonly timeTrialAttemptsKey = 'timeTrialAttempts';
+  private readonly timeTrialRetriesUnlockedKey = 'timeTrialRetriesUnlocked';
+  private readonly timeTrialResultKey = 'timeTrialResult';
+  private readonly dailyGamesKey = 'dailyGamesPlayed';
+  private readonly dailyGamesAdKey = 'dailyGamesInterstitial';
 
   getStats(): GameStats {
     const stored = localStorage.getItem(this.storageKey);
@@ -42,7 +47,19 @@ export class StatsService {
       bestStreak: Math.max(current.bestStreak, streak)
     };
     localStorage.setItem(this.storageKey, JSON.stringify(next));
+    const today = this.dailyKey(new Date());
+    const [storedDate, storedCount] = (localStorage.getItem(this.dailyGamesKey) ?? '').split(':');
+    const count = storedDate === today ? (Number(storedCount) || 0) + 1 : 1;
+    localStorage.setItem(this.dailyGamesKey, `${today}:${count}`);
     return next;
+  }
+
+  consumeDailyGamesInterstitial(date = new Date()): boolean {
+    const today = this.dailyKey(date);
+    const [storedDate, storedCount] = (localStorage.getItem(this.dailyGamesKey) ?? '').split(':');
+    if (storedDate !== today || (Number(storedCount) || 0) <= 10 || localStorage.getItem(this.dailyGamesAdKey) === today) return false;
+    localStorage.setItem(this.dailyGamesAdKey, today);
+    return true;
   }
 
   isDailyAvailable(date = new Date()): boolean {
@@ -129,6 +146,43 @@ export class StatsService {
   getDailyRemainingMs(date = new Date()): number {
     const nextDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
     return Math.max(0, nextDay.getTime() - date.getTime());
+  }
+
+  getTimeTrialAttempts(date = new Date()): number {
+    const stored = localStorage.getItem(this.timeTrialAttemptsKey);
+    if (!stored) return 0;
+    const [key, attempts] = stored.split(':');
+    return key === this.dailyKey(date) ? Math.min(3, Math.max(0, Number(attempts) || 0)) : 0;
+  }
+
+  startTimeTrialAttempt(date = new Date()): boolean {
+    const attempts = this.getTimeTrialAttempts(date);
+    if (attempts >= 3 || (attempts > 0 && !this.areTimeTrialRetriesUnlocked(date))) return false;
+    localStorage.setItem(this.timeTrialAttemptsKey, `${this.dailyKey(date)}:${attempts + 1}`);
+    return true;
+  }
+
+  areTimeTrialRetriesUnlocked(date = new Date()): boolean {
+    return localStorage.getItem(this.timeTrialRetriesUnlockedKey) === this.dailyKey(date);
+  }
+
+  unlockTimeTrialRetries(date = new Date()): void {
+    localStorage.setItem(this.timeTrialRetriesUnlockedKey, this.dailyKey(date));
+  }
+
+  getTimeTrialRetriesRemaining(date = new Date()): number {
+    return Math.max(0, 3 - this.getTimeTrialAttempts(date));
+  }
+
+  completeTimeTrial(won: boolean, date = new Date()): void {
+    localStorage.setItem(this.timeTrialResultKey, `${this.dailyKey(date)}:${won ? 'won' : 'lost'}`);
+  }
+
+  getTimeTrialResult(date = new Date()): 'won' | 'lost' | null {
+    const result = localStorage.getItem(this.timeTrialResultKey);
+    if (result === `${this.dailyKey(date)}:won`) return 'won';
+    if (result === `${this.dailyKey(date)}:lost`) return 'lost';
+    return null;
   }
 
   private dailyKey(date: Date): string {

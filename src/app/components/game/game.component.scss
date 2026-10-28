@@ -13,6 +13,10 @@
 .game-heading { display: flex; flex: 1; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
 .game-kicker, .panel-title, .result-kicker { font-size: .7rem; font-weight: 850; letter-spacing: .13em; }
 .game-kicker { margin-left: auto; color: #b5f566; line-height: 1.2; }
+.time-trial-status { display: flex; align-items: center; gap: 12px; margin-left: auto; color: #b5f566; font-size: .7rem; font-weight: 850; letter-spacing: .13em; }
+.time-trial-status strong { display: inline-flex; align-items: center; gap: 6px; min-width: 82px; padding: 8px 12px; border: 1px solid #b5f566; border-radius: 12px; color: #b5f566; font-size: 1rem; letter-spacing: 0; }
+.time-trial-status strong.urgent { border-color: #ff6d7e; color: #ff8795; animation: timer-pulse .8s ease-in-out infinite alternate; }
+@keyframes timer-pulse { to { transform: scale(1.06); box-shadow: 0 0 18px rgba(255,109,126,.25); } }
 .game-controls { display: flex; flex: none; gap: 8px; margin-left: auto; }
 .game-sound-toggle { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid #b5f566; border-radius: 12px; background: #20243b; color: #b5f566; font-size: 1.45rem; cursor: pointer; transition: transform .15s, border-color .15s, color .15s; }
 .game-sound-toggle:hover, .game-sound-toggle:focus-visible { transform: translateY(-2px); border-color: #b5f566; outline: none; }
@@ -21,6 +25,9 @@
 .game-hint-button ion-icon { font-size: 1.35rem; }
 .game-hint-button:hover:not(:disabled), .game-hint-button:focus-visible { transform: translateY(-2px); border-color: #b5f566; outline: none; }
 .game-hint-button:disabled { opacity: .5; cursor: default; }
+.game-hint-button.last-attempt { border-color: #b5f566; background: #35452d; box-shadow: 0 0 0 0 rgba(181,245,102,.55); animation: hint-attention 2s ease-out infinite; }
+@keyframes hint-attention { 0% { box-shadow: 0 0 0 0 rgba(181,245,102,.55), 0 0 14px rgba(181,245,102,.25); } 65%, 100% { box-shadow: 0 0 0 10px rgba(181,245,102,0), 0 0 18px rgba(181,245,102,0); } }
+@media (prefers-reduced-motion: reduce) { .game-hint-button.last-attempt { animation: none; } }
 .game-tags { display: none; }
 .game-layout { display: grid; grid-template-columns: minmax(280px, .82fr) minmax(0, 1.18fr); align-items: stretch; gap: 19px; }
 .figure-panel, .play-panel { border: 1px solid #373f5e; border-radius: 22px; background: linear-gradient(150deg, #252a44, #1c2036); }
