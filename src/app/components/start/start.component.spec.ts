@@ -9,7 +9,7 @@ import { StartComponent } from './start.component';
 describe('StartComponent', () => {
   let fixture: ComponentFixture<StartComponent>;
   const router = jasmine.createSpyObj('Router', ['navigate']);
-  const stats = jasmine.createSpyObj('StatsService', ['getStats', 'getTimeTrialAttempts', 'getTimeTrialResult', 'areTimeTrialRetriesUnlocked', 'unlockTimeTrialRetries']);
+  const stats = jasmine.createSpyObj('StatsService', ['getStats', 'getTimeTrialAttempts', 'getTimeTrialResult', 'getTimeTrialRetriesUnlocked', 'unlockTimeTrialRetry']);
   const platform = jasmine.createSpyObj<Platform>('Platform', ['is']);
   const admob = jasmine.createSpyObj<AdmobService>('AdmobService', ['showBannerBottomCenter', 'showRewardedVideo']);
 
@@ -19,7 +19,9 @@ describe('StartComponent', () => {
     stats.getStats.and.returnValue({ gamesPlayed: 2, wins: 1, losses: 1, bestStreak: 1 });
     stats.getTimeTrialAttempts.and.returnValue(0);
     stats.getTimeTrialResult.and.returnValue(null);
-    stats.areTimeTrialRetriesUnlocked.and.returnValue(false);
+    stats.getTimeTrialRetriesUnlocked.and.returnValue(0);
+    stats.unlockTimeTrialRetry.and.returnValue(true);
+    stats.unlockTimeTrialRetry.calls.reset();
     platform.is.and.returnValue(false);
     admob.showRewardedVideo.calls.reset();
     await TestBed.configureTestingModule({
@@ -66,7 +68,7 @@ describe('StartComponent', () => {
   it('lets the player use unlocked time trial retries from the start screen', async () => {
     stats.getTimeTrialAttempts.and.returnValue(1);
     stats.getTimeTrialResult.and.returnValue('lost');
-    stats.areTimeTrialRetriesUnlocked.and.returnValue(true);
+    stats.getTimeTrialRetriesUnlocked.and.returnValue(1);
 
     await fixture.componentInstance.ionViewWillEnter();
     expect(fixture.componentInstance.timeTrialAvailable).toBeTrue();
@@ -76,7 +78,7 @@ describe('StartComponent', () => {
     expect(admob.showRewardedVideo).not.toHaveBeenCalled();
   });
 
-  it('offers one rewarded ad to unlock time trial retries from the start screen', async () => {
+  it('offers a rewarded ad for the next time trial retry from the start screen', async () => {
     stats.getTimeTrialAttempts.and.returnValue(1);
     stats.getTimeTrialResult.and.returnValue('lost');
     platform.is.and.returnValue(true);
@@ -86,14 +88,29 @@ describe('StartComponent', () => {
     expect(fixture.componentInstance.timeTrialNeedsAd).toBeTrue();
     await fixture.componentInstance.startTimeTrial();
     expect(admob.showRewardedVideo).toHaveBeenCalledTimes(1);
-    expect(stats.unlockTimeTrialRetries).toHaveBeenCalledTimes(1);
+    expect(stats.unlockTimeTrialRetry).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledWith(['/contrarreloj']);
+  });
+
+  it('requires another ad for the final retry from the start screen', async () => {
+    stats.getTimeTrialAttempts.and.returnValue(2);
+    stats.getTimeTrialResult.and.returnValue('lost');
+    stats.getTimeTrialRetriesUnlocked.and.returnValue(1);
+    platform.is.and.returnValue(true);
+    admob.showRewardedVideo.and.resolveTo(true);
+
+    await fixture.componentInstance.ionViewWillEnter();
+    expect(fixture.componentInstance.timeTrialNeedsAd).toBeTrue();
+    await fixture.componentInstance.startTimeTrial();
+    expect(admob.showRewardedVideo).toHaveBeenCalledTimes(1);
+    expect(stats.unlockTimeTrialRetry).toHaveBeenCalledTimes(1);
     expect(router.navigate).toHaveBeenCalledWith(['/contrarreloj']);
   });
 
   it('disables the time trial after all three attempts are used', async () => {
     stats.getTimeTrialAttempts.and.returnValue(3);
     stats.getTimeTrialResult.and.returnValue('lost');
-    stats.areTimeTrialRetriesUnlocked.and.returnValue(true);
+    stats.getTimeTrialRetriesUnlocked.and.returnValue(2);
 
     await fixture.componentInstance.ionViewWillEnter();
     expect(fixture.componentInstance.timeTrialAvailable).toBeFalse();

@@ -61,20 +61,36 @@ describe('StatsService', () => {
     expect(service.isDailyRetryAvailable(tomorrow)).toBeTrue();
   });
 
-  it('limits the time trial to three attempts per day', () => {
+  it('requires a separate rewarded ad for each of the two time trial retries', () => {
     const today = new Date(2026, 4, 17, 12);
     const tomorrow = new Date(2026, 4, 18, 12);
     expect(service.startTimeTrialAttempt(today)).toBeTrue();
     expect(service.startTimeTrialAttempt(today)).toBeFalse();
     expect(service.getTimeTrialRetriesRemaining(today)).toBe(2);
-    service.unlockTimeTrialRetries(today);
-    expect(service.areTimeTrialRetriesUnlocked(today)).toBeTrue();
+    expect(service.unlockTimeTrialRetry(today)).toBeTrue();
+    expect(service.getTimeTrialRetriesUnlocked(today)).toBe(1);
+    expect(service.unlockTimeTrialRetry(today)).toBeFalse();
     expect(service.startTimeTrialAttempt(today)).toBeTrue();
+    expect(service.startTimeTrialAttempt(today)).toBeFalse();
+    expect(service.unlockTimeTrialRetry(today)).toBeTrue();
+    expect(service.getTimeTrialRetriesUnlocked(today)).toBe(2);
     expect(service.startTimeTrialAttempt(today)).toBeTrue();
+    expect(service.unlockTimeTrialRetry(today)).toBeFalse();
     expect(service.startTimeTrialAttempt(today)).toBeFalse();
     expect(service.getTimeTrialRetriesRemaining(today)).toBe(0);
     expect(service.getTimeTrialAttempts(tomorrow)).toBe(0);
-    expect(service.areTimeTrialRetriesUnlocked(tomorrow)).toBeFalse();
+    expect(service.getTimeTrialRetriesUnlocked(tomorrow)).toBe(0);
+  });
+
+  it('keeps one retry for players who already watched an ad today', () => {
+    const today = new Date(2026, 4, 17, 12);
+    localStorage.setItem('timeTrialAttempts', '2026-5-17:2');
+    localStorage.setItem('timeTrialRetriesUnlocked', '2026-5-17');
+
+    expect(service.getTimeTrialRetriesUnlocked(today)).toBe(1);
+    expect(service.startTimeTrialAttempt(today)).toBeFalse();
+    expect(service.unlockTimeTrialRetry(today)).toBeTrue();
+    expect(service.startTimeTrialAttempt(today)).toBeTrue();
   });
 
   it('stores the daily time trial result', () => {

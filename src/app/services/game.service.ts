@@ -62,7 +62,7 @@ export class GameService {
   finalizarPorTiempo(): void {
     const estado = this.GameStateSubject.value;
     if (estado.gameOver) return;
-    this.GameStateSubject.next({ ...estado, attemptsRemaining: 0, gameOver: true, winner: false, streak: 0 });
+    this.GameStateSubject.next({ ...estado, gameOver: true, winner: false, lossReason: 'time', streak: 0 });
     this.statsService.recordResult(false, 0);
     this.audioService.playSound('derrota');
   }
@@ -145,6 +145,7 @@ export class GameService {
       if (nuevoEstado.attemptsRemaining === 0) {
         nuevoEstado.gameOver = true;
         nuevoEstado.winner = false;
+        nuevoEstado.lossReason = 'attempts';
         nuevoEstado.streak = 0;
         this.statsService.recordResult(false, 0);
         if (this.currentLevel === 'diario') this.statsService.completeDaily(false);

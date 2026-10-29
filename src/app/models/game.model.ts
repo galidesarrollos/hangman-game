@@ -10,6 +10,7 @@ export interface GameState {
   attemptsRemaining: number;
   gameOver: boolean;
   winner: boolean;
+  lossReason?: 'time' | 'attempts';
   score: number;
   streak: number;
   theme?: Theme;

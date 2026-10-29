@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, IonicModule, IonRouterOutlet, ModalController, Platform, ToastController } from '@ionic/angular';
 import { of, Subject } from 'rxjs';
@@ -12,16 +12,18 @@ import { GameComponent } from './game.component';
 describe('GameComponent', () => {
   let fixture: ComponentFixture<GameComponent>;
   let gameStates: Subject<GameState>;
-  const game = { GameState$: new Subject<GameState>(), iniciarNuevoJuego: jasmine.createSpy(), iniciarContrarreloj: jasmine.createSpy(), reintentarRetoDiario: jasmine.createSpy(), usarPista: jasmine.createSpy(), obtenerPalabraVisible: () => '_ _ _ _', adivinarLetra: jasmine.createSpy() };
+  const game = { GameState$: new Subject<GameState>(), iniciarNuevoJuego: jasmine.createSpy(), iniciarContrarreloj: jasmine.createSpy(), finalizarPorTiempo: jasmine.createSpy(), reintentarRetoDiario: jasmine.createSpy(), usarPista: jasmine.createSpy(), obtenerPalabraVisible: () => '_ _ _ _', adivinarLetra: jasmine.createSpy() };
   const alert = jasmine.createSpyObj<AlertController>('AlertController', ['create']);
   const admob = jasmine.createSpyObj<AdmobService>('AdmobService', ['showBannerBottomCenter', 'showInterstitial', 'showRewardedVideo']);
-  const stats = jasmine.createSpyObj<StatsService>('StatsService', ['isDailyRetryAvailable', 'consumeDailyGamesInterstitial', 'areTimeTrialRetriesUnlocked', 'unlockTimeTrialRetries', 'startTimeTrialAttempt', 'getTimeTrialRetriesRemaining', 'completeTimeTrial']);
+  const stats = jasmine.createSpyObj<StatsService>('StatsService', ['isDailyRetryAvailable', 'consumeDailyGamesInterstitial', 'getTimeTrialRetriesUnlocked', 'unlockTimeTrialRetry', 'getTimeTrialAttempts', 'startTimeTrialAttempt', 'getTimeTrialRetriesRemaining', 'completeTimeTrial']);
   const platform = jasmine.createSpyObj<Platform>('Platform', ['is']);
   const toast = jasmine.createSpyObj<ToastController>('ToastController', ['create']);
   const audio = jasmine.createSpyObj<AudioService>('AudioService', ['getVolume', 'toggleMute']);
 
   beforeEach(async () => {
     game.iniciarNuevoJuego.calls.reset();
+    game.iniciarContrarreloj.calls.reset();
+    game.finalizarPorTiempo.calls.reset();
     game.reintentarRetoDiario.calls.reset();
     game.reintentarRetoDiario.and.returnValue(true);
     game.usarPista.calls.reset();
@@ -34,8 +36,13 @@ describe('GameComponent', () => {
     stats.isDailyRetryAvailable.and.returnValue(true);
     stats.consumeDailyGamesInterstitial.calls.reset();
     stats.consumeDailyGamesInterstitial.and.returnValue(false);
-    stats.areTimeTrialRetriesUnlocked.and.returnValue(false);
+    stats.getTimeTrialRetriesUnlocked.and.returnValue(0);
+    stats.getTimeTrialAttempts.and.returnValue(1);
+    stats.unlockTimeTrialRetry.and.returnValue(true);
+    stats.unlockTimeTrialRetry.calls.reset();
     stats.startTimeTrialAttempt.and.returnValue(true);
+    stats.startTimeTrialAttempt.calls.reset();
+    stats.completeTimeTrial.calls.reset();
     stats.getTimeTrialRetriesRemaining.and.returnValue(2);
     platform.is.and.returnValue(false);
     audio.getVolume.and.returnValue(1);
@@ -228,6 +235,7 @@ describe('GameComponent', () => {
       const component = fixture.componentInstance;
       component.nivel = nivel;
       component.isTimeTrial = nivel === 'contrarreloj';
+      component['timeTrialAttemptStarted'] = component.isTimeTrial;
       platform.is.and.returnValue(true);
       stats.consumeDailyGamesInterstitial.and.returnValue(true);
       gameStates.next({
@@ -275,10 +283,11 @@ describe('GameComponent', () => {
     expect(stats.consumeDailyGamesInterstitial).not.toHaveBeenCalled();
   });
 
-  it('unlocks both time trial retries with one rewarded ad', async () => {
+  it('requires a rewarded ad for each time trial retry', async () => {
     const component = fixture.componentInstance;
     component.isTimeTrial = true;
     component.nivel = 'contrarreloj';
+    component['timeTrialAttemptStarted'] = true;
     admob.showRewardedVideo.and.resolveTo(true);
     gameStates.next({
       secretWord: 'GATO', lettersGuessed: new Set<string>(), lettersFailed: new Set<string>(),
@@ -287,18 +296,88 @@ describe('GameComponent', () => {
 
     expect(await component['solicitarReintento']()).toBeTrue();
     expect(admob.showRewardedVideo).toHaveBeenCalledTimes(1);
-    expect(stats.unlockTimeTrialRetries).toHaveBeenCalledTimes(1);
+    expect(stats.unlockTimeTrialRetry).toHaveBeenCalledTimes(1);
     expect(stats.startTimeTrialAttempt).toHaveBeenCalledTimes(1);
     expect(game.iniciarContrarreloj).toHaveBeenCalledWith(1);
 
-    stats.areTimeTrialRetriesUnlocked.and.returnValue(true);
+    stats.getTimeTrialRetriesUnlocked.and.returnValue(1);
+    stats.getTimeTrialAttempts.and.returnValue(2);
     gameStates.next({
       secretWord: 'GATO', lettersGuessed: new Set<string>(), lettersFailed: new Set<string>(),
       attemptsRemaining: 0, gameOver: true, winner: false, score: 0, streak: 0
     });
     expect(await component['solicitarReintento']()).toBeTrue();
-    expect(admob.showRewardedVideo).toHaveBeenCalledTimes(1);
+    expect(admob.showRewardedVideo).toHaveBeenCalledTimes(2);
+    expect(stats.unlockTimeTrialRetry).toHaveBeenCalledTimes(2);
     expect(stats.startTimeTrialAttempt).toHaveBeenCalledTimes(2);
+  });
+
+  it('starts the countdown only when the time trial view is visible and pauses while hidden', fakeAsync(() => {
+    let visibility: DocumentVisibilityState = 'visible';
+    spyOnProperty(document, 'visibilityState', 'get').and.callFake(() => visibility);
+    const component = fixture.componentInstance;
+    component.isTimeTrial = true;
+    component.remainingSeconds = 3;
+    component['timeTrialAttemptStarted'] = true;
+    gameStates.next({
+      secretWord: 'CASA', lettersGuessed: new Set<string>(), lettersFailed: new Set<string>(),
+      attemptsRemaining: 7, gameOver: false, winner: false, score: 0, streak: 0
+    });
+
+    tick(1000);
+    expect(component.remainingSeconds).toBe(3);
+    component.ionViewDidEnter();
+    tick(1000);
+    expect(component.remainingSeconds).toBe(2);
+
+    visibility = 'hidden';
+    document.dispatchEvent(new Event('visibilitychange'));
+    tick(3000);
+    expect(component.remainingSeconds).toBe(2);
+
+    visibility = 'visible';
+    document.dispatchEvent(new Event('visibilitychange'));
+    tick(2000);
+    expect(game.finalizarPorTiempo).toHaveBeenCalledTimes(1);
+    expect(component.remainingSeconds).toBe(0);
+    component.ionViewWillLeave();
+  }));
+
+  it('does not start a timer or process a result without an admitted time trial attempt', fakeAsync(() => {
+    const component = fixture.componentInstance;
+    component.isTimeTrial = true;
+    component.remainingSeconds = 20;
+    component.ionViewDidEnter();
+    gameStates.next({
+      secretWord: 'CASA', lettersGuessed: new Set<string>(), lettersFailed: new Set<string>(),
+      attemptsRemaining: 0, gameOver: true, winner: false, lossReason: 'time', score: 0, streak: 0
+    });
+
+    tick(2000);
+    expect(component.remainingSeconds).toBe(20);
+    expect(game.finalizarPorTiempo).not.toHaveBeenCalled();
+    expect(stats.completeTimeTrial).not.toHaveBeenCalled();
+    expect(alert.create).not.toHaveBeenCalled();
+    component.ionViewWillLeave();
+  }));
+
+  it('waits for the rewarded ad to finish before starting another time trial', async () => {
+    const component = fixture.componentInstance;
+    component.isTimeTrial = true;
+    component.nivel = 'contrarreloj';
+    component['timeTrialAttemptStarted'] = true;
+    let finishAd!: (rewarded: boolean) => void;
+    admob.showRewardedVideo.and.returnValue(new Promise(resolve => { finishAd = resolve; }));
+    gameStates.next({
+      secretWord: 'CASA', lettersGuessed: new Set<string>(), lettersFailed: new Set<string>(),
+      attemptsRemaining: 0, gameOver: true, winner: false, lossReason: 'attempts', score: 0, streak: 0
+    });
+
+    const retry = component['solicitarReintento']();
+    expect(game.iniciarContrarreloj).not.toHaveBeenCalled();
+    finishAd(true);
+    expect(await retry).toBeTrue();
+    expect(game.iniciarContrarreloj).toHaveBeenCalledOnceWith(1);
   });
 
   for (const nivel of ['facil', 'normal', 'avanzado'] as Level[]) {
@@ -321,8 +400,7 @@ describe('GameComponent', () => {
 
   for (const scenario of [
     { nivel: 'normal', winner: false },
-    { nivel: 'diario', winner: true },
-    { nivel: 'contrarreloj', winner: true }
+    { nivel: 'diario', winner: true }
   ] as { nivel: Level; winner: boolean }[]) {
     it(`keeps the pending daily interstitial for ${scenario.nivel} with winner=${scenario.winner}`, async () => {
       const component = fixture.componentInstance;
@@ -341,6 +419,46 @@ describe('GameComponent', () => {
       expect(alert.create).toHaveBeenCalledTimes(1);
     });
   }
+
+  it('shows the time trial result without an interstitial and states the loss reason', async () => {
+    const component = fixture.componentInstance;
+    component.nivel = 'contrarreloj';
+    component.isTimeTrial = true;
+    component['timeTrialAttemptStarted'] = true;
+    stats.getTimeTrialRetriesRemaining.and.returnValue(0);
+    stats.consumeDailyGamesInterstitial.and.returnValue(true);
+    gameStates.next({
+      secretWord: 'CASA', lettersGuessed: new Set<string>(), lettersFailed: new Set(['B']),
+      attemptsRemaining: 6, gameOver: true, winner: false, lossReason: 'time', score: 0, streak: 0
+    });
+
+    await fixture.whenStable();
+
+    expect(admob.showInterstitial).not.toHaveBeenCalled();
+    expect(stats.consumeDailyGamesInterstitial).not.toHaveBeenCalled();
+    expect(alert.create.calls.mostRecent().args[0]?.header).toBe('Tiempo agotado');
+    expect(alert.create.calls.mostRecent().args[0]?.message).toContain('Se ha agotado el tiempo.');
+    expect(component.fallos).toBe(1);
+  });
+
+  it('shows the final time trial win without an interstitial', async () => {
+    const component = fixture.componentInstance;
+    component.nivel = 'contrarreloj';
+    component.isTimeTrial = true;
+    component['timeTrialAttemptStarted'] = true;
+    component.timeTrialLevel = component.timeTrialTimes.length;
+    stats.consumeDailyGamesInterstitial.and.returnValue(true);
+    gameStates.next({
+      secretWord: 'CASA', lettersGuessed: new Set(['C', 'A', 'S']), lettersFailed: new Set<string>(),
+      attemptsRemaining: 7, gameOver: true, winner: true, score: 70, streak: 1
+    });
+
+    await fixture.whenStable();
+
+    expect(admob.showInterstitial).not.toHaveBeenCalled();
+    expect(stats.consumeDailyGamesInterstitial).not.toHaveBeenCalled();
+    expect(alert.create.calls.mostRecent().args[0]?.header).toBe('¡Contrarreloj superado!');
+  });
 
   it('starts another word without showing an ad after winning', async () => {
     game.iniciarNuevoJuego.calls.reset();

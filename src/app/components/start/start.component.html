@@ -14,7 +14,7 @@
     <div class="daily-divider"><span>O TAMBIÉN</span></div>
     <button type="button" class="daily-challenge" [class.available]="timeTrialAvailable" [class.completed]="!timeTrialAvailable" (click)="startTimeTrial()" [disabled]="!timeTrialAvailable">
       <span class="daily-icon"><ion-icon name="timer-outline" aria-hidden="true"></ion-icon></span>
-      <span class="daily-copy"><span class="section-kicker">MODO CONTRARRELOJ</span><strong>{{ timeTrialAvailable ? (timeTrialNeedsAd ? 'Ver anuncio para desbloquear 2 reintentos' : 'Supera 5 niveles antes de que se agote el tiempo') : timeTrialResult === 'won' ? 'Contrarreloj superado hoy' : 'Intentos agotados por hoy' }}</strong></span>
+      <span class="daily-copy"><span class="section-kicker">MODO CONTRARRELOJ</span><strong>{{ timeTrialAvailable ? (timeTrialNeedsAd ? 'Ver anuncio para conseguir 1 reintento' : 'Supera 5 niveles antes de que se agote el tiempo') : timeTrialResult === 'won' ? 'Contrarreloj superado hoy' : 'Intentos agotados por hoy' }}</strong></span>
       <ion-icon class="daily-arrow" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
     </button>
     <div class="web-ad-slot" *ngIf="!platform.is('hybrid')" aria-label="Publicidad">

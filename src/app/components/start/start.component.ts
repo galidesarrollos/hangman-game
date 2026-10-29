@@ -66,7 +66,7 @@ export class StartComponent implements ViewWillEnter, AfterViewInit {
     try {
       if (this.timeTrialNeedsAd) {
         if (!await this.admobService.showRewardedVideo()) return;
-        this.statsService.unlockTimeTrialRetries();
+        if (!this.statsService.unlockTimeTrialRetry()) return;
         this.refreshTimeTrial();
       }
       await this.router.navigate(['/contrarreloj']);
@@ -78,7 +78,7 @@ export class StartComponent implements ViewWillEnter, AfterViewInit {
   private refreshTimeTrial(): void {
     this.timeTrialResult = this.statsService.getTimeTrialResult();
     const attempts = this.statsService.getTimeTrialAttempts();
-    this.timeTrialNeedsAd = attempts > 0 && !this.statsService.areTimeTrialRetriesUnlocked();
+    this.timeTrialNeedsAd = attempts > 0 && this.statsService.getTimeTrialRetriesUnlocked() < attempts;
     this.timeTrialAvailable = attempts < 3 && this.timeTrialResult !== 'won' &&
       (!this.timeTrialNeedsAd || this.platform.is('hybrid'));
   }

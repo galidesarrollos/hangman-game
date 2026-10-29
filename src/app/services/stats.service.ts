@@ -157,17 +157,23 @@ export class StatsService {
 
   startTimeTrialAttempt(date = new Date()): boolean {
     const attempts = this.getTimeTrialAttempts(date);
-    if (attempts >= 3 || (attempts > 0 && !this.areTimeTrialRetriesUnlocked(date))) return false;
+    if (attempts >= 3 || (attempts > 0 && this.getTimeTrialRetriesUnlocked(date) < attempts)) return false;
     localStorage.setItem(this.timeTrialAttemptsKey, `${this.dailyKey(date)}:${attempts + 1}`);
     return true;
   }
 
-  areTimeTrialRetriesUnlocked(date = new Date()): boolean {
-    return localStorage.getItem(this.timeTrialRetriesUnlockedKey) === this.dailyKey(date);
+  getTimeTrialRetriesUnlocked(date = new Date()): number {
+    const stored = localStorage.getItem(this.timeTrialRetriesUnlockedKey);
+    if (stored === this.dailyKey(date)) return 1;
+    const [key, retries] = (stored ?? '').split(':');
+    return key === this.dailyKey(date) ? Math.min(2, Math.max(0, Number(retries) || 0)) : 0;
   }
 
-  unlockTimeTrialRetries(date = new Date()): void {
-    localStorage.setItem(this.timeTrialRetriesUnlockedKey, this.dailyKey(date));
+  unlockTimeTrialRetry(date = new Date()): boolean {
+    const unlocked = this.getTimeTrialRetriesUnlocked(date);
+    if (unlocked >= 2 || unlocked >= this.getTimeTrialAttempts(date)) return false;
+    localStorage.setItem(this.timeTrialRetriesUnlockedKey, `${this.dailyKey(date)}:${unlocked + 1}`);
+    return true;
   }
 
   getTimeTrialRetriesRemaining(date = new Date()): number {

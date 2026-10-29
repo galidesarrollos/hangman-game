@@ -45,6 +45,9 @@ export class GameComponent implements OnInit, OnDestroy {
   private anuncioRecompensadoEnCurso = false;
   private timeTrialTimer?: ReturnType<typeof setInterval>;
   private timeTrialNextLevelTimeout?: ReturnType<typeof setTimeout>;
+  private timeTrialViewEntered = false;
+  private timeTrialAttemptStarted = false;
+  private pendingTimeTrialLevel?: number;
 
   private readonly subscription = new Subscription();
 
@@ -61,6 +64,7 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    document.addEventListener('visibilitychange', this.onVisibilityChange);
     this.subscription.add(this.route.params.subscribe(params => {
       this.isTimeTrial = this.route.snapshot.routeConfig?.path === 'contrarreloj';
       const esRetoDiario = !this.isTimeTrial && !params['theme'] && !params['level'];
@@ -70,7 +74,10 @@ export class GameComponent implements OnInit, OnDestroy {
       this.nivel = this.isTimeTrial ? 'contrarreloj' : esRetoDiario || nivel === 'diario' ? 'diario' : (nivel === 'avanzado' ? 'avanzado' : (nivel === 'facil' ? 'facil' : 'normal'));
       if (this.isTimeTrial) {
         if (!this.statsService.startTimeTrialAttempt()) void this.router.navigate(['/']);
-        else this.startTimeTrialLevel(1);
+        else {
+          this.timeTrialAttemptStarted = true;
+          this.startTimeTrialLevel(1);
+        }
       } else if (!this.juegoService.iniciarNuevoJuego(this.tematica, this.nivel) && this.nivel === 'diario') {
         void this.router.navigate(['/']);
       }
@@ -79,11 +86,13 @@ export class GameComponent implements OnInit, OnDestroy {
     if (this.platform.is('hybrid')) this.admobService.showBannerBottomCenter();
 
     this.subscription.add(this.juegoService.GameState$.subscribe(estado => {
+      if (this.isTimeTrial && !this.timeTrialAttemptStarted) return;
       if (estado.gameOver && !this.partidaFinalizadaMostrada) {
         this.clearTimeTrialTimer();
         if (this.isTimeTrial && estado.winner && this.timeTrialLevel < this.timeTrialTimes.length) {
           this.partidaFinalizadaMostrada = true;
-          this.timeTrialNextLevelTimeout = setTimeout(() => this.startTimeTrialLevel(this.timeTrialLevel + 1), 350);
+          this.pendingTimeTrialLevel = this.timeTrialLevel + 1;
+          this.scheduleNextTimeTrialLevel();
         } else {
           if (this.isTimeTrial) this.statsService.completeTimeTrial(estado.winner);
           void this.mostrarFinPartida(estado);
@@ -99,9 +108,32 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    document.removeEventListener('visibilitychange', this.onVisibilityChange);
     this.clearTimeTrialTimer();
     this.subscription.unsubscribe();
   }
+
+  ionViewDidEnter(): void {
+    this.timeTrialViewEntered = true;
+    this.scheduleNextTimeTrialLevel();
+    this.resumeTimeTrialTimer();
+  }
+
+  ionViewWillLeave(): void {
+    this.timeTrialViewEntered = false;
+    this.pauseTimeTrialTimer();
+    this.pauseNextTimeTrialLevel();
+  }
+
+  private readonly onVisibilityChange = (): void => {
+    if (document.visibilityState === 'hidden') {
+      this.pauseTimeTrialTimer();
+      this.pauseNextTimeTrialLevel();
+    } else {
+      this.scheduleNextTimeTrialLevel();
+      this.resumeTimeTrialTimer();
+    }
+  };
 
   async openUserSettings(): Promise<void> {
     await openSettingsModal(this.modalController, UserSettingsComponent, 'user-settings-modal', this.routerOutlet.nativeEl);
@@ -168,9 +200,11 @@ export class GameComponent implements OnInit, OnDestroy {
     if (this.anuncioRecompensadoEnCurso || !this.estado?.gameOver || this.estado.winner) return false;
     this.anuncioRecompensadoEnCurso = true;
     try {
-      const recompensaObtenida = this.isTimeTrial && this.statsService.areTimeTrialRetriesUnlocked()
+      const recompensaObtenida = this.isTimeTrial && this.statsService.getTimeTrialRetriesUnlocked() >= this.statsService.getTimeTrialAttempts()
         ? true : await this.admobService.showRewardedVideo();
-      if (this.isTimeTrial && recompensaObtenida) this.statsService.unlockTimeTrialRetries();
+      if (this.isTimeTrial && recompensaObtenida && this.statsService.getTimeTrialRetriesUnlocked() < this.statsService.getTimeTrialAttempts()) {
+        if (!this.statsService.unlockTimeTrialRetry()) return false;
+      }
       const reintentoAceptado = this.isTimeTrial
         ? recompensaObtenida && this.statsService.startTimeTrialAttempt()
         : this.nivel === 'diario' ? recompensaObtenida && this.juegoService.reintentarRetoDiario()
@@ -194,14 +228,19 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   private async mostrarAvisoAnuncioFallido(): Promise<void> {
-    const aviso = await this.toastController.create({ message: 'No se completó el anuncio. Puedes intentarlo de nuevo.', duration: 3000, position: 'top' });
+    const message = this.admobService.rewardedFailure === 'consent'
+      ? 'Los anuncios no están disponibles por ahora. Revisa Privacidad y anuncios en Ajustes o inténtalo más tarde.'
+      : this.admobService.rewardedFailure === 'unavailable'
+        ? 'No hay un anuncio disponible ahora. Inténtalo de nuevo más tarde.'
+        : 'No se completó el anuncio. Puedes intentarlo de nuevo.';
+    const aviso = await this.toastController.create({ message, duration: 3000, position: 'top' });
     await aviso.present();
   }
 
   private async mostrarFinPartida(estado: GameState): Promise<void> {
     const esVictoriaTematica = estado.winner && this.nivel !== 'diario' && !this.isTimeTrial;
     const ofreceReintento = !estado.winner && this.puedeReintentar;
-    if (!esVictoriaTematica && !ofreceReintento && !this.anuncioRecompensadoEnCurso && this.statsService.consumeDailyGamesInterstitial()) {
+    if (!this.isTimeTrial && !esVictoriaTematica && !ofreceReintento && !this.anuncioRecompensadoEnCurso && this.statsService.consumeDailyGamesInterstitial()) {
       try {
         await this.admobService.showInterstitial();
       } catch (error) {
@@ -212,20 +251,20 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   private get puedeReintentar(): boolean {
-    return (this.isTimeTrial && this.statsService.areTimeTrialRetriesUnlocked() || this.platform.is('hybrid')) &&
+    return (this.isTimeTrial && this.statsService.getTimeTrialRetriesUnlocked() >= this.statsService.getTimeTrialAttempts() || this.platform.is('hybrid')) &&
       (this.isTimeTrial ? this.statsService.getTimeTrialRetriesRemaining() > 0 : this.nivel !== 'diario' || this.statsService.isDailyRetryAvailable());
   }
 
   private async mostrarDerrota(estado: GameState): Promise<void> {
     const aviso = await this.alertController.create({
-      header: 'Esta vez no pudo ser',
+      header: this.isTimeTrial ? estado.lossReason === 'time' ? 'Tiempo agotado' : 'Sin intentos' : 'Esta vez no pudo ser',
       backdropDismiss: false,
       message: this.isTimeTrial
-        ? `Has llegado al nivel ${this.timeTrialLevel} de 5. La palabra era ${estado.secretWord}.\n\nSi reintentas, volverás al nivel 1. Te quedan ${this.statsService.getTimeTrialRetriesRemaining()} reintentos hoy.`
+        ? `${estado.lossReason === 'time' ? 'Se ha agotado el tiempo.' : 'Has agotado los 7 intentos.'} Has llegado al nivel ${this.timeTrialLevel} de 5. La palabra era ${estado.secretWord}.\n\nSi reintentas, volverás al nivel 1. Te quedan ${this.statsService.getTimeTrialRetriesRemaining()} reintentos hoy.`
         : `La palabra era ${estado.secretWord}.\n\nPuntuación: ${estado.score}\nRacha: ${estado.streak}`,
       cssClass: 'game-result-alert game-result-alert-lost',
       buttons: [
-        ...(this.puedeReintentar ? [{ text: this.isTimeTrial && this.statsService.areTimeTrialRetriesUnlocked() ? 'Reintentar' : 'Ver anuncio y reintentar', handler: () => this.solicitarReintento() }] : []),
+        ...(this.puedeReintentar ? [{ text: this.isTimeTrial && this.statsService.getTimeTrialRetriesUnlocked() >= this.statsService.getTimeTrialAttempts() ? 'Reintentar' : 'Ver anuncio y reintentar', handler: () => this.solicitarReintento() }] : []),
         { text: 'Volver al menú', handler: () => this.volverAlMenu() }
       ]
     });
@@ -256,23 +295,46 @@ export class GameComponent implements OnInit, OnDestroy {
 
   private startTimeTrialLevel(level: number): void {
     this.clearTimeTrialTimer();
+    this.pendingTimeTrialLevel = undefined;
     this.timeTrialLevel = level;
     this.remainingSeconds = this.timeTrialTimes[level - 1];
     this.partidaFinalizadaMostrada = false;
     this.juegoService.iniciarContrarreloj(level);
+    this.resumeTimeTrialTimer();
+  }
+
+  private resumeTimeTrialTimer(): void {
+    if (!this.isTimeTrial || !this.timeTrialAttemptStarted || !this.timeTrialViewEntered || document.visibilityState !== 'visible' ||
+        this.timeTrialTimer || this.pendingTimeTrialLevel || !this.estado?.secretWord || this.estado.gameOver || this.remainingSeconds <= 0) return;
     this.timeTrialTimer = setInterval(() => {
-      this.remainingSeconds -= 1;
+      this.remainingSeconds = Math.max(0, this.remainingSeconds - 1);
       if (this.remainingSeconds <= 0) {
-        this.clearTimeTrialTimer();
+        this.pauseTimeTrialTimer();
         this.juegoService.finalizarPorTiempo();
       }
     }, 1000);
   }
 
-  private clearTimeTrialTimer(): void {
+  private scheduleNextTimeTrialLevel(): void {
+    if (!this.pendingTimeTrialLevel || !this.timeTrialViewEntered || document.visibilityState !== 'visible' || this.timeTrialNextLevelTimeout) return;
+    this.timeTrialNextLevelTimeout = setTimeout(() => {
+      this.timeTrialNextLevelTimeout = undefined;
+      if (this.pendingTimeTrialLevel) this.startTimeTrialLevel(this.pendingTimeTrialLevel);
+    }, 350);
+  }
+
+  private pauseTimeTrialTimer(): void {
     if (this.timeTrialTimer) clearInterval(this.timeTrialTimer);
-    if (this.timeTrialNextLevelTimeout) clearTimeout(this.timeTrialNextLevelTimeout);
     this.timeTrialTimer = undefined;
+  }
+
+  private pauseNextTimeTrialLevel(): void {
+    if (this.timeTrialNextLevelTimeout) clearTimeout(this.timeTrialNextLevelTimeout);
     this.timeTrialNextLevelTimeout = undefined;
+  }
+
+  private clearTimeTrialTimer(): void {
+    this.pauseTimeTrialTimer();
+    this.pauseNextTimeTrialLevel();
   }
 }

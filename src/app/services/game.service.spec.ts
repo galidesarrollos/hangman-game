@@ -60,6 +60,7 @@ describe('GameService', () => {
     expect(state.attemptsRemaining).toBe(0);
     expect(state.gameOver).toBeTrue();
     expect(state.winner).toBeFalse();
+    expect(state.lossReason).toBe('attempts');
     expect(state.streak).toBe(0);
     expect(stats.recordResult).toHaveBeenCalledWith(false, 0);
   });
@@ -163,11 +164,13 @@ describe('GameService', () => {
 
   it('ends an active game when the time trial expires', () => {
     service.iniciarContrarreloj(1);
+    service.adivinarLetra('B');
     service.finalizarPorTiempo();
 
     expect(state.gameOver).toBeTrue();
     expect(state.winner).toBeFalse();
-    expect(state.attemptsRemaining).toBe(0);
+    expect(state.lossReason).toBe('time');
+    expect(state.attemptsRemaining).toBe(6);
     expect(stats.recordResult).toHaveBeenCalledWith(false, 0);
   });
 });
