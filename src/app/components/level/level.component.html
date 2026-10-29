@@ -1,5 +1,5 @@
 <ion-content class="level-content">
-  <app-screen-actions backUrl="/tematicas" backLabel="Volver a las temáticas"></app-screen-actions>
+  <app-screen-actions backUrl="/tematicas" backLabel="Volver a las temáticas" [showHome]="true"></app-screen-actions>
   <main class="level-shell" [class.native-shell]="platform.is('hybrid')">
     <section class="level-intro" aria-labelledby="level-title">
       <div class="theme-badge"><span aria-hidden="true">{{ temaActual.icono }}</span> {{ temaActual.nombre }}</div>

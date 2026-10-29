@@ -7,8 +7,8 @@
         <span>NIVEL {{ timeTrialLevel }} / 5</span>
         <strong [class.urgent]="remainingSeconds <= 10"><ion-icon name="timer-outline" aria-hidden="true"></ion-icon>{{ remainingSeconds }} s</strong>
       </div>
-      <div class="game-controls">
-        <button *ngIf="!isTimeTrial" type="button" class="game-hint-button" [class.last-attempt]="pistaEnUltimoIntento" (click)="confirmarPista()" [disabled]="!puedePedirPista" aria-label="Pedir una pista viendo un anuncio">
+      <div class="game-controls" *ngIf="!isTimeTrial">
+        <button type="button" class="game-hint-button" [class.last-attempt]="pistaEnUltimoIntento" (click)="confirmarPista()" [disabled]="!puedePedirPista" aria-label="Pedir una pista viendo un anuncio">
           <ion-icon name="bulb-outline" aria-hidden="true"></ion-icon>
         </button>
       </div>
@@ -19,7 +19,7 @@
 
     <div class="game-layout">
       <section class="figure-panel" [class.long-word]="casillas.length > 7" aria-label="Dibujo del ahorcado">
-        <div class="panel-title"><span>{{ isTimeTrial ? 'CONTRARRELOJ' : 'EL AHORCADO' }}</span><span>{{ isTimeTrial ? 'Nivel ' + timeTrialLevel + ' de 5' : fallos + ' / 7 fallos' }}</span></div>
+        <div class="panel-title"><span>{{ isTimeTrial ? 'CONTRARRELOJ' : 'EL AHORCADO' }}</span><span>{{ isTimeTrial ? fallos + ' usados · ' + estado.attemptsRemaining + ' restantes' : fallos + ' / 7 fallos' }}</span></div>
         <svg class="hangman" viewBox="0 0 200 220" role="img" [attr.aria-label]="'Dibujo del ahorcado con ' + fallos + ' de 7 fallos'">
           <g class="gallows">
             <path d="M27 203 H170 M53 203 V22 H123 V46" />
