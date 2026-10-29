@@ -17,6 +17,8 @@
 
 .user-settings-shell { max-width: 660px; margin: auto; padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
 .settings-option { min-height: 66px; cursor: pointer; }
+.settings-option + .settings-option { margin-top: 10px; }
+.settings-option:disabled { opacity: .6; cursor: default; }
 .settings-option span:nth-child(2), .overview-stat span { min-width: 0; }
 .settings-option:focus-visible { outline: 2px solid #b5f566; outline-offset: 3px; }
 

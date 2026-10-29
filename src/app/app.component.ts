@@ -15,7 +15,7 @@ export class AppComponent {
   private readonly admobService = inject(AdmobService);
   readonly router = inject(Router);
 
-  showPrivacyNotice = localStorage.getItem('privacyNoticeDismissed') !== 'true';
+  showPrivacyNotice = !this.platform.is('hybrid') && localStorage.getItem('privacyNoticeDismissed') !== 'true';
 
   constructor() {
     this.initializeApp();
