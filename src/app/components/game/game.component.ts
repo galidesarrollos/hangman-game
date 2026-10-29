@@ -173,8 +173,8 @@ export class GameComponent implements OnInit, OnDestroy {
       if (this.isTimeTrial && recompensaObtenida) this.statsService.unlockTimeTrialRetries();
       const reintentoAceptado = this.isTimeTrial
         ? recompensaObtenida && this.statsService.startTimeTrialAttempt()
-        : this.nivel === 'diario' ? recompensaObtenida && await this.admobService.showRewardedVideo() && this.juegoService.reintentarRetoDiario()
-          : recompensaObtenida && await this.admobService.showRewardedVideo();
+        : this.nivel === 'diario' ? recompensaObtenida && this.juegoService.reintentarRetoDiario()
+          : recompensaObtenida;
       if (reintentoAceptado) {
         this.partidaFinalizadaMostrada = false;
         if (this.isTimeTrial) this.startTimeTrialLevel(1);
@@ -199,7 +199,9 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   private async mostrarFinPartida(estado: GameState): Promise<void> {
-    if (this.statsService.consumeDailyGamesInterstitial()) {
+    const esVictoriaTematica = estado.winner && this.nivel !== 'diario' && !this.isTimeTrial;
+    const ofreceReintento = !estado.winner && this.puedeReintentar;
+    if (!esVictoriaTematica && !ofreceReintento && !this.anuncioRecompensadoEnCurso && this.statsService.consumeDailyGamesInterstitial()) {
       try {
         await this.admobService.showInterstitial();
       } catch (error) {
@@ -209,9 +211,12 @@ export class GameComponent implements OnInit, OnDestroy {
     await (estado.winner ? this.mostrarResultado(estado) : this.mostrarDerrota(estado));
   }
 
-  private async mostrarDerrota(estado: GameState): Promise<void> {
-    const puedeReintentar = (this.isTimeTrial && this.statsService.areTimeTrialRetriesUnlocked() || this.platform.is('hybrid')) &&
+  private get puedeReintentar(): boolean {
+    return (this.isTimeTrial && this.statsService.areTimeTrialRetriesUnlocked() || this.platform.is('hybrid')) &&
       (this.isTimeTrial ? this.statsService.getTimeTrialRetriesRemaining() > 0 : this.nivel !== 'diario' || this.statsService.isDailyRetryAvailable());
+  }
+
+  private async mostrarDerrota(estado: GameState): Promise<void> {
     const aviso = await this.alertController.create({
       header: 'Esta vez no pudo ser',
       backdropDismiss: false,
@@ -220,7 +225,7 @@ export class GameComponent implements OnInit, OnDestroy {
         : `La palabra era ${estado.secretWord}.\n\nPuntuación: ${estado.score}\nRacha: ${estado.streak}`,
       cssClass: 'game-result-alert game-result-alert-lost',
       buttons: [
-        ...(puedeReintentar ? [{ text: this.isTimeTrial && this.statsService.areTimeTrialRetriesUnlocked() ? 'Reintentar' : 'Ver anuncio y reintentar', handler: () => this.solicitarReintento() }] : []),
+        ...(this.puedeReintentar ? [{ text: this.isTimeTrial && this.statsService.areTimeTrialRetriesUnlocked() ? 'Reintentar' : 'Ver anuncio y reintentar', handler: () => this.solicitarReintento() }] : []),
         { text: 'Volver al menú', handler: () => this.volverAlMenu() }
       ]
     });

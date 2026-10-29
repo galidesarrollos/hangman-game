@@ -98,27 +98,30 @@ export class AdmobService {
       ? environment.rewardedIosAdUnitId
       : environment.rewardedAndroidAdUnitId;
     const listeners: PluginListenerHandle[] = [];
+    let rewardEarned = false;
     let finish: (earned: boolean) => void = () => undefined;
     const outcome = new Promise<boolean>(resolve => { finish = resolve; });
 
     try {
       await this.initialize();
-      listeners.push(await AdMob.addListener(RewardAdPluginEvents.Rewarded, reward => finish(reward.amount > 0)));
-      listeners.push(await AdMob.addListener(RewardAdPluginEvents.Dismissed, () => finish(false)));
-      listeners.push(await AdMob.addListener(RewardAdPluginEvents.FailedToShow, () => finish(false)));
+      listeners.push(await AdMob.addListener(RewardAdPluginEvents.Rewarded, reward => {
+        rewardEarned ||= reward.amount > 0;
+      }));
+      listeners.push(await AdMob.addListener(RewardAdPluginEvents.Dismissed, () => finish(rewardEarned)));
+      listeners.push(await AdMob.addListener(RewardAdPluginEvents.FailedToShow, () => finish(rewardEarned)));
 
       await AdMob.prepareRewardVideoAd({ adId, isTesting: false });
       void AdMob.showRewardVideoAd().then(
-        reward => finish(reward.amount > 0),
+        reward => { rewardEarned ||= reward.amount > 0; },
         error => {
           console.warn('No se ha podido mostrar el anuncio recompensado:', error);
-          finish(false);
+          finish(rewardEarned);
         }
       );
       return await outcome;
     } catch (error) {
       console.warn('No se ha podido cargar el anuncio recompensado:', error);
-      return false;
+      return rewardEarned;
     } finally {
       for (const listener of listeners) {
         try {

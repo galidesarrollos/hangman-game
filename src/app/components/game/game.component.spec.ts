@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, IonicModule, IonRouterOutlet, ModalController, Platform, ToastController } from '@ionic/angular';
 import { of, Subject } from 'rxjs';
-import { GameState } from '../../models/game.model';
+import { GameState, Level } from '../../models/game.model';
 import { AdmobService } from '../../services/admob.service';
 import { AudioService } from '../../services/audio.service';
 import { GameService } from '../../services/game.service';
@@ -32,6 +32,7 @@ describe('GameComponent', () => {
     toast.create.calls.reset();
     toast.create.and.resolveTo({ present: () => Promise.resolve() } as HTMLIonToastElement);
     stats.isDailyRetryAvailable.and.returnValue(true);
+    stats.consumeDailyGamesInterstitial.calls.reset();
     stats.consumeDailyGamesInterstitial.and.returnValue(false);
     stats.areTimeTrialRetriesUnlocked.and.returnValue(false);
     stats.startTimeTrialAttempt.and.returnValue(true);
@@ -176,7 +177,7 @@ describe('GameComponent', () => {
     const buttons = alert.create.calls.mostRecent().args[0]?.buttons ?? [];
     expect(buttons.some(button => typeof button !== 'string' && button.text === 'Ver anuncio y reintentar')).toBeTrue();
     expect(await fixture.componentInstance['solicitarReintento']()).toBeTrue();
-    expect(admob.showRewardedVideo).toHaveBeenCalledTimes(2);
+    expect(admob.showRewardedVideo).toHaveBeenCalledTimes(1);
     expect(game.reintentarRetoDiario).toHaveBeenCalledTimes(1);
   });
 
@@ -197,6 +198,81 @@ describe('GameComponent', () => {
     expect(await fixture.componentInstance['solicitarReintento']()).toBeFalse();
     expect(game.reintentarRetoDiario).not.toHaveBeenCalled();
     expect(toast.create).toHaveBeenCalled();
+  });
+
+  for (const nivel of ['facil', 'normal', 'avanzado'] as Level[]) {
+    it(`grants a ${nivel} retry with one rewarded ad and skips the pending interstitial`, async () => {
+      const component = fixture.componentInstance;
+      component.nivel = nivel;
+      platform.is.and.returnValue(true);
+      stats.consumeDailyGamesInterstitial.and.returnValue(true);
+      admob.showRewardedVideo.and.resolveTo(true);
+      gameStates.next({
+        secretWord: 'GATO', lettersGuessed: new Set<string>(), lettersFailed: new Set<string>(),
+        attemptsRemaining: 0, gameOver: true, winner: false, score: 0, streak: 0
+      });
+      await fixture.whenStable();
+      game.iniciarNuevoJuego.calls.reset();
+
+      expect(await component['solicitarReintento']()).toBeTrue();
+
+      expect(game.iniciarNuevoJuego).toHaveBeenCalledOnceWith('general', nivel);
+      expect(admob.showRewardedVideo).toHaveBeenCalledTimes(1);
+      expect(admob.showInterstitial).not.toHaveBeenCalled();
+      expect(stats.consumeDailyGamesInterstitial).not.toHaveBeenCalled();
+    });
+  }
+
+  for (const nivel of ['diario', 'contrarreloj'] as Level[]) {
+    it(`skips the pending interstitial when ${nivel} offers a retry`, async () => {
+      const component = fixture.componentInstance;
+      component.nivel = nivel;
+      component.isTimeTrial = nivel === 'contrarreloj';
+      platform.is.and.returnValue(true);
+      stats.consumeDailyGamesInterstitial.and.returnValue(true);
+      gameStates.next({
+        secretWord: 'GATO', lettersGuessed: new Set<string>(), lettersFailed: new Set<string>(),
+        attemptsRemaining: 0, gameOver: true, winner: false, score: 0, streak: 0
+      });
+      await fixture.whenStable();
+
+      expect(stats.consumeDailyGamesInterstitial).not.toHaveBeenCalled();
+      expect(admob.showInterstitial).not.toHaveBeenCalled();
+      expect(alert.create.calls.mostRecent().args[0]?.buttons?.length).toBe(2);
+    });
+  }
+
+  it('keeps the pending interstitial when a daily retry has already been used', async () => {
+    fixture.componentInstance.nivel = 'diario';
+    platform.is.and.returnValue(true);
+    stats.isDailyRetryAvailable.and.returnValue(false);
+    stats.consumeDailyGamesInterstitial.and.returnValue(true);
+    gameStates.next({
+      secretWord: 'GATO', lettersGuessed: new Set<string>(), lettersFailed: new Set<string>(),
+      attemptsRemaining: 0, gameOver: true, winner: false, score: 0, streak: 0
+    });
+    await fixture.whenStable();
+
+    expect(admob.showInterstitial).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not add an interstitial when a rewarded hint completes the daily word', async () => {
+    fixture.componentInstance.nivel = 'diario';
+    stats.consumeDailyGamesInterstitial.and.returnValue(true);
+    admob.showRewardedVideo.and.resolveTo(true);
+    game.usarPista.and.callFake(() => {
+      gameStates.next({
+        secretWord: 'GATO', lettersGuessed: new Set(['G', 'A', 'T', 'O']), lettersFailed: new Set<string>(),
+        attemptsRemaining: 7, gameOver: true, winner: true, score: 70, streak: 1
+      });
+      return true;
+    });
+
+    expect(await fixture.componentInstance['verAnuncioYPedirPista']()).toBeTrue();
+    await fixture.whenStable();
+
+    expect(admob.showInterstitial).not.toHaveBeenCalled();
+    expect(stats.consumeDailyGamesInterstitial).not.toHaveBeenCalled();
   });
 
   it('unlocks both time trial retries with one rewarded ad', async () => {
@@ -224,6 +300,47 @@ describe('GameComponent', () => {
     expect(admob.showRewardedVideo).toHaveBeenCalledTimes(1);
     expect(stats.startTimeTrialAttempt).toHaveBeenCalledTimes(2);
   });
+
+  for (const nivel of ['facil', 'normal', 'avanzado'] as Level[]) {
+    it(`skips the pending daily interstitial after winning at ${nivel} difficulty`, async () => {
+      fixture.componentInstance.nivel = nivel;
+      stats.consumeDailyGamesInterstitial.and.returnValue(true);
+      gameStates.next({
+        secretWord: 'CASA', lettersGuessed: new Set(['C', 'A', 'S']), lettersFailed: new Set<string>(),
+        attemptsRemaining: 7, gameOver: true, winner: true, score: 100, streak: 1
+      });
+
+      await fixture.whenStable();
+
+      expect(stats.consumeDailyGamesInterstitial).not.toHaveBeenCalled();
+      expect(admob.showInterstitial).not.toHaveBeenCalled();
+      expect(admob.showRewardedVideo).not.toHaveBeenCalled();
+      expect(alert.create.calls.mostRecent().args[0]?.cssClass).toBe('game-result-alert game-result-alert-won');
+    });
+  }
+
+  for (const scenario of [
+    { nivel: 'normal', winner: false },
+    { nivel: 'diario', winner: true },
+    { nivel: 'contrarreloj', winner: true }
+  ] as { nivel: Level; winner: boolean }[]) {
+    it(`keeps the pending daily interstitial for ${scenario.nivel} with winner=${scenario.winner}`, async () => {
+      const component = fixture.componentInstance;
+      component.nivel = scenario.nivel;
+      component.isTimeTrial = scenario.nivel === 'contrarreloj';
+      component.timeTrialLevel = component.timeTrialTimes.length;
+      stats.consumeDailyGamesInterstitial.and.returnValue(true);
+      gameStates.next({
+        secretWord: 'CASA', lettersGuessed: new Set<string>(), lettersFailed: new Set<string>(),
+        attemptsRemaining: scenario.winner ? 7 : 0, gameOver: true, winner: scenario.winner, score: 0, streak: 0
+      });
+
+      await fixture.whenStable();
+
+      expect(admob.showInterstitial).toHaveBeenCalledTimes(1);
+      expect(alert.create).toHaveBeenCalledTimes(1);
+    });
+  }
 
   it('starts another word without showing an ad after winning', async () => {
     game.iniciarNuevoJuego.calls.reset();
