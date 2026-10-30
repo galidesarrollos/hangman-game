@@ -1,6 +1,8 @@
-import { AfterViewInit, Component, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ViewWillEnter } from '@ionic/angular';
+import { IonicModule, IonContent, ViewWillEnter, ViewWillLeave } from '@ionic/angular';
+import { NativeAdFeed, NativeAdPluginEvents, NativeAdTemplate } from '@capacitor-community/admob';
+import { Capacitor } from '@capacitor/core';
 import { Router } from '@angular/router';
 import { ModalController, Platform } from '@ionic/angular';
 import { UserSettingsComponent } from '../user-settings/user-settings.component';
@@ -11,10 +13,12 @@ import { StatsService } from 'src/app/services/stats.service';
 import { openSettingsModal } from 'src/app/services/settings-modal';
 import { WebAdsService } from 'src/app/services/web-ads.service';
 import { AppFooterComponent } from '../app-footer/app-footer.component';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-start',
   templateUrl: './start.component.html',
+  styleUrls: ['./start-ad.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -22,7 +26,9 @@ import { AppFooterComponent } from '../app-footer/app-footer.component';
     AppFooterComponent
   ]
 })
-export class StartComponent implements ViewWillEnter, AfterViewInit {
+export class StartComponent implements ViewWillEnter, ViewWillLeave, AfterViewInit {
+  @ViewChild('nativeAdSlot') private nativeAdSlot?: ElementRef<HTMLElement>;
+  @ViewChild(IonContent) private content?: IonContent;
   private readonly router = inject(Router);
   private readonly modalController = inject(ModalController);
   private readonly routerOutlet = inject(IonRouterOutlet);
@@ -35,16 +41,79 @@ export class StartComponent implements ViewWillEnter, AfterViewInit {
   timeTrialNeedsAd = false;
   timeTrialResult: 'won' | 'lost' | null = null;
   private timeTrialStarting = false;
+  readonly nativeAdEnabled = this.platform.is('hybrid') && (!environment.production || !!this.nativeAdUnitId);
+  nativeAdFailed = false;
+  private nativeAdFeed?: NativeAdFeed;
+  private nativeAdSetup?: Promise<void>;
+  private viewActive = false;
+
+  private get nativeAdUnitId(): string {
+    return Capacitor.getPlatform() === 'ios' ? environment.nativeIosAdUnitId : environment.nativeAndroidAdUnitId;
+  }
 
   constructor() {
     this.refreshTimeTrial();
   }
 
   async ionViewWillEnter() {
+    this.viewActive = true;
     this.refreshTimeTrial();
+    this.nativeAdFailed = false;
     if (this.platform.is('hybrid')) {
-      this.admobService.showBannerBottomCenter();
-      // Solo muestra el banner de AdMob si es app nativa (Android/iOS)
+      if (this.nativeAdEnabled) {
+        this.nativeAdSetup = this.showNativeAd();
+        await this.nativeAdSetup;
+      }
+      else await this.admobService.showBannerBottomCenter();
+    }
+  }
+
+  async ionViewWillLeave(): Promise<void> {
+    this.viewActive = false;
+    await this.nativeAdSetup;
+    this.nativeAdSetup = undefined;
+    if (this.nativeAdFeed) {
+      await this.nativeAdFeed.destroy();
+      this.nativeAdFeed = undefined;
+    }
+    if (this.nativeAdEnabled) {
+      await this.admobService.restoreBanner();
+    }
+  }
+
+  private async showNativeAd(): Promise<void> {
+    try {
+      if (!await this.admobService.initialize(false)) {
+        this.nativeAdFailed = true;
+        return;
+      }
+      if (!this.viewActive) return;
+      await this.admobService.hideBannerForNativeAd();
+      if (!this.viewActive) return;
+      const feed = await NativeAdFeed.create({
+        feedId: 'start-screen',
+        template: NativeAdTemplate.Medium,
+        scrollElement: await this.content?.getScrollElement(),
+        ...(environment.production ? { adId: this.nativeAdUnitId } : { isTesting: true }),
+        style: { backgroundColor: '#20243b', cornerRadius: 14, headlineColor: '#ffffff' }
+      });
+      if (!this.viewActive) {
+        await feed.destroy();
+        return;
+      }
+      this.nativeAdFeed = feed;
+      await feed.addListener(NativeAdPluginEvents.FailedToLoad, error => {
+        console.warn('El anuncio nativo no se ha cargado:', error);
+        this.nativeAdFailed = true;
+        void feed.destroy();
+        if (this.nativeAdFeed === feed) this.nativeAdFeed = undefined;
+        void this.admobService.restoreBanner();
+      });
+      if (this.nativeAdSlot) feed.attach('start-ad', this.nativeAdSlot.nativeElement);
+    } catch (error) {
+      console.warn('No se ha podido mostrar el anuncio nativo:', error);
+      this.nativeAdFailed = true;
+      await this.admobService.restoreBanner();
     }
   }
 
@@ -53,7 +122,12 @@ export class StartComponent implements ViewWillEnter, AfterViewInit {
   }
 
   async openUserSettings(): Promise<void> {
-    await openSettingsModal(this.modalController, UserSettingsComponent, 'user-settings-modal', this.routerOutlet.nativeEl);
+    await this.nativeAdFeed?.pause();
+    try {
+      await openSettingsModal(this.modalController, UserSettingsComponent, 'user-settings-modal', this.routerOutlet.nativeEl);
+    } finally {
+      this.nativeAdFeed?.resume();
+    }
   }
 
   async openThemeSelector(): Promise<void> {

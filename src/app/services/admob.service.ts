@@ -17,6 +17,7 @@ export class AdmobService {
   private privacyOptionsOpen = false;
   private bannerRequest?: Promise<void>;
   private bannerVisible = false;
+  private bannerSuppressed = false;
   private retryTimer?: ReturnType<typeof setTimeout>;
   private retryDelay = 60000;
 
@@ -84,7 +85,7 @@ export class AdmobService {
           this.scheduleRetry();
         });
         document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible' && !this.bannerVisible) {
+          if (document.visibilityState === 'visible' && !this.bannerVisible && !this.bannerSuppressed) {
             void this.showBannerBottomCenter();
           }
         });
@@ -118,7 +119,7 @@ export class AdmobService {
   }
 
   showBannerBottomCenter(): Promise<void> {
-    if (!Capacitor.isNativePlatform() || this.bannerVisible || this.privacyOptionsOpen) return Promise.resolve();
+    if (!Capacitor.isNativePlatform() || this.bannerVisible || this.bannerSuppressed || this.privacyOptionsOpen) return Promise.resolve();
     if (!this.bannerRequest) {
       this.bannerRequest = (async () => {
         try {
@@ -127,7 +128,7 @@ export class AdmobService {
                 this.latestConsentInfo.status === AdmobConsentStatus.UNKNOWN) this.scheduleRetry();
             return;
           }
-          if (this.privacyOptionsOpen) return;
+          if (this.privacyOptionsOpen || this.bannerSuppressed) return;
           if (this.bannerVisible) return;
           this.clearRetry();
           this.bannerVisible = true;
@@ -145,6 +146,21 @@ export class AdmobService {
       })().finally(() => { this.bannerRequest = undefined; });
     }
     return this.bannerRequest;
+  }
+
+  async hideBannerForNativeAd(): Promise<void> {
+    this.bannerSuppressed = true;
+    this.clearRetry();
+    if (this.bannerRequest) await this.bannerRequest;
+    if (this.bannerVisible) {
+      await AdMob.removeBanner();
+      this.bannerVisible = false;
+    }
+  }
+
+  restoreBanner(): Promise<void> {
+    this.bannerSuppressed = false;
+    return this.showBannerBottomCenter();
   }
 
   private scheduleRetry(): void {

@@ -17,6 +17,7 @@
       <span class="daily-copy"><span class="section-kicker">MODO CONTRARRELOJ</span><strong>{{ timeTrialAvailable ? (timeTrialNeedsAd ? 'Ver anuncio para conseguir 1 reintento' : 'Supera 5 niveles antes de que se agote el tiempo') : timeTrialResult === 'won' ? 'Contrarreloj superado hoy' : 'Intentos agotados por hoy' }}</strong></span>
       <ion-icon class="daily-arrow" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
     </button>
+    <div #nativeAdSlot class="native-ad-slot" *ngIf="nativeAdEnabled && !nativeAdFailed" aria-label="Publicidad"></div>
     <div class="web-ad-slot" *ngIf="!platform.is('hybrid')" aria-label="Publicidad">
       <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6536506161156686" data-ad-slot="REEMPLAZAR_CON_SLOT_ADSENSE" data-ad-format="auto" data-full-width-responsive="true"></ins>
     </div>

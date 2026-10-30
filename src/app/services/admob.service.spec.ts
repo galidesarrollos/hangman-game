@@ -246,4 +246,19 @@ describe('AdmobService consent', () => {
     expect(requestConsentInfo).toHaveBeenCalledTimes(2);
     expect(showBanner).toHaveBeenCalledTimes(1);
   });
+
+  it('removes the banner while a native ad occupies the home screen and restores it afterward', async () => {
+    const showBanner = spyOn(AdMobWeb.prototype, 'showBanner').and.resolveTo();
+    const removeBanner = spyOn(AdMobWeb.prototype, 'removeBanner').and.resolveTo();
+    requestConsentInfo.and.resolveTo(obtained);
+
+    await service.showBannerBottomCenter();
+    await service.hideBannerForNativeAd();
+    await service.showBannerBottomCenter();
+    expect(showBanner).toHaveBeenCalledTimes(1);
+    expect(removeBanner).toHaveBeenCalledTimes(1);
+
+    await service.restoreBanner();
+    expect(showBanner).toHaveBeenCalledTimes(2);
+  });
 });
