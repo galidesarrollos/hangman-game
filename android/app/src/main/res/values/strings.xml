@@ -4,4 +4,8 @@
     <string name="title_activity_main">Juego de ahorcado</string>
     <string name="package_name">io.ahorcado.juego</string>
     <string name="custom_url_scheme">io.ahorcado.juego</string>
+    <string name="update_required_title">Actualización necesaria</string>
+    <string name="update_required_message">Hay una nueva versión disponible. Actualiza la aplicación para seguir jugando.</string>
+    <string name="open_google_play">Abrir Google Play</string>
+    <string name="close_app">Cerrar aplicación</string>
 </resources>
