@@ -77,7 +77,7 @@ export class StartComponent implements ViewWillEnter, ViewWillLeave, AfterViewIn
       this.nativeAdFeed = undefined;
     }
     if (this.nativeAdEnabled) {
-      await this.admobService.restoreBanner();
+      await this.admobService.restoreBanner('start-screen');
     }
   }
 
@@ -88,7 +88,7 @@ export class StartComponent implements ViewWillEnter, ViewWillLeave, AfterViewIn
         return;
       }
       if (!this.viewActive) return;
-      await this.admobService.hideBannerForNativeAd();
+      await this.admobService.hideBannerForNativeAd('start-screen');
       if (!this.viewActive) return;
       const feed = await NativeAdFeed.create({
         feedId: 'start-screen',
@@ -107,13 +107,13 @@ export class StartComponent implements ViewWillEnter, ViewWillLeave, AfterViewIn
         this.nativeAdFailed = true;
         void feed.destroy();
         if (this.nativeAdFeed === feed) this.nativeAdFeed = undefined;
-        void this.admobService.restoreBanner();
+        void this.admobService.restoreBanner('start-screen');
       });
       if (this.nativeAdSlot) feed.attach('start-ad', this.nativeAdSlot.nativeElement);
     } catch (error) {
       console.warn('No se ha podido mostrar el anuncio nativo:', error);
       this.nativeAdFailed = true;
-      await this.admobService.restoreBanner();
+      await this.admobService.restoreBanner('start-screen');
     }
   }
 

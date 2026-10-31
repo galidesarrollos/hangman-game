@@ -1,5 +1,5 @@
 <ion-content class="theme-selector-content">
-  <app-screen-actions backUrl="/" backLabel="Volver al inicio"></app-screen-actions>
+  <app-screen-actions backUrl="/" backLabel="Volver al inicio" [beforeSettingsOpen]="pauseNativeAd" [afterSettingsClose]="resumeNativeAd"></app-screen-actions>
   <main class="theme-selector-shell" [class.native-shell]="platform.is('hybrid')">
     <header class="themes-heading"><span class="section-kicker">SELECCIONA UNA TEMÁTICA PARA EMPEZAR</span></header>
     <div class="themes-grid">
@@ -11,6 +11,7 @@
         <div *ngIf="!platform.is('hybrid') && i === 3" class="theme-ad-slot" aria-label="Publicidad">
           <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6536506161156686" data-ad-slot="REEMPLAZAR_CON_SLOT_ADSENSE" data-ad-format="auto" data-full-width-responsive="true"></ins>
         </div>
+        <div #nativeAdSlot *ngIf="nativeAdEnabled && !nativeAdFailed && i === 3" class="theme-native-ad-slot" aria-label="Publicidad"></div>
       </ng-container>
     </div>
     <app-footer></app-footer>

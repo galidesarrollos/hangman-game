@@ -24,12 +24,19 @@ export class ScreenActionsComponent {
   @Input() showHome = false;
   @Input() showSound = true;
   @Input() showProfile = true;
+  @Input() beforeSettingsOpen?: () => Promise<void>;
+  @Input() afterSettingsClose?: () => void;
 
   get isMuted(): boolean { return this.audioService.getVolume() === 0; }
   navigateBack(): void { if (this.backUrl) void this.router.navigate(Array.isArray(this.backUrl) ? this.backUrl : [this.backUrl]); }
   navigateHome(): void { void this.router.navigate(['/']); }
   toggleMute(): void { this.audioService.toggleMute(); }
   async openUserSettings(): Promise<void> {
-    await openSettingsModal(this.modalController, UserSettingsComponent, 'user-settings-modal', this.routerOutlet.nativeEl);
+    await this.beforeSettingsOpen?.();
+    try {
+      await openSettingsModal(this.modalController, UserSettingsComponent, 'user-settings-modal', this.routerOutlet.nativeEl);
+    } finally {
+      this.afterSettingsClose?.();
+    }
   }
 }

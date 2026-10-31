@@ -18,6 +18,7 @@ export class AdmobService {
   private bannerRequest?: Promise<void>;
   private bannerVisible = false;
   private bannerSuppressed = false;
+  private readonly nativeAdOwners = new Set<string>();
   private retryTimer?: ReturnType<typeof setTimeout>;
   private retryDelay = 60000;
 
@@ -148,7 +149,8 @@ export class AdmobService {
     return this.bannerRequest;
   }
 
-  async hideBannerForNativeAd(): Promise<void> {
+  async hideBannerForNativeAd(owner: string): Promise<void> {
+    this.nativeAdOwners.add(owner);
     this.bannerSuppressed = true;
     this.clearRetry();
     if (this.bannerRequest) await this.bannerRequest;
@@ -158,9 +160,10 @@ export class AdmobService {
     }
   }
 
-  restoreBanner(): Promise<void> {
-    this.bannerSuppressed = false;
-    return this.showBannerBottomCenter();
+  restoreBanner(owner: string): Promise<void> {
+    this.nativeAdOwners.delete(owner);
+    this.bannerSuppressed = this.nativeAdOwners.size > 0;
+    return this.bannerSuppressed ? Promise.resolve() : this.showBannerBottomCenter();
   }
 
   private scheduleRetry(): void {

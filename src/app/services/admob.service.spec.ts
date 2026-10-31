@@ -253,12 +253,25 @@ describe('AdmobService consent', () => {
     requestConsentInfo.and.resolveTo(obtained);
 
     await service.showBannerBottomCenter();
-    await service.hideBannerForNativeAd();
+    await service.hideBannerForNativeAd('start-screen');
     await service.showBannerBottomCenter();
     expect(showBanner).toHaveBeenCalledTimes(1);
     expect(removeBanner).toHaveBeenCalledTimes(1);
 
-    await service.restoreBanner();
+    await service.restoreBanner('start-screen');
     expect(showBanner).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps the banner hidden while another screen still has a native ad', async () => {
+    const showBanner = spyOn(AdMobWeb.prototype, 'showBanner').and.resolveTo();
+    requestConsentInfo.and.resolveTo(obtained);
+
+    await service.hideBannerForNativeAd('start-screen');
+    await service.hideBannerForNativeAd('theme-selector');
+    await service.restoreBanner('start-screen');
+    expect(showBanner).not.toHaveBeenCalled();
+
+    await service.restoreBanner('theme-selector');
+    expect(showBanner).toHaveBeenCalledTimes(1);
   });
 });
