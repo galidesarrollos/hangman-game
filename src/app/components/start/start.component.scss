@@ -68,8 +68,6 @@
 .theme-body strong { font-size: 1.15rem; }
 .theme-body > span { color: #a8b1c8; font-size: .83rem; line-height: 1.4; }
 .theme-arrow { align-self: flex-end; display: grid; place-items: center; width: 27px; height: 27px; margin-top: auto; border-radius: 50%; background: var(--accent); color: #1a2030; }
-.web-ad-slot { min-height: 100px; display: grid; place-items: center; margin: 12px 0 0; padding: 4px 0; overflow: hidden; }
-.web-ad-slot .adsbygoogle { width: 100%; min-height: 90px; }
 @media (max-width: 850px) { .hero { padding-top: 10px; } .themes-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
 @media (max-width: 540px) { .start-shell { padding: 0 18px 24px; } .hero { padding: 8px 0 16px; } .hangman-art { margin-top: 2px; } .themes-heading, .stats-overview-heading { display: block; } .themes-heading > p { margin-top: 8px; } .stats-caption { display: block; margin-top: 8px; } .stats-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; } .themes-grid { gap: 10px; } .theme-card { min-height: 190px; padding: 15px; } .theme-icon { width: 44px; height: 44px; font-size: 1.5rem; } .theme-body strong { font-size: 1rem; } .theme-body > span { font-size: .75rem; } }
 @media (prefers-reduced-motion: reduce) { .hero-action, .theme-card, .daily-challenge { transition: none; } .daily-challenge.available { animation: none; } }

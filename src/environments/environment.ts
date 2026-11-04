@@ -5,7 +5,12 @@
 export const environment = {
   production: false,
   nativeAndroidAdUnitId: '',
-  nativeIosAdUnitId: '',
+  nativeIosAdUnitId: 'ca-app-pub-3940256099942544/3986624511',
+  nativeIosThemeAdUnitId: 'ca-app-pub-3940256099942544/3986624511',
+  bannerAndroidAdUnitId: 'ca-app-pub-3940256099942544/6300978111',
+  bannerIosAdUnitId: 'ca-app-pub-3940256099942544/2934735716',
+  interstitialAndroidAdUnitId: 'ca-app-pub-3940256099942544/1033173712',
+  interstitialIosAdUnitId: 'ca-app-pub-3940256099942544/4411468910',
   rewardedAndroidAdUnitId: 'ca-app-pub-3940256099942544/5224354917',
   rewardedIosAdUnitId: 'ca-app-pub-3940256099942544/1712485313'
 };

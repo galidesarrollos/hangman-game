@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, IonContent, ViewWillEnter, ViewWillLeave } from '@ionic/angular';
 import { NativeAdFeed, NativeAdPluginEvents, NativeAdTemplate } from '@capacitor-community/admob';
@@ -11,7 +11,6 @@ import { IonRouterOutlet } from '@ionic/angular';
 import { AdmobService } from 'src/app/services/admob.service';
 import { StatsService } from 'src/app/services/stats.service';
 import { openSettingsModal } from 'src/app/services/settings-modal';
-import { WebAdsService } from 'src/app/services/web-ads.service';
 import { AppFooterComponent } from '../app-footer/app-footer.component';
 import { environment } from 'src/environments/environment';
 
@@ -26,7 +25,7 @@ import { environment } from 'src/environments/environment';
     AppFooterComponent
   ]
 })
-export class StartComponent implements ViewWillEnter, ViewWillLeave, AfterViewInit {
+export class StartComponent implements ViewWillEnter, ViewWillLeave {
   @ViewChild('nativeAdSlot') private nativeAdSlot?: ElementRef<HTMLElement>;
   @ViewChild(IonContent) private content?: IonContent;
   private readonly router = inject(Router);
@@ -35,7 +34,6 @@ export class StartComponent implements ViewWillEnter, ViewWillLeave, AfterViewIn
   private readonly admobService = inject(AdmobService);
   readonly platform = inject(Platform);
   private readonly statsService = inject(StatsService);
-  private readonly webAdsService = inject(WebAdsService);
 
   timeTrialAvailable = true;
   timeTrialNeedsAd = false;
@@ -60,11 +58,11 @@ export class StartComponent implements ViewWillEnter, ViewWillLeave, AfterViewIn
     this.refreshTimeTrial();
     this.nativeAdFailed = false;
     if (this.platform.is('hybrid')) {
+      await this.admobService.hideBannerForNativeAd('start-screen');
       if (this.nativeAdEnabled) {
         this.nativeAdSetup = this.showNativeAd();
         await this.nativeAdSetup;
       }
-      else await this.admobService.showBannerBottomCenter();
     }
   }
 
@@ -76,7 +74,7 @@ export class StartComponent implements ViewWillEnter, ViewWillLeave, AfterViewIn
       await this.nativeAdFeed.destroy();
       this.nativeAdFeed = undefined;
     }
-    if (this.nativeAdEnabled) {
+    if (this.platform.is('hybrid')) {
       await this.admobService.restoreBanner('start-screen');
     }
   }
@@ -87,8 +85,6 @@ export class StartComponent implements ViewWillEnter, ViewWillLeave, AfterViewIn
         this.nativeAdFailed = true;
         return;
       }
-      if (!this.viewActive) return;
-      await this.admobService.hideBannerForNativeAd('start-screen');
       if (!this.viewActive) return;
       const feed = await NativeAdFeed.create({
         feedId: 'start-screen',
@@ -107,18 +103,12 @@ export class StartComponent implements ViewWillEnter, ViewWillLeave, AfterViewIn
         this.nativeAdFailed = true;
         void feed.destroy();
         if (this.nativeAdFeed === feed) this.nativeAdFeed = undefined;
-        void this.admobService.restoreBanner('start-screen');
       });
       if (this.nativeAdSlot) feed.attach('start-ad', this.nativeAdSlot.nativeElement);
     } catch (error) {
       console.warn('No se ha podido mostrar el anuncio nativo:', error);
       this.nativeAdFailed = true;
-      await this.admobService.restoreBanner('start-screen');
     }
-  }
-
-  ngAfterViewInit() {
-    this.webAdsService.requestAd();
   }
 
   async openUserSettings(): Promise<void> {

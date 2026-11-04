@@ -3,6 +3,7 @@ import { AdMob, AdmobConsentInfo, AdmobConsentStatus, InterstitialAdPluginEvents
 import { AdMobWeb } from '@capacitor-community/admob/dist/esm/web';
 import { Capacitor } from '@capacitor/core';
 import { AdmobService } from './admob.service';
+import { environment } from 'src/environments/environment';
 
 describe('AdmobService rewarded ads', () => {
   let service: AdmobService;
@@ -45,6 +46,14 @@ describe('AdmobService rewarded ads', () => {
     expect(result).toBeTrue();
     expect(remove).toHaveBeenCalledTimes(4);
     expect(show).toHaveBeenCalledTimes(1);
+  }));
+
+  it('uses the iOS rewarded unit on iOS', fakeAsync(() => {
+    (Capacitor.getPlatform as jasmine.Spy).and.returnValue('ios');
+    service.showRewardedVideo();
+    flushMicrotasks();
+    expect(prepare).toHaveBeenCalledWith(jasmine.objectContaining({ adId: environment.rewardedIosAdUnitId }));
+    emit(RewardAdPluginEvents.Dismissed);
   }));
 
   it('also waits for dismissal when the show promise supplies the reward', fakeAsync(() => {
@@ -110,13 +119,14 @@ describe('AdmobService rewarded ads', () => {
   }));
 
   it('waits until an interstitial is dismissed before continuing to the game', fakeAsync(() => {
-    spyOn(AdMobWeb.prototype, 'prepareInterstitial').and.resolveTo({ adUnitId: 'test' });
+    const prepareInterstitial = spyOn(AdMobWeb.prototype, 'prepareInterstitial').and.resolveTo({ adUnitId: 'test' });
     const showInterstitial = spyOn(AdMobWeb.prototype, 'showInterstitial').and.resolveTo();
     let finished = false;
 
     service.showInterstitial().then(() => { finished = true; });
     flushMicrotasks();
     expect(showInterstitial).toHaveBeenCalledTimes(1);
+    expect(prepareInterstitial).toHaveBeenCalledWith(jasmine.objectContaining({ adId: 'ca-app-pub-3940256099942544/1033173712' }));
     expect(finished).toBeFalse();
 
     const onDismissed = addListener.calls.allArgs().find(args => args[0] === InterstitialAdPluginEvents.Dismissed)?.[1];
@@ -125,6 +135,20 @@ describe('AdmobService rewarded ads', () => {
     flushMicrotasks();
     expect(finished).toBeTrue();
     expect(remove).toHaveBeenCalledTimes(2);
+  }));
+
+  it('uses the iOS interstitial unit on iOS', fakeAsync(() => {
+    (Capacitor.getPlatform as jasmine.Spy).and.returnValue('ios');
+    const prepareInterstitial = spyOn(AdMobWeb.prototype, 'prepareInterstitial').and.resolveTo({ adUnitId: 'test' });
+    spyOn(AdMobWeb.prototype, 'showInterstitial').and.resolveTo();
+
+    service.showInterstitial();
+    flushMicrotasks();
+    expect(prepareInterstitial).toHaveBeenCalledWith(jasmine.objectContaining({ adId: environment.interstitialIosAdUnitId }));
+
+    const onDismissed = addListener.calls.allArgs().find(args => args[0] === InterstitialAdPluginEvents.Dismissed)?.[1];
+    onDismissed();
+    flushMicrotasks();
   }));
 });
 
@@ -220,7 +244,7 @@ describe('AdmobService consent', () => {
     expect(initializeSdk).toHaveBeenCalledTimes(1);
   });
 
-  it('requests consent information before the iOS SDK and then presents the form', async () => {
+  it('presents the iOS consent form before initializing the SDK', async () => {
     (Capacitor.getPlatform as jasmine.Spy).and.returnValue('ios');
     const order: string[] = [];
     requestConsentInfo.and.callFake(async () => { order.push('info'); return required; });
@@ -228,7 +252,7 @@ describe('AdmobService consent', () => {
     showConsentForm.and.callFake(async () => { order.push('form'); return obtained; });
 
     expect(await service.initialize()).toBeTrue();
-    expect(order).toEqual(['info', 'sdk', 'form']);
+    expect(order).toEqual(['info', 'form', 'sdk']);
   });
 
   it('refreshes consent after privacy options are changed', async () => {
@@ -273,5 +297,15 @@ describe('AdmobService consent', () => {
 
     await service.restoreBanner('theme-selector');
     expect(showBanner).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the iOS banner unit on iOS', async () => {
+    (Capacitor.getPlatform as jasmine.Spy).and.returnValue('ios');
+    requestConsentInfo.and.resolveTo(obtained);
+    const showBanner = spyOn(AdMobWeb.prototype, 'showBanner').and.resolveTo();
+
+    await service.showBannerBottomCenter();
+
+    expect(showBanner).toHaveBeenCalledWith(jasmine.objectContaining({ adId: environment.bannerIosAdUnitId }));
   });
 });

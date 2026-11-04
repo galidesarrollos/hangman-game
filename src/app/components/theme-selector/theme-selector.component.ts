@@ -34,7 +34,7 @@ export class ThemeSelectorComponent implements AfterViewInit, ViewWillEnter, Vie
   private viewActive = false;
 
   private get nativeAdUnitId(): string {
-    return Capacitor.getPlatform() === 'ios' ? environment.nativeIosAdUnitId : environment.nativeAndroidAdUnitId;
+    return Capacitor.getPlatform() === 'ios' ? environment.nativeIosThemeAdUnitId : environment.nativeAndroidAdUnitId;
   }
 
   async ionViewWillEnter(): Promise<void> {

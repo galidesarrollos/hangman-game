@@ -11,7 +11,9 @@ describe('StartComponent', () => {
   const router = jasmine.createSpyObj('Router', ['navigate']);
   const stats = jasmine.createSpyObj('StatsService', ['getStats', 'getTimeTrialAttempts', 'getTimeTrialResult', 'getTimeTrialRetriesUnlocked', 'unlockTimeTrialRetry']);
   const platform = jasmine.createSpyObj<Platform>('Platform', ['is']);
-  const admob = jasmine.createSpyObj<AdmobService>('AdmobService', ['showBannerBottomCenter', 'showRewardedVideo']);
+  const admob = jasmine.createSpyObj<AdmobService>('AdmobService', [
+    'hideBannerForNativeAd', 'restoreBanner', 'showBannerBottomCenter', 'showRewardedVideo'
+  ]);
 
   beforeEach(async () => {
     localStorage.clear();
@@ -24,6 +26,11 @@ describe('StartComponent', () => {
     stats.unlockTimeTrialRetry.calls.reset();
     platform.is.and.returnValue(false);
     admob.showRewardedVideo.calls.reset();
+    admob.hideBannerForNativeAd.calls.reset();
+    admob.restoreBanner.calls.reset();
+    admob.showBannerBottomCenter.calls.reset();
+    admob.hideBannerForNativeAd.and.resolveTo();
+    admob.restoreBanner.and.resolveTo();
     await TestBed.configureTestingModule({
       imports: [StartComponent, IonicModule.forRoot()],
       providers: [
@@ -45,6 +52,18 @@ describe('StartComponent', () => {
     const component = fixture.componentInstance;
     await component.openThemeSelector();
     expect(router.navigate).toHaveBeenCalledWith(['/tematicas']);
+  });
+
+  it('suppresses banners on the native start screen without a banner fallback', async () => {
+    platform.is.and.returnValue(true);
+
+    await fixture.componentInstance.ionViewWillEnter();
+
+    expect(admob.hideBannerForNativeAd).toHaveBeenCalledOnceWith('start-screen');
+    expect(admob.showBannerBottomCenter).not.toHaveBeenCalled();
+
+    await fixture.componentInstance.ionViewWillLeave();
+    expect(admob.restoreBanner).toHaveBeenCalledOnceWith('start-screen');
   });
 
   it('shows the time trial when no attempt has been used today', async () => {

@@ -5,8 +5,13 @@ import { environment } from 'src/environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AdmobService {
-  private readonly bannerId = 'ca-app-pub-6536506161156686/1504061076';
-  private readonly interstitialId = 'ca-app-pub-6536506161156686/6321451098';
+  private get bannerId(): string {
+    return Capacitor.getPlatform() === 'ios' ? environment.bannerIosAdUnitId : environment.bannerAndroidAdUnitId;
+  }
+
+  private get interstitialId(): string {
+    return Capacitor.getPlatform() === 'ios' ? environment.interstitialIosAdUnitId : environment.interstitialAndroidAdUnitId;
+  }
   private initialization?: Promise<void>;
   private consentRequest?: Promise<AdmobConsentInfo | null>;
   private consentPending = false;
@@ -47,8 +52,6 @@ export class AdmobService {
         try {
           let info = await AdMob.requestConsentInfo();
           if (showForm && info.status === AdmobConsentStatus.REQUIRED && info.isConsentFormAvailable) {
-            // La versión 7.2 del plugin necesita inicializar AdMob para presentar formularios en iOS.
-            if (Capacitor.getPlatform() === 'ios') await this.initializeSdk();
             info = await AdMob.showConsentForm();
           }
           this.privacyOptionsRequired = info.privacyOptionsRequirementStatus === 'REQUIRED';
@@ -108,7 +111,6 @@ export class AdmobService {
         await AdMob.removeBanner();
         this.bannerVisible = false;
       }
-      if (Capacitor.getPlatform() === 'ios') await this.initializeSdk();
       await AdMob.showPrivacyOptionsForm();
     } finally {
       this.consentRequest = undefined;
