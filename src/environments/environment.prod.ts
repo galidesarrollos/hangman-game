@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  adTestMode: false,
   nativeAndroidAdUnitId: 'ca-app-pub-6536506161156686/2562220086',
   nativeIosAdUnitId: 'ca-app-pub-6536506161156686/8891291886',
   nativeIosThemeAdUnitId: '',

@@ -41,6 +41,14 @@
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import "@ionic/angular/css/palettes/dark.system.css";
 
+// These pages have no ion-header, so Ionic does not inset their scroll content.
+html.ios .start-content::part(scroll),
+html.ios .theme-selector-content::part(scroll),
+html.ios .level-content::part(scroll),
+html.ios .game-content::part(scroll) {
+  padding-top: var(--ion-safe-area-top, 0px);
+}
+
 
 * {
   margin: 0;

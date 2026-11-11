@@ -19,6 +19,9 @@ export class AdmobService {
   private latestConsentInfo: AdmobConsentInfo | null = null;
   privacyOptionsRequired = false;
   rewardedFailure: 'consent' | 'unavailable' | 'dismissed' | null = null;
+  consentDiagnostic = 'Pendiente';
+  sdkReady = false;
+  lastAdError = '';
   private privacyOptionsOpen = false;
   private bannerRequest?: Promise<void>;
   private bannerVisible = false;
@@ -36,7 +39,14 @@ export class AdmobService {
       this.consentRequest = undefined;
       consent = await this.requestConsent(true);
     }
-    if (!consent?.canRequestAds) return false;
+    if (!consent?.canRequestAds) {
+      console.warn('AdMob no está listo para cargar anuncios:', {
+        platform: Capacitor.getPlatform(),
+        consentStatus: consent?.status ?? 'ERROR',
+        formAvailable: consent?.isConsentFormAvailable ?? false
+      });
+      return false;
+    }
     await this.initializeSdk();
     return true;
   }
@@ -56,6 +66,7 @@ export class AdmobService {
           }
           this.privacyOptionsRequired = info.privacyOptionsRequirementStatus === 'REQUIRED';
           this.latestConsentInfo = info;
+          this.consentDiagnostic = `${info.status} · canRequestAds=${info.canRequestAds}`;
           if (!info.canRequestAds) {
             this.consentRetryAfter = Date.now() + 60000;
             console.warn('AdMob no puede solicitar anuncios:', { status: info.status, formAvailable: info.isConsentFormAvailable });
@@ -63,6 +74,8 @@ export class AdmobService {
           return info;
         } catch (error) {
           console.warn('No se ha podido obtener el consentimiento publicitario:', error);
+          this.consentDiagnostic = 'Error al consultar UMP';
+          this.recordAdError('UMP', error);
           this.latestConsentInfo = null;
           this.consentRetryAfter = Date.now() + 60000;
           return null;
@@ -78,6 +91,7 @@ export class AdmobService {
     if (!this.initialization) {
       this.initialization = (async () => {
         await AdMob.initialize();
+        this.sdkReady = true;
         await AdMob.addListener(BannerAdPluginEvents.Loaded, () => {
           this.bannerVisible = true;
           this.retryDelay = 60000;
@@ -85,6 +99,7 @@ export class AdmobService {
         });
         await AdMob.addListener(BannerAdPluginEvents.FailedToLoad, error => {
           console.warn('El banner de AdMob no se ha cargado:', error);
+          this.recordAdError('Banner', error);
           this.bannerVisible = false;
           this.scheduleRetry();
         });
@@ -95,6 +110,8 @@ export class AdmobService {
         });
       })().catch(error => {
         this.initialization = undefined;
+        this.sdkReady = false;
+        this.recordAdError('Inicialización', error);
         throw error;
       });
     }
@@ -144,6 +161,7 @@ export class AdmobService {
         } catch (error) {
           this.bannerVisible = false;
           console.error('Error al mostrar el banner de AdMob:', error);
+          this.recordAdError('Banner', error);
           this.scheduleRetry();
         }
       })().finally(() => { this.bannerRequest = undefined; });
@@ -198,6 +216,10 @@ export class AdmobService {
       });
       await AdMob.showInterstitial();
       await dismissed;
+    } catch (error) {
+      console.warn('No se ha podido cargar o mostrar el intersticial:', error);
+      this.recordAdError('Intersticial', error);
+      throw error;
     } finally {
       for (const listener of listeners) await listener.remove();
     }
@@ -225,6 +247,7 @@ export class AdmobService {
       }));
       listeners.push(await AdMob.addListener(RewardAdPluginEvents.FailedToLoad, error => {
         console.warn('El anuncio recompensado no se ha cargado:', { code: error.code, message: error.message });
+        this.recordAdError('Recompensado', error);
       }));
       listeners.push(await AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
         this.rewardedFailure = rewardEarned ? null : 'dismissed';
@@ -237,12 +260,14 @@ export class AdmobService {
         reward => { rewardEarned ||= reward.amount > 0; },
         error => {
           console.warn('No se ha podido mostrar el anuncio recompensado:', error);
+          this.recordAdError('Recompensado', error);
           if (!rewardEarned) finish(false);
         }
       );
       return await outcome;
     } catch (error) {
       console.warn('No se ha podido cargar el anuncio recompensado:', error);
+      this.recordAdError('Recompensado', error);
       return rewardEarned;
     } finally {
       for (const listener of listeners) {
@@ -253,6 +278,11 @@ export class AdmobService {
         }
       }
     }
+  }
+
+  recordAdError(format: string, error: unknown): void {
+    const details = error && typeof error === 'object' ? error as { code?: string | number; message?: string } : null;
+    this.lastAdError = `${format}: ${details?.code ?? ''} ${details?.message ?? String(error)}`.trim();
   }
 
 }

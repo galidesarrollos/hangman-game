@@ -1,4 +1,9 @@
 <ion-content class="start-content">
+  <div *ngIf="adTestMode" class="ad-test-banner">Anuncios de prueba · no publicar esta compilación</div>
+  <div *ngIf="adTestMode" class="ad-test-diagnostics">
+    Consentimiento: {{ admobService.consentDiagnostic }} · SDK: {{ admobService.sdkReady ? 'listo' : 'pendiente' }}
+    <span *ngIf="admobService.lastAdError"> · {{ admobService.lastAdError }}</span>
+  </div>
   <div class="start-brand-row">
     <h1 class="start-brand">Ahorcado</h1>
     <button type="button" class="start-profile" (click)="openUserSettings()" aria-label="Ver estadísticas y ajustes"><ion-icon name="person-outline" aria-hidden="true"></ion-icon></button>

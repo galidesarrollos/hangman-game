@@ -4,6 +4,7 @@
 
 export const environment = {
   production: false,
+  adTestMode: false,
   nativeAndroidAdUnitId: '',
   nativeIosAdUnitId: 'ca-app-pub-3940256099942544/3986624511',
   nativeIosThemeAdUnitId: 'ca-app-pub-3940256099942544/3986624511',

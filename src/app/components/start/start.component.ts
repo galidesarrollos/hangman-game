@@ -31,8 +31,9 @@ export class StartComponent implements ViewWillEnter, ViewWillLeave {
   private readonly router = inject(Router);
   private readonly modalController = inject(ModalController);
   private readonly routerOutlet = inject(IonRouterOutlet);
-  private readonly admobService = inject(AdmobService);
+  readonly admobService = inject(AdmobService);
   readonly platform = inject(Platform);
+  readonly adTestMode = environment.adTestMode;
   private readonly statsService = inject(StatsService);
 
   timeTrialAvailable = true;
@@ -81,7 +82,7 @@ export class StartComponent implements ViewWillEnter, ViewWillLeave {
 
   private async showNativeAd(): Promise<void> {
     try {
-      if (!await this.admobService.initialize(false)) {
+      if (!await this.admobService.initialize()) {
         this.nativeAdFailed = true;
         return;
       }
@@ -100,6 +101,7 @@ export class StartComponent implements ViewWillEnter, ViewWillLeave {
       this.nativeAdFeed = feed;
       await feed.addListener(NativeAdPluginEvents.FailedToLoad, error => {
         console.warn('El anuncio nativo no se ha cargado:', error);
+        this.admobService.recordAdError('Nativo', error);
         this.nativeAdFailed = true;
         void feed.destroy();
         if (this.nativeAdFeed === feed) this.nativeAdFeed = undefined;
@@ -107,6 +109,7 @@ export class StartComponent implements ViewWillEnter, ViewWillLeave {
       if (this.nativeAdSlot) feed.attach('start-ad', this.nativeAdSlot.nativeElement);
     } catch (error) {
       console.warn('No se ha podido mostrar el anuncio nativo:', error);
+      this.admobService.recordAdError('Nativo', error);
       this.nativeAdFailed = true;
     }
   }

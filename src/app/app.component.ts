@@ -34,6 +34,14 @@ export class AppComponent {
       }
     }
 
+    if (this.platform.is('hybrid') && this.platform.is('ios')) {
+      try {
+        await StatusBar.setStyle({ style: Style.Dark });
+      } catch (err) {
+        console.warn('No se ha podido configurar la barra de estado de iOS:', err);
+      }
+    }
+
     try {
       await this.admobService.initialize();
     } catch (err) {

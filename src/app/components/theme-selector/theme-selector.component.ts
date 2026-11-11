@@ -62,7 +62,7 @@ export class ThemeSelectorComponent implements AfterViewInit, ViewWillEnter, Vie
 
   private async showNativeAd(): Promise<void> {
     try {
-      if (!await this.admobService.initialize(false)) {
+      if (!await this.admobService.initialize()) {
         this.nativeAdFailed = true;
         return;
       }
