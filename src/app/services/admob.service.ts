@@ -61,6 +61,8 @@ export class AdmobService {
       this.consentRequest = (async () => {
         try {
           let info = await AdMob.requestConsentInfo();
+          const requestError = (info as AdmobConsentInfo & { requestError?: string }).requestError;
+          if (requestError) this.recordAdError('UMP', requestError);
           if (showForm && info.status === AdmobConsentStatus.REQUIRED && info.isConsentFormAvailable) {
             info = await AdMob.showConsentForm();
           }
