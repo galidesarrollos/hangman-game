@@ -120,6 +120,11 @@ body {
     --border-radius: 0;
   }
 
+  // Full-height iOS sheets must leave room for the status bar and sensor housing.
+  html.ios .volume-sidebar-modal, html.ios .user-settings-modal {
+    --height: calc(100% - max(var(--ion-safe-area-top, 0px), env(safe-area-inset-top)) - 10px);
+  }
+
   .start-header ion-toolbar, .level-header ion-toolbar,
   .theme-selector-header ion-toolbar, .game-header ion-toolbar,
   .settings-header ion-toolbar, .user-settings-header ion-toolbar,

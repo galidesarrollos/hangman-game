@@ -24,6 +24,7 @@ export class AudioService {
     }
     if (this.volume > 0) this.lastAudibleVolume = this.volume;
     Object.values(this.audios).forEach((audioElement: HTMLAudioElement) => {
+      audioElement.muted = this.volume === 0;
       audioElement.load();
     });
   }
@@ -31,6 +32,10 @@ export class AudioService {
   setVolume(level: number): void {
     this.volume = Math.max(0, Math.min(1, level));
     if (this.volume > 0) this.lastAudibleVolume = this.volume;
+    Object.values(this.audios).forEach(audio => {
+      audio.muted = this.volume === 0;
+      if (this.volume === 0) audio.pause();
+    });
     localStorage.setItem('gameVolume', String(Math.round(this.volume * 100)));
   }
 
@@ -43,6 +48,7 @@ export class AudioService {
   }
 
   public playSound(sound: Sounds): void {
+    if (this.volume === 0) return;
     const audio = this.audios[sound];
     audio.volume = this.volume;
     audio.currentTime = 0;
