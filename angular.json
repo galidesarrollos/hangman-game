@@ -32,6 +32,11 @@
               }
               ,
               {
+                "glob": "ads.txt",
+                "input": "src",
+                "output": "./"
+              },
+              {
                 "glob": "app-ads.txt",
                 "input": "src",
                 "output": "./"
@@ -130,6 +135,11 @@
                 "output": "./svg"
               }
               ,
+              {
+                "glob": "ads.txt",
+                "input": "src",
+                "output": "./"
+              },
               {
                 "glob": "app-ads.txt",
                 "input": "src",

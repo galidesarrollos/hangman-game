@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, IonContent, Platform, ViewWillEnter, ViewWillLeave } from '@ionic/angular';
 import { NativeAdFeed, NativeAdPluginEvents, NativeAdTemplate } from '@capacitor-community/admob';
@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 import { AdmobService } from 'src/app/services/admob.service';
 import { THEME_OPTIONS } from 'src/app/models/theme-options';
 import { Theme } from 'src/app/models/game.model';
-import { WebAdsService } from 'src/app/services/web-ads.service';
+import { WebAdComponent } from '../web-ad/web-ad.component';
 import { AppFooterComponent } from '../app-footer/app-footer.component';
 import { ScreenActionsComponent } from '../screen-actions/screen-actions.component';
 import { environment } from 'src/environments/environment';
@@ -15,18 +15,17 @@ import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-theme-selector',
   standalone: true,
-  imports: [CommonModule, IonicModule, AppFooterComponent, ScreenActionsComponent],
+  imports: [CommonModule, IonicModule, AppFooterComponent, ScreenActionsComponent, WebAdComponent],
   templateUrl: './theme-selector.component.html',
   styleUrls: ['./theme-selector.component.scss']
 })
-export class ThemeSelectorComponent implements AfterViewInit, ViewWillEnter, ViewWillLeave {
+export class ThemeSelectorComponent implements ViewWillEnter, ViewWillLeave {
   @ViewChild('nativeAdSlot') private nativeAdSlot?: ElementRef<HTMLElement>;
   @ViewChild(IonContent) private content?: IonContent;
   readonly tematicas = THEME_OPTIONS;
   readonly platform = inject(Platform);
   private readonly router = inject(Router);
   private readonly admobService = inject(AdmobService);
-  private readonly webAdsService = inject(WebAdsService);
   readonly nativeAdEnabled = this.platform.is('hybrid') && (!environment.production || !!this.nativeAdUnitId);
   nativeAdFailed = false;
   private nativeAdFeed?: NativeAdFeed;
@@ -99,9 +98,6 @@ export class ThemeSelectorComponent implements AfterViewInit, ViewWillEnter, Vie
   readonly pauseNativeAd = async (): Promise<void> => { await this.nativeAdFeed?.pause(); };
   readonly resumeNativeAd = (): void => { this.nativeAdFeed?.resume(); };
 
-  ngAfterViewInit(): void {
-    this.webAdsService.requestAd();
-  }
   seleccionar(tematica: Theme): void { void this.router.navigate(['/level', tematica]); }
   volver(): void { void this.router.navigate(['/']); }
 }

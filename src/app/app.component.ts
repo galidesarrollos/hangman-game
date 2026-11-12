@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { AdmobService } from './services/admob.service';
-import { Router } from '@angular/router';
+import { WebAdsService } from './services/web-ads.service';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
 @Component({
@@ -13,9 +13,7 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 export class AppComponent {
   private readonly platform = inject(Platform);
   private readonly admobService = inject(AdmobService);
-  readonly router = inject(Router);
-
-  showPrivacyNotice = !this.platform.is('hybrid') && localStorage.getItem('privacyNoticeDismissed') !== 'true';
+  private readonly webAds = inject(WebAdsService);
 
   constructor() {
     this.initializeApp();
@@ -23,6 +21,7 @@ export class AppComponent {
 
   async initializeApp() {
     await this.platform.ready();
+    this.webAds.initialize();
 
     if (this.platform.is('hybrid') && this.platform.is('android')) {
       try {
@@ -47,10 +46,5 @@ export class AppComponent {
     } catch (err) {
       console.error('Error al inicializar AdMob:', err);
     }
-  }
-
-  dismissPrivacyNotice(): void {
-    localStorage.setItem('privacyNoticeDismissed', 'true');
-    this.showPrivacyNotice = false;
   }
 }

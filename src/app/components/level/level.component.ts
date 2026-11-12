@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, Platform } from '@ionic/angular';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -9,7 +9,7 @@ import { ModalController } from '@ionic/angular';
 import { IonRouterOutlet } from '@ionic/angular';
 import { AdmobService } from 'src/app/services/admob.service';
 import { openSettingsModal } from 'src/app/services/settings-modal';
-import { WebAdsService } from 'src/app/services/web-ads.service';
+import { WebAdComponent } from '../web-ad/web-ad.component';
 import { AppFooterComponent } from '../app-footer/app-footer.component';
 import { ScreenActionsComponent } from '../screen-actions/screen-actions.component';
 
@@ -22,23 +22,19 @@ import { ScreenActionsComponent } from '../screen-actions/screen-actions.compone
     IonicModule,
     AppFooterComponent,
     ScreenActionsComponent,
+    WebAdComponent,
   ]
 })
-export class LevelComponent  implements OnInit, AfterViewInit {
+export class LevelComponent  implements OnInit {
   private readonly admobService = inject(AdmobService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly modalController = inject(ModalController);
   private readonly routerOutlet = inject(IonRouterOutlet);
-  private readonly webAdsService = inject(WebAdsService);
   readonly platform = inject(Platform);
 
   tematica: Theme = 'general';
   private startingGame = false;
-
-  ngAfterViewInit(): void {
-    this.webAdsService.requestAd();
-  }
 
   get temaActual(): { nombre: string; icono: string } {
     return THEME_DETAILS[this.tematica];

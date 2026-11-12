@@ -1,5 +1,7 @@
 # hangman-game
 
+Configuración de publicidad web: [guía de AdSense](ADSENSE.md).
+
 Aplicación Ionic/Angular con versiones web y móvil.
 
 - `src/`: código fuente compartido.
