@@ -231,6 +231,15 @@ describe('AdmobService consent', () => {
     expect(initializeSdk).toHaveBeenCalledTimes(1);
   });
 
+  it('continues with ads when tracking is restricted in iOS settings', async () => {
+    (Capacitor.getPlatform as jasmine.Spy).and.returnValue('ios');
+    trackingStatus.and.resolveTo({ status: 'restricted' });
+
+    expect(await service.initialize()).toBeTrue();
+    expect(requestTracking).not.toHaveBeenCalled();
+    expect(initializeSdk).toHaveBeenCalledTimes(1);
+  });
+
   it('does not initialize ads if iOS tracking authorization remains undetermined', async () => {
     (Capacitor.getPlatform as jasmine.Spy).and.returnValue('ios');
     spyOn(console, 'warn');
