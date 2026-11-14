@@ -157,6 +157,8 @@ describe('AdmobService consent', () => {
   let requestConsentInfo: jasmine.Spy;
   let showConsentForm: jasmine.Spy;
   let initializeSdk: jasmine.Spy;
+  let trackingStatus: jasmine.Spy;
+  let requestTracking: jasmine.Spy;
 
   const required: AdmobConsentInfo = {
     status: AdmobConsentStatus.REQUIRED,
@@ -181,6 +183,8 @@ describe('AdmobService consent', () => {
     spyOn(AdMobWeb.prototype, 'addListener').and.resolveTo({ remove: () => Promise.resolve() });
     requestConsentInfo = spyOn(AdMobWeb.prototype, 'requestConsentInfo').and.resolveTo(required);
     showConsentForm = spyOn(AdMobWeb.prototype, 'showConsentForm').and.resolveTo(obtained);
+    trackingStatus = spyOn(AdMobWeb.prototype, 'trackingAuthorizationStatus').and.resolveTo({ status: 'notDetermined' });
+    requestTracking = spyOn(AdMobWeb.prototype, 'requestTrackingAuthorization').and.resolveTo();
   });
 
   it('waits for consent before initializing the ads SDK', async () => {
@@ -196,6 +200,57 @@ describe('AdmobService consent', () => {
     expect(initializeSdk).toHaveBeenCalledTimes(1);
     expect(service.privacyOptionsRequired).toBeTrue();
     expect(requestConsentInfo).toHaveBeenCalledTimes(1);
+  });
+
+  it('waits for the iOS tracking choice before initializing the ads SDK', async () => {
+    (Capacitor.getPlatform as jasmine.Spy).and.returnValue('ios');
+    trackingStatus.and.returnValues(
+      Promise.resolve({ status: 'notDetermined' }),
+      Promise.resolve({ status: 'authorized' })
+    );
+    let finishTracking!: () => void;
+    requestTracking.and.returnValue(new Promise<void>(resolve => { finishTracking = resolve; }));
+
+    const starting = service.initialize();
+    await new Promise(resolve => setTimeout(resolve, 400));
+    expect(showConsentForm).toHaveBeenCalledTimes(1);
+    expect(requestTracking).toHaveBeenCalledTimes(1);
+    expect(initializeSdk).not.toHaveBeenCalled();
+
+    finishTracking();
+    expect(await starting).toBeTrue();
+    expect(initializeSdk).toHaveBeenCalledTimes(1);
+  });
+
+  it('continues with ads when iOS tracking permission was already denied', async () => {
+    (Capacitor.getPlatform as jasmine.Spy).and.returnValue('ios');
+    trackingStatus.and.resolveTo({ status: 'denied' });
+
+    expect(await service.initialize()).toBeTrue();
+    expect(requestTracking).not.toHaveBeenCalled();
+    expect(initializeSdk).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not initialize ads if iOS tracking authorization remains undetermined', async () => {
+    (Capacitor.getPlatform as jasmine.Spy).and.returnValue('ios');
+    spyOn(console, 'warn');
+
+    expect(await service.initialize()).toBeFalse();
+    expect(requestTracking).toHaveBeenCalledTimes(1);
+    expect(initializeSdk).not.toHaveBeenCalled();
+  });
+
+  it('shares one iOS tracking request across simultaneous ad initializations', async () => {
+    (Capacitor.getPlatform as jasmine.Spy).and.returnValue('ios');
+    requestConsentInfo.and.resolveTo(obtained);
+    trackingStatus.and.returnValues(
+      Promise.resolve({ status: 'notDetermined' }),
+      Promise.resolve({ status: 'denied' })
+    );
+
+    expect(await Promise.all([service.initialize(), service.initialize()])).toEqual([true, true]);
+    expect(requestTracking).toHaveBeenCalledTimes(1);
+    expect(initializeSdk).toHaveBeenCalledTimes(1);
   });
 
   it('does not initialize ads when UMP cannot request them', async () => {
@@ -250,9 +305,10 @@ describe('AdmobService consent', () => {
     requestConsentInfo.and.callFake(async () => { order.push('info'); return required; });
     initializeSdk.and.callFake(async () => { order.push('sdk'); });
     showConsentForm.and.callFake(async () => { order.push('form'); return obtained; });
+    trackingStatus.and.callFake(async () => { order.push('att'); return { status: 'denied' }; });
 
     expect(await service.initialize()).toBeTrue();
-    expect(order).toEqual(['info', 'form', 'sdk']);
+    expect(order).toEqual(['info', 'form', 'att', 'sdk']);
   });
 
   it('refreshes consent after privacy options are changed', async () => {
@@ -301,6 +357,7 @@ describe('AdmobService consent', () => {
 
   it('uses the iOS banner unit on iOS', async () => {
     (Capacitor.getPlatform as jasmine.Spy).and.returnValue('ios');
+    trackingStatus.and.resolveTo({ status: 'authorized' });
     requestConsentInfo.and.resolveTo(obtained);
     const showBanner = spyOn(AdMobWeb.prototype, 'showBanner').and.resolveTo();
 

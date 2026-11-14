@@ -13,6 +13,7 @@ export class AdmobService {
     return Capacitor.getPlatform() === 'ios' ? environment.interstitialIosAdUnitId : environment.interstitialAndroidAdUnitId;
   }
   private initialization?: Promise<void>;
+  private trackingAuthorization?: Promise<boolean>;
   private consentRequest?: Promise<AdmobConsentInfo | null>;
   private consentPending = false;
   private consentRetryAfter = Number.POSITIVE_INFINITY;
@@ -47,8 +48,36 @@ export class AdmobService {
       });
       return false;
     }
+    if (!await this.requestTrackingAuthorization()) return false;
     await this.initializeSdk();
     return true;
+  }
+
+  private requestTrackingAuthorization(): Promise<boolean> {
+    if (Capacitor.getPlatform() !== 'ios') return Promise.resolve(true);
+    if (!this.trackingAuthorization) {
+      this.trackingAuthorization = (async () => {
+        const { status } = await AdMob.trackingAuthorizationStatus();
+        if (status !== 'notDetermined') return true;
+
+        // Let the UMP consent form finish dismissing before presenting the iOS system prompt.
+        await new Promise(resolve => setTimeout(resolve, 350));
+        await AdMob.requestTrackingAuthorization();
+        const result = await AdMob.trackingAuthorizationStatus();
+        if (result.status === 'notDetermined') {
+          this.recordAdError('ATT', 'No se ha podido mostrar la solicitud de seguimiento');
+          return false;
+        }
+        return true;
+      })().catch(error => {
+        this.recordAdError('ATT', error);
+        return false;
+      }).then(ready => {
+        if (!ready) this.trackingAuthorization = undefined;
+        return ready;
+      });
+    }
+    return this.trackingAuthorization;
   }
 
   private requestConsent(showForm = true): Promise<AdmobConsentInfo | null> {
