@@ -15,7 +15,7 @@ describe('WebAdsService', () => {
   beforeEach(() => {
     head = document.createElement('head');
     adWindow = {};
-    previousSlot = WEB_ADS_CONFIG.slots.themes;
+    previousSlot = WEB_ADS_CONFIG.slots.home;
     previousProduction = environment.production;
     environment.production = true;
     TestBed.configureTestingModule({ providers: [{ provide: DOCUMENT, useValue: {
@@ -29,14 +29,14 @@ describe('WebAdsService', () => {
   });
 
   afterEach(() => {
-    WEB_ADS_CONFIG.slots.themes = previousSlot;
+    WEB_ADS_CONFIG.slots.home = previousSlot;
     environment.production = previousProduction;
   });
 
   it('does not load ads on localhost', () => {
     service.initialize();
     expect(head.childElementCount).toBe(0);
-    expect(service.slot('themes')).toBe('');
+    expect(service.slot('home')).toBe('');
   });
 
   it('does not load AdSense in native apps', () => {
@@ -56,15 +56,15 @@ describe('WebAdsService', () => {
 
   it('rejects empty and provisional slots', () => {
     spyOnProperty(service, 'enabled', 'get').and.returnValue(true);
-    WEB_ADS_CONFIG.slots.themes = '';
-    expect(service.slot('themes')).toBe('');
-    WEB_ADS_CONFIG.slots.themes = 'REEMPLAZAR_CON_SLOT_ADSENSE';
-    expect(service.slot('themes')).toBe('');
+    WEB_ADS_CONFIG.slots.home = '';
+    expect(service.slot('home')).toBe('');
+    WEB_ADS_CONFIG.slots.home = 'REEMPLAZAR_CON_SLOT_ADSENSE';
+    expect(service.slot('home')).toBe('');
   });
 
   it('waits for a visible width and requests each element only once', () => {
     spyOnProperty(service, 'enabled', 'get').and.returnValue(true);
-    WEB_ADS_CONFIG.slots.themes = '1234567890';
+    WEB_ADS_CONFIG.slots.home = '1234567890';
     const element = document.createElement('ins');
     element.dataset['adSlot'] = '1234567890';
     document.body.appendChild(element);

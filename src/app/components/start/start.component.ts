@@ -12,6 +12,7 @@ import { AdmobService } from 'src/app/services/admob.service';
 import { StatsService } from 'src/app/services/stats.service';
 import { openSettingsModal } from 'src/app/services/settings-modal';
 import { AppFooterComponent } from '../app-footer/app-footer.component';
+import { WebAdComponent } from '../web-ad/web-ad.component';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -22,7 +23,8 @@ import { environment } from 'src/environments/environment';
   imports: [
     CommonModule,
     IonicModule,
-    AppFooterComponent
+    AppFooterComponent,
+    WebAdComponent
   ]
 })
 export class StartComponent implements ViewWillEnter, ViewWillLeave {

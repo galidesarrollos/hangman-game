@@ -9,7 +9,6 @@ import { ModalController } from '@ionic/angular';
 import { IonRouterOutlet } from '@ionic/angular';
 import { AdmobService } from 'src/app/services/admob.service';
 import { openSettingsModal } from 'src/app/services/settings-modal';
-import { WebAdComponent } from '../web-ad/web-ad.component';
 import { AppFooterComponent } from '../app-footer/app-footer.component';
 import { ScreenActionsComponent } from '../screen-actions/screen-actions.component';
 
@@ -22,7 +21,6 @@ import { ScreenActionsComponent } from '../screen-actions/screen-actions.compone
     IonicModule,
     AppFooterComponent,
     ScreenActionsComponent,
-    WebAdComponent,
   ]
 })
 export class LevelComponent  implements OnInit {

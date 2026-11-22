@@ -7,7 +7,6 @@ import { Router } from '@angular/router';
 import { AdmobService } from 'src/app/services/admob.service';
 import { THEME_OPTIONS } from 'src/app/models/theme-options';
 import { Theme } from 'src/app/models/game.model';
-import { WebAdComponent } from '../web-ad/web-ad.component';
 import { AppFooterComponent } from '../app-footer/app-footer.component';
 import { ScreenActionsComponent } from '../screen-actions/screen-actions.component';
 import { environment } from 'src/environments/environment';
@@ -15,7 +14,7 @@ import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-theme-selector',
   standalone: true,
-  imports: [CommonModule, IonicModule, AppFooterComponent, ScreenActionsComponent, WebAdComponent],
+  imports: [CommonModule, IonicModule, AppFooterComponent, ScreenActionsComponent],
   templateUrl: './theme-selector.component.html',
   styleUrls: ['./theme-selector.component.scss']
 })

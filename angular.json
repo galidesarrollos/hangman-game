@@ -42,7 +42,7 @@
                 "output": "./"
               },
               {
-                "glob": "politica-privacidad.html",
+                "glob": "{como-jugar,politica-privacidad}.html",
                 "input": "src",
                 "output": "./"
               }

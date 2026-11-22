@@ -17,7 +17,8 @@ import { WebAdsService } from '../../services/web-ads.service';
   `,
   styles: [`
     :host { display: block; min-width: 0; }
-    aside { margin: 48px 0 24px; min-height: 120px; }
+    aside { margin: 152px 0 24px; min-height: 120px; }
+    aside:has(ins[data-ad-status="unfilled"]) { display: none; }
     span { display: block; margin-bottom: 12px; color: #a8b1c8; font-size: .7rem; text-align: center; }
     ins { width: 100%; min-height: 100px; }
   `]
