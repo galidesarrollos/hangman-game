@@ -3,9 +3,12 @@ const { resolve } = require('node:path');
 
 const docs = resolve(__dirname, '../docs');
 
-// Share the Angular bundles without repeating the home page content on other URLs.
 const shell = readFileSync(resolve(docs, 'index.html'), 'utf8')
   .replace(/<app-root>[\s\S]*?<\/app-root>/, '<app-root></app-root>');
+
+// Only the public home page needs content before Angular bootstraps.
+const home = readFileSync(resolve(__dirname, '../src/home-fallback.html'), 'utf8').trimEnd();
+writeFileSync(resolve(docs, 'index.html'), shell.replace('<app-root></app-root>', `<app-root>\n${home}\n  </app-root>`));
 writeFileSync(resolve(docs, '404.html'), shell);
 
 // GitHub Pages serves directory indexes with HTTP 200 for direct visits.

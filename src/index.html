@@ -10,6 +10,11 @@
 
   <meta name="color-scheme" content="light dark" />
   <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0" />
+  <script>
+    if (window.Capacitor?.getPlatform() === 'android') {
+      document.querySelector('meta[name="viewport"]').content = 'viewport-fit=contain, width=device-width, initial-scale=1.0';
+    }
+  </script>
   <meta name="format-detection" content="telephone=no" />
   <meta name="msapplication-tap-highlight" content="no" />
 
@@ -22,14 +27,6 @@
 </head>
 
 <body>
-  <app-root>
-    <main style="max-width: 42rem; margin: 2rem auto; padding: 0 1rem;">
-      <h1>El Juego del Ahorcado</h1>
-      <p>Adivina una palabra en español antes de cometer siete errores. Cada letra acertada revela todas sus apariciones en la palabra.</p>
-      <p>Escoge una temática, como animales, ciencia o deportes, y uno de los tres niveles de dificultad. En el modo contrarreloj tienes que resolver cinco palabras y el tiempo disminuye en cada nivel.</p>
-      <p><a href="como-jugar.html">Consulta las reglas y el ejemplo de partida</a></p>
-      <p><a href="politica-privacidad.html">Política de privacidad</a></p>
-    </main>
-  </app-root>
+  <app-root></app-root>
 </body>
 </html>

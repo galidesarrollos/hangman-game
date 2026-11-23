@@ -3,6 +3,7 @@ import { Platform } from '@ionic/angular';
 import { AdmobService } from './services/admob.service';
 import { WebAdsService } from './services/web-ads.service';
 import { StatusBar, Style } from '@capacitor/status-bar';
+import { SystemBars, SystemBarsStyle, SystemBarType } from '@capacitor/core';
 
 @Component({
   selector: 'app-root',
@@ -25,9 +26,7 @@ export class AppComponent {
 
     if (this.platform.is('hybrid') && this.platform.is('android')) {
       try {
-        await StatusBar.setOverlaysWebView({ overlay: false });
-        await StatusBar.setBackgroundColor({ color: '#101322' });
-        await StatusBar.setStyle({ style: Style.Dark });
+        await SystemBars.setStyle({ bar: SystemBarType.StatusBar, style: SystemBarsStyle.Dark });
       } catch (err) {
         console.error('Error al configurar la barra de estado:', err);
       }
