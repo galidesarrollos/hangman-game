@@ -1,6 +1,5 @@
 import { Component, inject, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { IonicModule, IonRouterOutlet, ModalController } from '@ionic/angular';
+import { IonIcon, IonRouterOutlet, ModalController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AudioService } from 'src/app/services/audio.service';
 import { openSettingsModal } from 'src/app/services/settings-modal';
@@ -9,7 +8,7 @@ import { UserSettingsComponent } from '../user-settings/user-settings.component'
 @Component({
   selector: 'app-screen-actions',
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [IonIcon],
   templateUrl: './screen-actions.component.html',
   styleUrls: ['./screen-actions.component.scss']
 })

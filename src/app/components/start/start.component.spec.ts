@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { IonicModule, IonRouterOutlet, ModalController, Platform } from '@ionic/angular';
+import { provideIonicAngular, IonRouterOutlet, ModalController, Platform } from '@ionic/angular';
 import { AdmobService } from '../../services/admob.service';
 import { AudioService } from '../../services/audio.service';
 import { StatsService } from '../../services/stats.service';
@@ -32,8 +32,9 @@ describe('StartComponent', () => {
     admob.hideBannerForNativeAd.and.resolveTo();
     admob.restoreBanner.and.resolveTo();
     await TestBed.configureTestingModule({
-      imports: [StartComponent, IonicModule.forRoot()],
+      imports: [StartComponent],
       providers: [
+        provideIonicAngular(),
         { provide: Router, useValue: router },
         { provide: ModalController, useValue: {} },
         { provide: IonRouterOutlet, useValue: { nativeEl: document.createElement('div') } },

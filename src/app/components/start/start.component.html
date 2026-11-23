@@ -1,9 +1,15 @@
 <ion-content class="start-content">
-  <div *ngIf="adTestMode" class="ad-test-banner">Anuncios de prueba · no publicar esta compilación</div>
-  <div *ngIf="adTestMode" class="ad-test-diagnostics">
-    Consentimiento: {{ admobService.consentDiagnostic }} · SDK: {{ admobService.sdkReady ? 'listo' : 'pendiente' }}
-    <span *ngIf="admobService.lastAdError"> · {{ admobService.lastAdError }}</span>
-  </div>
+  @if (adTestMode) {
+    <div class="ad-test-banner">Anuncios de prueba · no publicar esta compilación</div>
+  }
+  @if (adTestMode) {
+    <div class="ad-test-diagnostics">
+      Consentimiento: {{ admobService.consentDiagnostic }} · SDK: {{ admobService.sdkReady ? 'listo' : 'pendiente' }}
+      @if (admobService.lastAdError) {
+        <span> · {{ admobService.lastAdError }}</span>
+      }
+    </div>
+  }
   <div class="start-brand-row">
     <h1 class="start-brand">Ahorcado</h1>
     <button type="button" class="start-profile" (click)="openUserSettings()" aria-label="Ver estadísticas y ajustes"><ion-icon name="person-outline" aria-hidden="true"></ion-icon></button>
@@ -22,13 +28,17 @@
       <span class="daily-copy"><span class="section-kicker">MODO CONTRARRELOJ</span><strong>{{ timeTrialAvailable ? (timeTrialNeedsAd ? 'Ver anuncio para conseguir 1 reintento' : 'Supera 5 niveles antes de que se agote el tiempo') : timeTrialResult === 'won' ? 'Contrarreloj superado hoy' : 'Intentos agotados por hoy' }}</strong></span>
       <ion-icon class="daily-arrow" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
     </button>
-    <section *ngIf="!platform.is('hybrid')" class="web-game-guide" aria-labelledby="web-game-guide-title">
-      <h2 id="web-game-guide-title">Cómo jugar al ahorcado</h2>
-      <p>Adivina la palabra letra a letra. Cada acierto revela todas las posiciones de esa letra y, al séptimo error, termina la partida. Elige una temática que conozcas y prueba el nivel fácil para empezar.</p>
-      <a href="como-jugar.html">Ver las reglas y un ejemplo de partida</a>
-      <app-web-ad placement="home"></app-web-ad>
-    </section>
-    <div #nativeAdSlot class="native-ad-slot" *ngIf="nativeAdEnabled && !nativeAdFailed" aria-label="Publicidad"></div>
+    @if (!platform.is('hybrid')) {
+      <section class="web-game-guide" aria-labelledby="web-game-guide-title">
+        <h2 id="web-game-guide-title">Cómo jugar al ahorcado</h2>
+        <p>Adivina la palabra letra a letra. Cada acierto revela todas las posiciones de esa letra y, al séptimo error, termina la partida. Elige una temática que conozcas y prueba el nivel fácil para empezar.</p>
+        <a href="como-jugar.html">Ver las reglas y un ejemplo de partida</a>
+        <app-web-ad placement="home"></app-web-ad>
+      </section>
+    }
+    @if (nativeAdEnabled && !nativeAdFailed) {
+      <div #nativeAdSlot class="native-ad-slot" aria-label="Publicidad"></div>
+    }
     <app-footer></app-footer>
   </main>
 </ion-content>

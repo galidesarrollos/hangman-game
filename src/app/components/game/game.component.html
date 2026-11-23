@@ -2,56 +2,81 @@
   <app-screen-actions [backUrl]="nivel === 'diario' || isTimeTrial ? '/' : ['/level', tematica]" backLabel="Volver" [showHome]="true"></app-screen-actions>
   <div class="game-topbar">
     <div class="game-heading">
-      <span class="game-kicker" *ngIf="!isTimeTrial">PARTIDA EN CURSO</span>
-      <div class="time-trial-status" *ngIf="isTimeTrial" aria-live="polite">
-        <span>NIVEL {{ timeTrialLevel }} / 5</span>
-        <strong [class.urgent]="remainingSeconds <= 10"><ion-icon name="timer-outline" aria-hidden="true"></ion-icon>{{ remainingSeconds }} s</strong>
-      </div>
-      <div class="game-controls" *ngIf="!isTimeTrial">
-        <button type="button" class="game-hint-button" [class.last-attempt]="pistaEnUltimoIntento" (click)="confirmarPista()" [disabled]="!puedePedirPista" aria-label="Pedir una pista viendo un anuncio">
-          <ion-icon name="bulb-outline" aria-hidden="true"></ion-icon>
-        </button>
-      </div>
+      @if (!isTimeTrial) {
+        <span class="game-kicker">PARTIDA EN CURSO</span>
+      }
+      @if (isTimeTrial) {
+        <div class="time-trial-status" aria-live="polite">
+          <span>NIVEL {{ timeTrialLevel }} / 5</span>
+          <strong [class.urgent]="remainingSeconds <= 10"><ion-icon name="timer-outline" aria-hidden="true"></ion-icon>{{ remainingSeconds }} s</strong>
+        </div>
+      }
+      @if (!isTimeTrial) {
+        <div class="game-controls">
+          <button type="button" class="game-hint-button" [class.last-attempt]="pistaEnUltimoIntento" (click)="confirmarPista()" [disabled]="!puedePedirPista" aria-label="Pedir una pista viendo un anuncio">
+            <ion-icon name="bulb-outline" aria-hidden="true"></ion-icon>
+          </button>
+        </div>
+      }
       <div class="game-tags"><span>{{ nivel === 'diario' ? 'Reto diario' : temas[tematica].nombre }}</span><span>{{ nivel === 'diario' ? temas[tematica].nombre : (nivel === 'facil' ? 'Fácil' : (nivel === 'normal' ? 'Normal' : 'Avanzado')) }}</span></div>
     </div>
   </div>
-  <main class="game-shell" *ngIf="estado" [class.native-shell]="platform.is('hybrid')">
-
-    <div class="game-layout">
-      <section class="figure-panel" [class.long-word]="casillas.length > 7" aria-label="Dibujo del ahorcado">
-        <div class="panel-title"><span>{{ isTimeTrial ? 'CONTRARRELOJ' : 'EL AHORCADO' }}</span><span>{{ isTimeTrial ? fallos + ' usados · ' + estado.attemptsRemaining + ' restantes' : fallos + ' / 7 fallos' }}</span></div>
-        <svg class="hangman" viewBox="0 0 200 220" role="img" [attr.aria-label]="'Dibujo del ahorcado con ' + fallos + ' de 7 fallos'">
-          <g class="gallows">
-            <path d="M27 203 H170 M53 203 V22 H123 V46" />
-          </g>
-          <g class="figure-lines">
-            <circle *ngIf="fallos >= 1" cx="123" cy="67" r="21" />
-            <path *ngIf="fallos >= 2" d="M123 88 V143" />
-            <path *ngIf="fallos >= 3" d="M123 102 L96 125" />
-            <path *ngIf="fallos >= 4" d="M123 102 L150 125" />
-            <path *ngIf="fallos >= 5" d="M123 143 L99 178" />
-            <path *ngIf="fallos >= 6" d="M123 143 L147 178" />
-            <path *ngIf="fallos >= 7" d="M114 64 h1 M131 64 h1 M116 77 Q123 71 130 77" />
-          </g>
-        </svg>
-        <div class="figure-word-panel">
-          <div class="word-slots" [class.long-word-slots]="casillas.length > 7" aria-live="polite"><span *ngFor="let casilla of casillas" class="letter-slot" [class.revealed]="casilla !== '_'">{{ casilla === '_' ? '' : casilla }}</span></div>
-        </div>
-      </section>
-
-      <section class="play-panel" aria-label="Palabra y teclado">
-        <div class="keyboard-panel" *ngIf="!estado.gameOver">
-          <div class="panel-title"><span>ELIGE UNA LETRA</span><span>{{ estado.lettersGuessed.size + estado.lettersFailed.size }} usadas</span></div>
-          <div class="keyboard-grid">
-            <button *ngFor="let letra of letras" type="button" class="letter-key"
-              [class.correct]="letraUsada(letra) && !esIncorrecto(letra)"
-              [class.incorrect]="esIncorrecto(letra)" [disabled]="letraUsada(letra)"
-              [attr.aria-label]="'Letra ' + letra + (letraUsada(letra) ? (esIncorrecto(letra) ? ', incorrecta' : ', correcta') : '')"
-              (click)="seleccionarLetra(letra)">{{ letra }}</button>
+  @if (estado) {
+    <main class="game-shell" [class.native-shell]="platform.is('hybrid')">
+      <div class="game-layout">
+        <section class="figure-panel" [class.long-word]="casillas.length > 7" aria-label="Dibujo del ahorcado">
+          <div class="panel-title"><span>{{ isTimeTrial ? 'CONTRARRELOJ' : 'EL AHORCADO' }}</span><span>{{ isTimeTrial ? fallos + ' usados · ' + estado.attemptsRemaining + ' restantes' : fallos + ' / 7 fallos' }}</span></div>
+          <svg class="hangman" viewBox="0 0 200 220" role="img" [attr.aria-label]="'Dibujo del ahorcado con ' + fallos + ' de 7 fallos'">
+            <g class="gallows">
+              <path d="M27 203 H170 M53 203 V22 H123 V46" />
+            </g>
+            <g class="figure-lines">
+              @if (fallos >= 1) {
+                <circle cx="123" cy="67" r="21" />
+              }
+              @if (fallos >= 2) {
+                <path d="M123 88 V143" />
+              }
+              @if (fallos >= 3) {
+                <path d="M123 102 L96 125" />
+              }
+              @if (fallos >= 4) {
+                <path d="M123 102 L150 125" />
+              }
+              @if (fallos >= 5) {
+                <path d="M123 143 L99 178" />
+              }
+              @if (fallos >= 6) {
+                <path d="M123 143 L147 178" />
+              }
+              @if (fallos >= 7) {
+                <path d="M114 64 h1 M131 64 h1 M116 77 Q123 71 130 77" />
+              }
+            </g>
+          </svg>
+          <div class="figure-word-panel">
+            <div class="word-slots" [class.long-word-slots]="casillas.length > 7" aria-live="polite">@for (casilla of casillas; track $index) {
+              <span class="letter-slot" [class.revealed]="casilla !== '_'">{{ casilla === '_' ? '' : casilla }}</span>
+            }</div>
           </div>
-        </div>
-
-      </section>
-    </div>
-  </main>
+        </section>
+        <section class="play-panel" aria-label="Palabra y teclado">
+          @if (!estado.gameOver) {
+            <div class="keyboard-panel">
+              <div class="panel-title"><span>ELIGE UNA LETRA</span><span>{{ estado.lettersGuessed.size + estado.lettersFailed.size }} usadas</span></div>
+              <div class="keyboard-grid">
+                @for (letra of letras; track letra) {
+                  <button type="button" class="letter-key"
+                    [class.correct]="letraUsada(letra) && !esIncorrecto(letra)"
+                    [class.incorrect]="esIncorrecto(letra)" [disabled]="letraUsada(letra)"
+                    [attr.aria-label]="'Letra ' + letra + (letraUsada(letra) ? (esIncorrecto(letra) ? ', incorrecta' : ', correcta') : '')"
+                  (click)="seleccionarLetra(letra)">{{ letra }}</button>
+                }
+              </div>
+            </div>
+          }
+        </section>
+      </div>
+    </main>
+  }
 </ion-content>

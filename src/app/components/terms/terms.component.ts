@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonHeader, IonToolbar, IonButtons, IonButton, IonIcon, IonTitle, IonContent } from '@ionic/angular';
 
 @Component({
   selector: 'app-terms',
   templateUrl: './terms.component.html',
-  imports: [IonicModule, RouterLink]
+  imports: [IonHeader, IonToolbar, IonButtons, IonButton, IonIcon, IonTitle, IonContent, RouterLink]
 })
 export class TermsComponent {
   irA(id: string): void {

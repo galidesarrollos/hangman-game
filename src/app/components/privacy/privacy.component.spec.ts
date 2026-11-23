@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+import { provideIonicAngular } from '@ionic/angular';
 import { PrivacyComponent } from './privacy.component';
 
 describe('PrivacyComponent', () => {
@@ -7,7 +7,8 @@ describe('PrivacyComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PrivacyComponent, IonicModule.forRoot()]
+      imports: [PrivacyComponent],
+      providers: [provideIonicAngular()]
     }).overrideComponent(PrivacyComponent, { set: { template: '' } }).compileComponents();
 
     fixture = TestBed.createComponent(PrivacyComponent);

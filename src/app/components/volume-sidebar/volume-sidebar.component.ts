@@ -1,14 +1,13 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular';
 import { AudioService } from 'src/app/services/audio.service';
-import { IonicModule } from '@ionic/angular';
-import { CommonModule } from '@angular/common';
+import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon, IonContent, IonRange, ModalController } from '@ionic/angular';
+
 import { Sounds } from 'src/app/models/game.model';
 
 @Component({
   selector: 'app-volume-sidebar',
   templateUrl: './volume-sidebar.component.html',
-  imports: [IonicModule, CommonModule]
+  imports: [IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon, IonContent, IonRange],
 })
 export class VolumeSidebarComponent implements OnInit {
   readonly audioService = inject(AudioService);

@@ -1,6 +1,6 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AlertController, IonicModule, IonRouterOutlet, ModalController, Platform, ToastController } from '@ionic/angular';
+import { AlertController, provideIonicAngular, IonRouterOutlet, ModalController, Platform, ToastController } from '@ionic/angular';
 import { of, Subject } from 'rxjs';
 import { GameState, Level } from '../../models/game.model';
 import { AdmobService } from '../../services/admob.service';
@@ -51,8 +51,9 @@ describe('GameComponent', () => {
     alert.create.calls.reset();
     alert.create.and.resolveTo({ present: () => Promise.resolve() } as HTMLIonAlertElement);
     await TestBed.configureTestingModule({
-      imports: [GameComponent, IonicModule.forRoot()],
+      imports: [GameComponent],
       providers: [
+        provideIonicAngular(),
         { provide: Router, useValue: jasmine.createSpyObj('Router', ['navigate']) },
         { provide: ActivatedRoute, useValue: { params: of({ theme: 'general', level: 'normal' }), snapshot: { routeConfig: { path: 'game/:theme/:level' } } } },
         { provide: GameService, useValue: game },

@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { IonicModule, ModalController, ToastController } from '@ionic/angular';
-import { CommonModule } from '@angular/common';
+import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon, IonContent, ModalController, ToastController } from '@ionic/angular';
 import { StatsService } from 'src/app/services/stats.service';
 import { VolumeSidebarComponent } from '../volume-sidebar/volume-sidebar.component';
 import { openSettingsModal } from 'src/app/services/settings-modal';
@@ -9,7 +8,7 @@ import { AdmobService } from 'src/app/services/admob.service';
 @Component({
   selector: 'app-user-settings',
   standalone: true,
-  imports: [IonicModule, CommonModule],
+  imports: [IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon, IonContent],
   templateUrl: './user-settings.component.html',
   styleUrls: ['./user-settings.component.scss']
 })

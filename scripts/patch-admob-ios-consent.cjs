@@ -1,4 +1,4 @@
-// AdMob 8.2.1 discards the underlying iOS UMP error. Keep the real reason
+// AdMob discards the underlying iOS UMP error. Keep the real reason
 // visible and use previously gathered consent only when UMP explicitly allows ads.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -27,7 +27,7 @@ const replacement = `                if let error = error {
 
 if (source.includes(original)) {
   fs.writeFileSync(file, source.replace(original, replacement));
-  console.log('Applied iOS UMP diagnostics to AdMob 8.2.1');
+  console.log('Applied iOS UMP diagnostics to AdMob');
 } else if (!source.includes(replacement)) {
   throw new Error('AdMob ConsentExecutor.swift changed; review the iOS UMP patch');
 }

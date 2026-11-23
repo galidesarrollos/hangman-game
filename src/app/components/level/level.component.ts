@@ -1,12 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { IonicModule, Platform } from '@ionic/angular';
+import { IonContent, IonIcon, IonRouterOutlet, ModalController, Platform } from '@ionic/angular';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Theme } from 'src/app/models/game.model';
 import { THEME_DETAILS } from 'src/app/models/theme-options';
 import { UserSettingsComponent } from '../user-settings/user-settings.component';
-import { ModalController } from '@ionic/angular';
-import { IonRouterOutlet } from '@ionic/angular';
 import { AdmobService } from 'src/app/services/admob.service';
 import { openSettingsModal } from 'src/app/services/settings-modal';
 import { AppFooterComponent } from '../app-footer/app-footer.component';
@@ -17,8 +14,7 @@ import { ScreenActionsComponent } from '../screen-actions/screen-actions.compone
   templateUrl: './level.component.html',
   styleUrls: ['./level.component.scss'],
   imports: [
-    CommonModule,
-    IonicModule,
+    IonContent, IonIcon,
     AppFooterComponent,
     ScreenActionsComponent,
   ]

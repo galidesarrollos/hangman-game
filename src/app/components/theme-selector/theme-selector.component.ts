@@ -1,6 +1,6 @@
 import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, IonContent, Platform, ViewWillEnter, ViewWillLeave } from '@ionic/angular';
+import { IonContent, IonIcon, Platform, ViewWillEnter, ViewWillLeave } from '@ionic/angular';
 import { NativeAdFeed, NativeAdPluginEvents, NativeAdTemplate } from '@capacitor-community/admob';
 import { Capacitor } from '@capacitor/core';
 import { Router } from '@angular/router';
@@ -14,7 +14,7 @@ import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-theme-selector',
   standalone: true,
-  imports: [CommonModule, IonicModule, AppFooterComponent, ScreenActionsComponent],
+  imports: [CommonModule, IonContent, IonIcon, AppFooterComponent, ScreenActionsComponent],
   templateUrl: './theme-selector.component.html',
   styleUrls: ['./theme-selector.component.scss']
 })

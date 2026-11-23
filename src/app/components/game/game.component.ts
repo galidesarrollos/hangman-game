@@ -1,7 +1,6 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { AlertController, IonicModule, IonRouterOutlet, ModalController, Platform, ToastController } from '@ionic/angular';
+import { AlertController, IonContent, IonIcon, IonRouterOutlet, ModalController, Platform, ToastController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { Theme, Level, GameState } from 'src/app/models/game.model';
 import { THEME_DETAILS } from 'src/app/models/theme-options';
@@ -16,7 +15,7 @@ import { ScreenActionsComponent } from '../screen-actions/screen-actions.compone
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
-  imports: [CommonModule, IonicModule, ScreenActionsComponent]
+  imports: [IonContent, IonIcon, ScreenActionsComponent]
 })
 export class GameComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);

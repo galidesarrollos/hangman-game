@@ -1,12 +1,9 @@
 import { Component, ElementRef, ViewChild, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { IonicModule, IonContent, ViewWillEnter, ViewWillLeave } from '@ionic/angular';
+import { IonContent, IonIcon, IonRouterOutlet, ModalController, Platform, ViewWillEnter, ViewWillLeave } from '@ionic/angular';
 import { NativeAdFeed, NativeAdPluginEvents, NativeAdTemplate } from '@capacitor-community/admob';
 import { Capacitor } from '@capacitor/core';
 import { Router } from '@angular/router';
-import { ModalController, Platform } from '@ionic/angular';
 import { UserSettingsComponent } from '../user-settings/user-settings.component';
-import { IonRouterOutlet } from '@ionic/angular';
 
 import { AdmobService } from 'src/app/services/admob.service';
 import { StatsService } from 'src/app/services/stats.service';
@@ -21,8 +18,7 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./start-ad.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    IonicModule,
+    IonContent, IonIcon,
     AppFooterComponent,
     WebAdComponent
   ]

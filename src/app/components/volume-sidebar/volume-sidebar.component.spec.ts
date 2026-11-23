@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
-import { ModalController } from '@ionic/angular';
+import { ModalController, provideIonicAngular } from '@ionic/angular';
 import { AudioService } from '../../services/audio.service';
 
 import { VolumeSidebarComponent } from './volume-sidebar.component';
@@ -11,8 +10,9 @@ describe('VolumeSidebarComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [VolumeSidebarComponent, IonicModule.forRoot()],
+      imports: [VolumeSidebarComponent],
       providers: [
+        provideIonicAngular(),
         { provide: AudioService, useValue: { getVolume: () => 1 } },
         { provide: ModalController, useValue: {} }
       ]

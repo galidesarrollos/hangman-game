@@ -1,5 +1,7 @@
 <footer>
   <a routerLink="/terminos-y-condiciones">Términos y condiciones</a>
   <a routerLink="/politica-privacidad">Política de privacidad</a>
-  <button *ngIf="webAds.enabled" type="button" (click)="webAds.openPrivacyOptions()">Privacidad y anuncios</button>
+  @if (webAds.enabled) {
+    <button type="button" (click)="webAds.openPrivacyOptions()">Privacidad y anuncios</button>
+  }
 </footer>

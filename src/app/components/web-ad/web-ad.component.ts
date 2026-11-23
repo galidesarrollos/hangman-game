@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild, inject } from '@angular/core';
 import { WebAdPlacement } from '../../config/web-ads.config';
 import { WebAdsService } from '../../services/web-ads.service';
@@ -6,14 +5,15 @@ import { WebAdsService } from '../../services/web-ads.service';
 @Component({
   selector: 'app-web-ad',
   standalone: true,
-  imports: [CommonModule],
   template: `
-    <aside *ngIf="ads.slot(placement) as slot" aria-label="Publicidad">
-      <span>Publicidad</span>
-      <ins #ad class="adsbygoogle" style="display:block"
-        [attr.data-ad-client]="ads.client" [attr.data-ad-slot]="slot"
-        data-ad-format="auto" data-full-width-responsive="true"></ins>
-    </aside>
+    @if (ads.slot(placement); as slot) {
+      <aside aria-label="Publicidad">
+        <span>Publicidad</span>
+        <ins #ad class="adsbygoogle" style="display:block"
+          [attr.data-ad-client]="ads.client" [attr.data-ad-slot]="slot"
+          data-ad-format="auto" data-full-width-responsive="true"></ins>
+      </aside>
+    }
   `,
   styles: [`
     :host { display: block; min-width: 0; }

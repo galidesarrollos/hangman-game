@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IonicModule, IonRouterOutlet, ModalController } from '@ionic/angular';
+import { provideIonicAngular, IonRouterOutlet, ModalController } from '@ionic/angular';
 import { of } from 'rxjs';
 import { AdmobService } from '../../services/admob.service';
 import { AudioService } from '../../services/audio.service';
@@ -17,8 +17,9 @@ describe('LevelComponent', () => {
     admob.showInterstitial.calls.reset();
     admob.showInterstitial.and.resolveTo();
     await TestBed.configureTestingModule({
-      imports: [LevelComponent, IonicModule.forRoot()],
+      imports: [LevelComponent],
       providers: [
+        provideIonicAngular(),
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: { params: of({ theme: 'animales' }) } },
         { provide: AdmobService, useValue: admob },

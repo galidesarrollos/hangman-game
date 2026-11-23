@@ -4,6 +4,8 @@ Configuración de publicidad web: [guía de AdSense](ADSENSE.md).
 
 Aplicación Ionic/Angular con versiones web y móvil.
 
+Para instalar las dependencias y ejecutar el proyecto, usa Node.js 24 LTS y `npm ci`.
+
 - `src/`: código fuente compartido.
 - `www/`: compilación local generada con `npm run build`, utilizada por Capacitor para Android/iOS. No se guarda en Git.
 - `docs/`: compilación publicada por GitHub Pages desde la rama `main`. Se guarda en Git y puede corresponder a una versión diferente de `www/`.
