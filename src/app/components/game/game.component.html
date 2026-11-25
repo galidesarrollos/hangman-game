@@ -2,14 +2,15 @@
   <app-screen-actions [backUrl]="nivel === 'diario' || isTimeTrial ? '/' : ['/level', tematica]" backLabel="Volver" [showHome]="true"></app-screen-actions>
   <div class="game-topbar">
     <div class="game-heading">
-      <span class="game-kicker" *ngIf="!isTimeTrial">PARTIDA EN CURSO</span>
+      <span class="game-kicker" *ngIf="!isTimeTrial">{{ temas[tematica].nombre }}</span>
       <div class="time-trial-status" *ngIf="isTimeTrial" aria-live="polite">
         <span>NIVEL {{ timeTrialLevel }} / 5</span>
         <strong [class.urgent]="remainingSeconds <= 10"><ion-icon name="timer-outline" aria-hidden="true"></ion-icon>{{ remainingSeconds }} s</strong>
       </div>
       <div class="game-controls" *ngIf="!isTimeTrial">
-        <button type="button" class="game-hint-button" [class.last-attempt]="pistaEnUltimoIntento" (click)="confirmarPista()" [disabled]="!puedePedirPista" aria-label="Pedir una pista viendo un anuncio">
+        <button type="button" class="game-hint-button" [class.last-attempt]="pistaEnUltimoIntento" (click)="confirmarPista()" [disabled]="!puedePedirPista" aria-label="Pista (requiere ver un anuncio)">
           <ion-icon name="bulb-outline" aria-hidden="true"></ion-icon>
+          <span>PISTA</span>
         </button>
       </div>
       <div class="game-tags"><span>{{ nivel === 'diario' ? 'Reto diario' : temas[tematica].nombre }}</span><span>{{ nivel === 'diario' ? temas[tematica].nombre : (nivel === 'facil' ? 'Fácil' : (nivel === 'normal' ? 'Normal' : 'Avanzado')) }}</span></div>
